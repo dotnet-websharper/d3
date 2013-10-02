@@ -1,12 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ivy-module version="2.0">
-  <info organisation="IntelliFactory" module="if-ws-d3" revision="2.5" />
-  <publications>
-    <artifact name="IntelliFactory.WebSharper.D3" ext="dll" type="bin" />
-    <artifact name="IntelliFactory.WebSharper.D3" ext="xml" type="doc" />
-    <artifact name="IntelliFactory.WebSharper.D3" ext="pdb" type="debug" />
-  </publications>
+  <info organisation="IntelliFactory" module="websharper.d3" revision="2.5" />
   <dependencies>
-    <dependency name="WebSharper" rev="latest.integration" />
+    <dependency name="websharper" rev="latest.integration" />
   </dependencies>
 </ivy-module>

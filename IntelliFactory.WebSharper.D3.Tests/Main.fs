@@ -3,26 +3,26 @@ namespace IntelliFactory.WebSharper.D3.Tests
 open IntelliFactory.WebSharper
 open IntelliFactory.WebSharper.Sitelets
 open IntelliFactory.WebSharper.D3
-  
+
 //module D3Helpers =
 //    type Area [<Inline "d3.svg.area()">] () =
-//        member this.X 
+//        member this.X
 //            with [<Inline "$this.x()">] get () = X<obj -> float>
 //            and  [<Inline "$this.x($x)">] set (x: obj -> float) = ()
 //
-//        [<Inline "$this.x($x)">] 
+//        [<Inline "$this.x($x)">]
 //        member this.SetX (x: float) = ()
 
-module FocusBrushing = 
+module FocusBrushing =
     open IntelliFactory.WebSharper.Html
 
-    type Margin = 
+    type Margin =
         {
             Top    : float
             Right  : float
             Bottom : float
             Left   : float
-        }           
+        }
 
     type DataRow =
         {
@@ -50,18 +50,18 @@ module FocusBrushing =
             let xAxis2 = D3.Svg.Axis().Scale(x2).Orient(Orientation.Bottom)
             let yAxis  = D3.Svg.Axis().Scale(y) .Orient(Orientation.Left  )
 
-            let brush = 
+            let brush =
                 D3.Svg.Brush()
                     .X(x2)
 
-            let area = 
+            let area =
                 D3.Svg.Area()
                     .Interpolate(Interpolation.Monotone)
                     .X(fun d -> x.Apply(d.Date))
                     .Y0(float height)
                     .Y1(fun d -> y.Apply(d.Price))
 
-            let area2 = 
+            let area2 =
                 D3.Svg.Area()
                     .Interpolate(Interpolation.Monotone)
                     .X(fun d -> x2.Apply(d.Date))
@@ -69,23 +69,23 @@ module FocusBrushing =
                     .Y1(fun d -> y2.Apply(d.Price))
 
             let svg =
-                 
+
                 D3.Select("body").Append("svg")
                     .Attr("width", width + margin.Left + margin.Right)
                     .Attr("height", height + margin.Top + margin.Bottom);
 
             svg.Append("defs").Append("clipPath")
                 .Attr("id", "clip")
-              .Append("rect")
+                .Append("rect")
                 .Attr("width", width)
                 .Attr("height", height)
                 |> ignore
-                                 
-            let focus = 
+
+            let focus =
                 svg.Append("g")
                     .Attr("transform", SvgTransform.Translate(margin.Left, margin.Top))
 
-            let context = 
+            let context =
                 svg.Append("g")
                     .Attr("transform", SvgTransform.Translate(margin2.Left, margin2.Top))
 
@@ -112,32 +112,32 @@ module FocusBrushing =
                 y.Domain([|0.; D3.Max(parsedData, fun d -> d.Price)|]) |> ignore
                 x2.Domain(x.Domain()) |> ignore
                 y2.Domain(y.Domain()) |> ignore
-                
+
                 focus.Append("path")
                     .Datum(parsedData)
                     .Attr("clip-path", "url(#clip)")
                     .Attr("d", area)
                     |> ignore
-                
+
                 focus.Append("g")
                     .Attr("class", "x axis")
                     .Attr("transform", SvgTransform.Translate(0., height))
                     |> xAxis.Apply
-                
+
                 focus.Append("g")
                     .Attr("class", "y axis")
                     |> yAxis.Apply
-                
+
                 context.Append("path")
                     .Datum(parsedData)
                     .Attr("d", area2)
                     |> ignore
-                
+
                 context.Append("g")
                     .Attr("class", "x axis")
                     .Attr("transform", SvgTransform.Translate(0., height2))
                     |> xAxis2.Apply
-                
+
                 context.Append("g")
                     .Attr("class", "x brush")
                     .Call(brush.Apply)
@@ -158,7 +158,7 @@ module AreaChart =
             Date  : EcmaScript.Date
             Close : float
         }
- 
+
     type Control() =
         inherit Web.Control()
 
@@ -172,9 +172,9 @@ module AreaChart =
             let y = D3.Scale.Linear().Range([| height; 0. |])
 
             let xAxis = D3.Svg.Axis().Scale(x).Orient(Orientation.Bottom)
-            let yAxis = D3.Svg.Axis().Scale(y).Orient(Orientation.Left) 
+            let yAxis = D3.Svg.Axis().Scale(y).Orient(Orientation.Left)
 
-            let area = 
+            let area =
                 D3.Svg.Area()
                     .X(fun d -> x.Apply(d.Date))
                     .Y0(float height)
@@ -184,7 +184,7 @@ module AreaChart =
                 D3.Select("body").Append("svg")
                     .Attr("width", width + left + right)
                     .Attr("height", height + top + bottom)
-                  .Append("g")          
+                  .Append("g")
                     .Attr("transform", SvgTransform.Translate(left, top))
 
             D3.Tsv("data.tsv", fun data ->
@@ -242,7 +242,7 @@ module Skin =
 
 module Site =
     open IntelliFactory.Html
-    
+
     let HomePage =
         Skin.WithTemplate <| fun ctx ->
             [

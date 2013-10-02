@@ -5,12 +5,12 @@ open IntelliFactory.WebSharper.InterfaceGenerator
 module Definition =
     let mutable classList = [] : CodeModel.NamespaceEntity list
 
-    let addToClassList c = 
+    let addToClassList c =
         classList <- upcast c :: classList
     let ( |>! ) x f =
         f x
         x
-                              
+
     let ObjType name propList =
         Class name
         |+> Protocol (
@@ -31,8 +31,8 @@ module Definition =
     let Int2x2 = Int2 * Int2
     let Float2 = Float * Float
     let Float3 = Float * Float * Float
-    let Float2x2 = Float2 * Float2 
-    let Comparator = Obj * Obj ^-> Int 
+    let Float2x2 = Float2 * Float2
+    let Comparator = Obj * Obj ^-> Int
 
     let Date = T<IntelliFactory.WebSharper.EcmaScript.Date>
     let DateTime = T<System.DateTime>
@@ -52,13 +52,13 @@ module Definition =
     let getSetVal chained (t: Type.IType) = getVal t + chained t
 
     let getProp t = nameArg ^-> t
-    let setProp t = nameArg * t?value 
-    let setPropF t = nameArg * (t + selectionCallback t)?value 
+    let setProp t = nameArg * t?value
+    let setPropF t = nameArg * (t + selectionCallback t)?value
     let getSetPropF chained t = getProp t + chained (setPropF t)
     let getSetProp chained (t: Type.Type) = getProp t + chained (setProp t)
-                    
-    let NameValuePair = 
-        ObjType "NameValuePair" [ 
+
+    let NameValuePair =
+        ObjType "NameValuePair" [
             "name"  , String
             "value" , String
         ]
@@ -75,28 +75,28 @@ module Definition =
         Class name |=> t |+> Protocol (members <| fun args -> args ^-> t)
         |>! addToClassList
 
-    let ChainedClassNew name members = 
+    let ChainedClassNew name members =
         ChainedClass name (Type.New()) members
 
-    let ChainedClassNewG name members = 
+    let ChainedClassNewG name members =
         ChainedClassG name (Type.New()) members
 
-    let ChainedClassNewInherits name inherits members = 
+    let ChainedClassNewInherits name inherits members =
         ChainedClassNew name members |=> Inherits inherits
 
-    let Selection =  
-        let self = Type.New()   
-        ChainedClass "Selection" self <| fun chained -> 
-        [  
+    let Selection =
+        let self = Type.New()
+        ChainedClass "Selection" self <| fun chained ->
+        [
             "attr"       => getProp Obj + chained (setPropF Obj) + chained NameValuePair?attrValueMap
             "classed"    => getSetPropF chained Bool
-            "style"      => getProp Obj + chained (setPropF Obj * !?String?priority) 
+            "style"      => getProp Obj + chained (setPropF Obj * !?String?priority)
             "property"   => getSetPropF chained Obj
-            "text"       => getSetValF chained String 
-            "html"       => getSetValF chained String 
+            "text"       => getSetValF chained String
+            "html"       => getSetValF chained String
             "append"     => chained nameArg
             "insert"     => chained (nameArg * !?(String + selectionCallback Element)?before)
-            "remove"     => chained O 
+            "remove"     => chained O
             "data"       => (!|Obj + selectionCallback !|Obj)?values * !?(selectionCallback String)?key ^-> UpdateSelection + O ^-> !|Obj
             "datum"      => chained (Obj + selectionCallback Obj)?value
             "filter"     => chained (String + selectionCallback Bool)?selector
@@ -105,7 +105,7 @@ module Definition =
             "on"         => String?``type`` * !?(selectionCallback O)?listener ^-> O
             "transition" => O ^-> Transition
             "interrupt"  => chained O
-            "each"       => chained (selectionCallback O) 
+            "each"       => chained (selectionCallback O)
             "call"       => chained (!+Obj * (self ^-> O)?callback)
             "empty"      => O ^-> Bool
             "node"       => O ^-> Element
@@ -114,13 +114,13 @@ module Definition =
             "selectAll"  => chained selector
         ]
 
-    //let UpdateSelectionClass = 
-    addToClassList ( 
+    //let UpdateSelectionClass =
+    addToClassList (
         Class "UpdateSelection"
         |=> Inherits Selection
         |+> Protocol [
             "enter" => O ^-> Selection
-            "exit"  => O ^-> Selection  
+            "exit"  => O ^-> Selection
         ]
     )
 
@@ -130,11 +130,11 @@ module Definition =
     let easing = T<float -> float>
 
     let TransitionClass =
-        ChainedClass "Transition" Transition <| fun chained -> 
+        ChainedClass "Transition" Transition <| fun chained ->
         [
-            "delay"      => chained Int?delay 
-            "duration"   => chained Int?duration 
-            "ease"       => chained (!+Float * String?value) + chained easing?value   
+            "delay"      => chained Int?delay
+            "duration"   => chained Int?duration
+            "ease"       => chained (!+Float * String?value) + chained easing?value
             "attr"       => chained (nameArg * (Obj + selectionCallback Obj)?value)
             "attrTween"  => chained (nameArg * tweenCallback?value)
             "style"      => chained (nameArg * (Obj + selectionCallback Obj)?value * !? String?priority)
@@ -142,36 +142,36 @@ module Definition =
             "text"       => chained (setValF String)
             "tween"      => chained (nameArg * factoryCallback?factory)
             "remove"     => chained O
-            "select"     => chained selector 
-            "selectAll"  => chained selector 
+            "select"     => chained selector
+            "selectAll"  => chained selector
             "filter"     => chained (String + selectionCallback Bool)?selector
             "transition" => chained O
             "each"       => chained (!?String?``type`` * selectionCallback O)
-            "call"       => chained (!+Obj * (Selection ^-> O)?callback) 
+            "call"       => chained (!+Obj * (Selection ^-> O)?callback)
             "empty"      => O ^-> Bool
             "node"       => O ^-> Element
             "size"       => O ^-> Int
-        ]   
-
-    let KeyValuePair = 
-        ObjType "KeyValuePair" [ 
-            "key"   , String
-            "value" , Obj 
         ]
 
-    let Map = 
+    let KeyValuePair =
+        ObjType "KeyValuePair" [
+            "key"   , String
+            "value" , Obj
+        ]
+
+    let Map =
         let self = Type.New()
         Class "Map"
         |=> self
         |+> Protocol [
             "has"     => String?key ^-> Bool
             "get"     => String?key ^-> Float
-            "set"     => String?key * Obj?value ^-> O       
+            "set"     => String?key * Obj?value ^-> O
             "remove"  => String?key ^-> Bool
             "keys"    => O ^-> !|String
             "values"  => O ^-> !|Obj
-            "entries" => O ^-> !|KeyValuePair    
-            "forEach" => self -* String?key * Obj?value ^-> O  
+            "entries" => O ^-> !|KeyValuePair
+            "forEach" => self -* String?key * Obj?value ^-> O
         ]
 
     let Set =
@@ -183,11 +183,11 @@ module Definition =
             "add"     => String?value ^-> String
             "remove"  => String?value ^-> Bool
             "values"  => O ^-> !|String
-            "forEach" => self -* String?value ^-> O  
+            "forEach" => self -* String?value ^-> O
         ]
 
     let Nest =
-        ChainedClassNew "Nest" <| fun chained -> 
+        ChainedClassNew "Nest" <| fun chained ->
         [
             "key"        => chained (Obj ^-> String)?``function``
             "sortKeys"   => chained Comparator?comparator
@@ -202,14 +202,14 @@ module Definition =
         Class "TimeFormat"
         |+> Protocol [
             "apply" => Date?date ^-> String
-            "parse" => String?string ^-> Date 
+            "parse" => String?string ^-> Date
         ]
         |>! addToClassList
 
     let Transform =
-        Class "Transform" 
+        Class "Transform"
         |+> Protocol [
-            "rotate"    =@ Float  
+            "rotate"    =@ Float
             "translate" =@ Int2
             "skew"      =@ Float
             "scale"     =@ Float2
@@ -218,11 +218,11 @@ module Definition =
         |>! addToClassList
 
     let Xhr =
-        ChainedClassNew "Xhr" <| fun chained -> 
+        ChainedClassNew "Xhr" <| fun chained ->
         [
             "header"       => getSetProp chained String
-            "mimeType"     => getSetVal chained String   
-            "responseType" => getSetVal chained String   
+            "mimeType"     => getSetVal chained String
+            "responseType" => getSetVal chained String
             "response"     => getSetVal chained (String?request ^-> Obj)
             "get"          => !?(Error?error * Obj?response ^-> O)?callback ^-> O
             "get"          => !?String?data * !?(Error?error * Obj?response ^-> O)?callback ^-> O
@@ -230,7 +230,6 @@ module Definition =
             "abort"        => O ^-> O
             "on"           => String?``type`` ^-> (Error?error * Obj?response ^-> O)
             "on"           => String?``type`` * (Error?error * Obj?response ^-> O)?listener ^-> O
-             
         ]
 
     let Rgb = Type.New()
@@ -240,14 +239,14 @@ module Definition =
         let chained args = args ^-> Rgb
         Class name
         |+> Protocol (
-            name |> Seq.map (fun n -> 
+            name |> Seq.map (fun n ->
                 string n =@ Int :> CodeModel.Member
-            ) 
+            )
             |> List.ofSeq
         )
         |+> Protocol [
-            "brighter" => chained !?Float?k  
-            "darker"   => chained !?Float?k  
+            "brighter" => chained !?Float?k
+            "darker"   => chained !?Float?k
             convName   => O ^-> convType
             "toString" => O ^-> String
         ]
@@ -257,26 +256,26 @@ module Definition =
     let Hcl = ColorType "hcl" "rgb" Rgb
     let RgbClass = ColorType "rgb" "hsl" Hsl |=> Rgb
 
-    let QualifiedNs = 
-        ObjType "QualifiedNs" [ 
+    let QualifiedNs =
+        ObjType "QualifiedNs" [
             "space" , String
             "local" , String
         ]
 
     let interpolate argType = argType?a * argType?b ^-> argType
- 
+
     let Scale = Class "Scale"
 
-    let getQuantScale name (domainType: Type.Type) =  
-        ChainedClassNewInherits name Scale <| fun chained -> 
+    let getQuantScale name (domainType: Type.Type) =
+        ChainedClassNewInherits name Scale <| fun chained ->
         [
             "apply"       => domainType?x ^-> Float |> WithInline "$this($x)"
-            "invert"      => Float?y ^-> domainType  
+            "invert"      => Float?y ^-> domainType
             "domain"      => getSetVal chained !|domainType
             "range"       => getSetVal chained !|Float
             "rangeRound"  => chained !|Float
-            "interpolate" => getSetVal chained (interpolate Float) 
-            "clamp"       => getSetVal chained Bool     
+            "interpolate" => getSetVal chained (interpolate Float)
+            "clamp"       => getSetVal chained Bool
             "nice"        => chained !?Int?count
             "ticks"       => !?Int?count ^-> !|Float
             "tickFormat"  => Int?count * !?String?format ^-> Float?number ^-> String
@@ -285,27 +284,27 @@ module Definition =
 
     let QuantitativeScale = getQuantScale "QuantitativeScale" Float
 
-    let DiscreteScale = 
-        ChainedClassNewInherits "DiscreteScale" Scale <| fun chained -> 
+    let DiscreteScale =
+        ChainedClassNewInherits "DiscreteScale" Scale <| fun chained ->
         [
             "apply"        => Float?x ^-> Float |> WithInline "$this($x)"
-            "invertExtent" => Float?y ^-> Float2  
+            "invertExtent" => Float?y ^-> Float2
             "domain"       => getSetVal chained !|Float
             "range"        => getSetVal chained !|Float
             "copy"         => chained O
         ]
 
     let QuantileScale =
-        ChainedClassNewInherits "QuantileScale" DiscreteScale <| fun chained -> 
+        ChainedClassNewInherits "QuantileScale" DiscreteScale <| fun chained ->
         [
             "quantiles" => O ^-> !|Float
         ]
 
     let IdentityScale =
-        ChainedClassNewInherits "IdentityScale" Scale <| fun chained -> 
+        ChainedClassNewInherits "IdentityScale" Scale <| fun chained ->
         [
             "apply"       => Float?x ^-> Float |> WithInline "$this($x)"
-            "invert"      => Float?y ^-> Float  
+            "invert"      => Float?y ^-> Float
             "domain"      => getSetVal chained !|Float
             "range"       => getSetVal chained !|Float
             "ticks"       => !?Int?count ^-> !|Float
@@ -313,7 +312,7 @@ module Definition =
         ]
 
     let OrdinalScale =
-        ChainedClassNewInherits "OrdinalScale" Scale <| fun chained -> 
+        ChainedClassNewInherits "OrdinalScale" Scale <| fun chained ->
         [
             "apply"           => Obj?x ^-> Obj |> WithInline "$this($x)"
             "domain"          => getSetVal chained !|Obj
@@ -338,7 +337,7 @@ module Definition =
             "basis-open"
             "cardinal"
             "cardinal-open"
-            "monotone"  
+            "monotone"
         ]
         |>! addToClassList
 
@@ -346,63 +345,63 @@ module Definition =
         let self = Type.New()
         let gen =
             Generic / fun tData ->
-            ChainedClassG name self.[tData] <| fun chained -> 
-            let coord name = name => getSetVal chained (tData ^-> Float) + chained Float 
+            ChainedClassG name self.[tData] <| fun chained ->
+            let coord name = name => getSetVal chained (tData ^-> Float) + chained Float
             members chained coord tData
         addToClassList <| Generic - gen
         gen
 
     let Line =
-        ChainedClassCoord "Line" <| fun chained coord tData -> 
+        ChainedClassCoord "Line" <| fun chained coord tData ->
         [
-            coord "x"    
-            coord "y" 
+            coord "x"
+            coord "y"
             "interpolate" => getSetVal chained Interpolation
             "tension" => getSetVal chained String
             "defined" => getSetVal chained (tData ^-> Bool)
         ]
 
     let RadialLine =
-        ChainedClassCoord "RadialLine" <| fun chained coord tData -> 
+        ChainedClassCoord "RadialLine" <| fun chained coord tData ->
         [
-            coord "radius"    
-            coord "angle" 
+            coord "radius"
+            coord "angle"
             "defined" => getSetVal chained (tData ^-> Bool)
         ]
 
     let Area =
-        ChainedClassCoord "Area" <| fun chained coord tData -> 
-        [                        
-            coord "x"    
-            coord "x0"    
-            coord "x1"    
-            coord "y" 
-            coord "y0"    
-            coord "y1"   
+        ChainedClassCoord "Area" <| fun chained coord tData ->
+        [
+            coord "x"
+            coord "x0"
+            coord "x1"
+            coord "y"
+            coord "y0"
+            coord "y1"
             "interpolate" => getSetVal chained Interpolation
             "tension" => getSetVal chained String
             "defined" => getSetVal chained (tData ^-> Bool)
         ]
 
     let RadialArea =
-        ChainedClassCoord "RadialArea" <| fun chained coord tData -> 
+        ChainedClassCoord "RadialArea" <| fun chained coord tData ->
         [
-            coord "radius"    
-            coord "innerRadius"    
-            coord "outerRadius"    
-            coord "angle" 
-            coord "startAngle"    
-            coord "endAngle"   
+            coord "radius"
+            coord "innerRadius"
+            coord "outerRadius"
+            coord "angle"
+            coord "startAngle"
+            coord "endAngle"
             "defined" => getSetVal chained (tData ^-> Bool)
         ]
 
     let Arc =
-        ChainedClassCoord "Arc" <| fun chained coord tData -> 
+        ChainedClassCoord "Arc" <| fun chained coord tData ->
         [
-            coord "innerRadius"    
-            coord "outerRadius"    
-            coord "startAngle"    
-            coord "endAngle"   
+            coord "innerRadius"
+            coord "outerRadius"
+            coord "startAngle"
+            coord "endAngle"
             "centroid" => Obj?datum * !?Int?index ^-> Float2
         ]
 
@@ -417,26 +416,26 @@ module Definition =
         ]
         |>! addToClassList
 
-    let Symbol = 
-        ChainedClassNew "Symbol" <| fun chained -> 
+    let Symbol =
+        ChainedClassNew "Symbol" <| fun chained ->
         [
             "type" => getSetVal chained SymbolType.Type
-            "size" => getSetVal chained Int         
+            "size" => getSetVal chained Int
         ]
 
-    let Chord = 
-        ChainedClassCoord "Chord" <| fun chained coord tData -> 
+    let Chord =
+        ChainedClassCoord "Chord" <| fun chained coord tData ->
         [
-            coord "radius"    
-            coord "innerRadius"    
-            coord "outerRadius"    
+            coord "radius"
+            coord "innerRadius"
+            coord "outerRadius"
             coord "angle"
             "source" => getSetVal chained (tData?d * Int?i ^-> Obj) + chained Obj
             "target" => getSetVal chained (tData?d * Int?i ^-> Obj) + chained Obj
         ]
 
-    let Diagonal = 
-        ChainedClassNew "Diagonal" <| fun chained -> 
+    let Diagonal =
+        ChainedClassNew "Diagonal" <| fun chained ->
         [
             "apply"  => Obj?datum * !?Int?index ^-> String
             "source" => getSetVal chained (Obj?d * Int?i ^-> Obj) + chained Obj
@@ -454,13 +453,13 @@ module Definition =
         |>! addToClassList
 
     let Axis =
-        ChainedClassNew "Axis" <| fun chained -> 
+        ChainedClassNew "Axis" <| fun chained ->
         [
             "apply"  => (Selection + Transition)?selection ^-> O |> WithInline "$this($selection)"
             "scale"  => getSetVal chained Scale.Type
             "orient" => getSetVal chained Orientation.Type
             "ticks"  => chained !+Obj
-            "tickValues" => getSetVal chained !|Obj 
+            "tickValues" => getSetVal chained !|Obj
             "tickSize"  => getSetVal chained Int
             "innerTickSize" => getSetVal chained Int
             "outerTickSize" => getSetVal chained Int
@@ -476,12 +475,12 @@ module Definition =
         ]
         |>! addToClassList
 
-    let Brush = 
-        ChainedClassNew "Brush" <| fun chained -> 
+    let Brush =
+        ChainedClassNew "Brush" <| fun chained ->
         [
-            "apply" => (Selection + Transition)?selection ^-> O |> WithInline "$this($selection)" 
-            "x" => getSetVal chained Scale.Type   
-            "y" => getSetVal chained Scale.Type   
+            "apply" => (Selection + Transition)?selection ^-> O |> WithInline "$this($selection)"
+            "x" => getSetVal chained Scale.Type
+            "y" => getSetVal chained Scale.Type
             "extent" => getSetVal chained (Int2 + Int2x2)
             "clamp" => getSetVal chained (Bool + Bool * Bool)
             "clear" => chained O
@@ -490,18 +489,18 @@ module Definition =
             "event" => (Selection + Transition)?selection ^-> O
         ]
 
-    let TimeInterval = 
-        ChainedClassNew "TimeInterval" <| fun chained -> 
+    let TimeInterval =
+        ChainedClassNew "TimeInterval" <| fun chained ->
         [
         ]
 
     let Link =
-        Generic / fun t -> 
+        Generic / fun t ->
             Class "Link"
             |+> Protocol [
                 "source" =@ t
-                "target" =@ t   
-            ]          
+                "target" =@ t
+            ]
     addToClassList <| Generic - Link
 
     let BundleNode =
@@ -511,7 +510,7 @@ module Definition =
         ]
 
     let Bundle =
-        ChainedClassNew "Bundle" <| fun chained -> 
+        ChainedClassNew "Bundle" <| fun chained ->
         [
             "links"      => (!|BundleNode)?nodes ^-> !|(Link BundleNode)
         ]
@@ -523,10 +522,10 @@ module Definition =
             "startAngle" , Float
             "endAngle"   , Float
             "value"      , Float
-        ] 
+        ]
 
     let ChordLayout =
-        ChainedClassNew "ChordLayout" <| fun chained -> 
+        ChainedClassNew "ChordLayout" <| fun chained ->
         [
             "matrix"  => getSetVal chained (!| !|Float)
             "padding" => getSetVal chained Float
@@ -534,7 +533,7 @@ module Definition =
             "sortSubGroups" => getSetVal chained Comparator
             "sortChords"    => getSetVal chained Comparator
             "chords" => O ^-> !|(Link ChordNode)
-            "groups" => O ^-> !|(Link ChordNode) 
+            "groups" => O ^-> !|(Link ChordNode)
         ]
 
     let ClusterNode =
@@ -545,19 +544,19 @@ module Definition =
             "depth"    , Int
             "x"        , Int
             "y"        , Int
-        ] 
+        ]
         |=> self
 
     let Cluster =
-        ChainedClassNew "Cluster" <| fun chained -> 
+        ChainedClassNew "Cluster" <| fun chained ->
         [
             "nodes"      => ClusterNode?root ^-> !|ClusterNode
             "links"      => (!|ClusterNode)?nodes ^-> !|(Link ClusterNode)
             "children"   => getSetVal chained (Obj ^-> Obj)
             "sort"       => getSetVal chained Comparator
             "separation" => getSetVal chained (ClusterNode * ClusterNode ^-> Int)
-            "size"       => getSetVal chained Float2 
-            "nodeSize"   => getSetVal chained Float2 
+            "size"       => getSetVal chained Float2
+            "nodeSize"   => getSetVal chained Float2
             "value"      => getSetVal chained (Obj ^-> Float)
         ]
 
@@ -570,7 +569,7 @@ module Definition =
             "py"     , Int
             "fixed"  , Bool
             "weight" , Int
-        ] 
+        ]
 
     let ForceEvent =
         Pattern.EnumStrings "ForceEvent" [
@@ -581,19 +580,19 @@ module Definition =
         |>! addToClassList
 
     let Force =
-        ChainedClassNew "Force" <| fun chained -> 
+        ChainedClassNew "Force" <| fun chained ->
         [
             "on" => (ForceEvent?``type`` ^-> (O ^-> O)) + chained (ForceEvent?``type`` * (O ^-> O)?listener)
             "nodes" => ForceNode?root ^-> !|ForceNode
             "links" => getSetVal chained !|(Link ForceNode)
             "start" => O ^-> O
             "alpha" => getSetVal chained Float
-            "resume" => O ^-> O 
-            "start" => O ^-> O 
+            "resume" => O ^-> O
+            "start" => O ^-> O
             "tick"  => O ^-> O
             "drag"  => O ^-> O
         ]
-    
+
     let HierarchyNode =
         let self = Type.New()
         ObjType "HierarchyNode" [
@@ -601,11 +600,11 @@ module Definition =
             "children" , !|self
             "value"    , Obj
             "depth"    , Int
-        ] 
+        ]
         |=> self
 
     let Hierarchy =
-        ChainedClassNew "Hierarchy" <| fun chained -> 
+        ChainedClassNew "Hierarchy" <| fun chained ->
         [
             "nodes"    => HierarchyNode?root ^-> !|HierarchyNode
             "links"    => getSetVal chained !|(Link HierarchyNode)
@@ -618,11 +617,11 @@ module Definition =
     let binningFunc = Float2 * !|Obj * Int ^-> !|Float
 
     let Histogram =
-        ChainedClassNew "Histogram" <| fun chained -> 
+        ChainedClassNew "Histogram" <| fun chained ->
         [
             "value"      => getSetVal chained (Obj ^-> Float)
             "range"      => getVal Float2 + chained (Float2 + !|Obj * Int ^-> Float2)
-            "bins"       => getVal binningFunc + chained(Int + !|Float + binningFunc) 
+            "bins"       => getVal binningFunc + chained(Int + !|Float + binningFunc)
             "frequency"  => getSetVal chained Bool
         ]
 
@@ -636,11 +635,11 @@ module Definition =
             "x"        , Int
             "y"        , Int
             "r"        , Int
-        ] 
+        ]
         |=> self
 
     let Pack =
-        ChainedClassNew "Pack" <| fun chained -> 
+        ChainedClassNew "Pack" <| fun chained ->
         [
             "nodes"    => PackNode?root ^-> !|PackNode
             "links"    => getSetVal chained !|(Link PackNode)
@@ -663,11 +662,11 @@ module Definition =
             "y"        , Int
             "dx"       , Int
             "dy"       , Int
-        ] 
+        ]
         |=> self
 
     let Partition =
-        ChainedClassNew "Partition" <| fun chained -> 
+        ChainedClassNew "Partition" <| fun chained ->
         [
             "nodes"    => PartitionNode?root ^-> !|PartitionNode
             "links"    => getSetVal chained !|(Link PartitionNode)
@@ -678,7 +677,7 @@ module Definition =
         ]
 
     let Pie =
-        ChainedClassNew "Pie" <| fun chained -> 
+        ChainedClassNew "Pie" <| fun chained ->
         [
             "value"    => getSetVal chained (Obj ^-> Float)
             "sort"     => getSetVal chained Comparator
@@ -704,7 +703,7 @@ module Definition =
         |>! addToClassList
 
     let Stack =
-        ChainedClassNew "Stack" <| fun chained -> 
+        ChainedClassNew "Stack" <| fun chained ->
         [
             "values" => getSetVal chained (Obj ^-> Obj)
             "offset" => getVal (!|Float2 ^-> !|Float) + chained (StackOffset + (Float2 ^-> !|Float))
@@ -722,19 +721,19 @@ module Definition =
             "depth"    , Int
             "x"        , Int
             "y"        , Int
-        ] 
+        ]
         |=> self
 
     let Tree =
-        ChainedClassNew "Tree" <| fun chained -> 
+        ChainedClassNew "Tree" <| fun chained ->
         [
             "nodes"      => TreeNode?root ^-> !|TreeNode
             "links"      => (!|TreeNode)?nodes ^-> !|(Link TreeNode)
             "children"   => getSetVal chained (Obj ^-> Obj)
             "sort"       => getSetVal chained Comparator
             "separation" => getSetVal chained (TreeNode * TreeNode ^-> Int)
-            "size"       => getSetVal chained Float2 
-            "nodeSize"   => getSetVal chained Float2 
+            "size"       => getSetVal chained Float2
+            "nodeSize"   => getSetVal chained Float2
         ]
 
     let TreemapMode =
@@ -747,14 +746,14 @@ module Definition =
         |>! addToClassList
 
     let Treemap =
-        ChainedClassNew "Treemap" <| fun chained -> 
+        ChainedClassNew "Treemap" <| fun chained ->
         [
             "nodes"      => PartitionNode?root ^-> !|PartitionNode
             "links"      => (!|PartitionNode)?nodes ^-> !|(Link PartitionNode)
             "children"   => getSetVal chained (Obj ^-> Obj)
             "sort"       => getSetVal chained Comparator
             "value"    => getSetVal chained (Obj ^-> Float)
-            "size"       => getSetVal chained Float2 
+            "size"       => getSetVal chained Float2
             "padding"  => getSetVal chained Int
             "round"   => getSetVal chained Bool
             "sticky"  => getSetVal chained Bool
@@ -774,7 +773,7 @@ module Definition =
     let Feature = Type.New()
 
     let Path =
-        ChainedClassNew "Path" <| fun chained -> 
+        ChainedClassNew "Path" <| fun chained ->
         [
             "projection"  => getSetVal chained (Float2 ^-> Float2)
             "context"     => getSetVal chained PathContext.Type
@@ -789,7 +788,7 @@ module Definition =
     let Polygon = Type.New()
 
     let Graticule =
-        ChainedClassNew "Graticule" <| fun chained -> 
+        ChainedClassNew "Graticule" <| fun chained ->
         [
             "lines" => O ^-> !|LineString
             "outline" => O ^-> Polygon
@@ -803,7 +802,7 @@ module Definition =
         ]
 
     let Circle =
-        ChainedClassNew "Circle" <| fun chained -> 
+        ChainedClassNew "Circle" <| fun chained ->
         [
             "origin"    => getVal Float2 + chained (Float2 + Obj ^-> Float2)
             "angle"     => getSetVal chained Float
@@ -811,14 +810,14 @@ module Definition =
         ]
 
     let Rotation =
-        ChainedClassNew "Rotation" <| fun chained -> 
+        ChainedClassNew "Rotation" <| fun chained ->
         [
             "apply"   => Float2?location ^-> Float2 |> WithInline "$this($location)"
             "invvert" => Float2?location ^-> Float2
         ]
 
     let Listener =
-        Interface "Listener" 
+        Interface "Listener"
         |+> [
             "point"        => Float?x * Float?y * !?Float?z ^-> O
             "lineStart"    => O ^-> O
@@ -830,7 +829,7 @@ module Definition =
         |>! addToClassList
 
     let Projection =
-        ChainedClassNew "Projection" <| fun chained -> 
+        ChainedClassNew "Projection" <| fun chained ->
         [
             "apply"      => Float2?location ^-> Float2 |> WithInline "$this($location)"
             "invert"     => Float2?location ^-> Float2
@@ -845,29 +844,29 @@ module Definition =
         ]
 
     let AlbersProjection =
-        ChainedClassNewInherits "AlbersProjection" Projection <| fun chained -> 
+        ChainedClassNewInherits "AlbersProjection" Projection <| fun chained ->
         [
             "parallels" => getVal Float2 + chained Float2
         ]
 
     let StreamTransform =
-        ChainedClassNew "StreamTransform" <| fun chained -> 
+        ChainedClassNew "StreamTransform" <| fun chained ->
         [
             "stream" => Listener?listener ^-> Listener
         ]
 
     let ClipTransform =
-        ChainedClassNewInherits "ClipTransform" StreamTransform <| fun chained -> 
+        ChainedClassNewInherits "ClipTransform" StreamTransform <| fun chained ->
         [
-            "extent" => getSetVal chained Float2x2 
+            "extent" => getSetVal chained Float2x2
         ]
 
     let Voronoi =
-        ChainedClassNew "Voronoi" <| fun chained -> 
+        ChainedClassNew "Voronoi" <| fun chained ->
         [
-            "x"     => getSetVal chained (Obj ^-> Float) 
-            "y"     => getSetVal chained (Obj ^-> Float) 
-            "clipExtent" => getSetVal chained Float2x2 
+            "x"     => getSetVal chained (Obj ^-> Float)
+            "y"     => getSetVal chained (Obj ^-> Float)
+            "clipExtent" => getSetVal chained Float2x2
             "links" => !|Obj ^-> !|Obj
             "data" => !|Obj ^-> !|Obj
         ]
@@ -885,37 +884,37 @@ module Definition =
         ]
 
     let QuadtreeRoot =
-        ChainedClassNewInherits "QuadtreeRoot" QuadtreeNode <| fun chained -> 
+        ChainedClassNewInherits "QuadtreeRoot" QuadtreeNode <| fun chained ->
         [
-            "add"   => Float2 ^-> O 
+            "add"   => Float2 ^-> O
             "visit" => (QuadtreeNode?node * Float?x1 * Float?y1 * Float?x2 * Float?y2 ^-> Bool)?callback ^-> O
         ]
 
     let Quadtree =
-        ChainedClassNew "Quadtree" <| fun chained -> 
+        ChainedClassNew "Quadtree" <| fun chained ->
         [
             "apply"  => (!|Float2)?points ^-> QuadtreeRoot |> WithInline "$this($points)"
-            "x"     => getSetVal chained (Obj ^-> Float) 
-            "y"     => getSetVal chained (Obj ^-> Float) 
-            "extent" => getSetVal chained Float2x2 
+            "x"     => getSetVal chained (Obj ^-> Float)
+            "y"     => getSetVal chained (Obj ^-> Float)
+            "extent" => getSetVal chained Float2x2
         ]
 
     let PolygonClass =
-        ChainedClassNew "Polygon" (fun chained -> 
+        ChainedClassNew "Polygon" (fun chained ->
             [
                 "area"     => O ^-> Float
                 "centroid" => O ^-> Float2
                 "clip"     => chained Polygon
-            ] 
+            ]
         )
         |=> Polygon
 
     let Hull =
-        ChainedClassNew "Hull" <| fun chained -> 
+        ChainedClassNew "Hull" <| fun chained ->
         [
-            "apply" => !|Obj ^-> !|Obj 
-            "x"     => getSetVal chained (Obj ^-> Float) 
-            "y"     => getSetVal chained (Obj ^-> Float) 
+            "apply" => !|Obj ^-> !|Obj
+            "x"     => getSetVal chained (Obj ^-> Float)
+            "y"     => getSetVal chained (Obj ^-> Float)
         ]
 
     let DragEvent =
@@ -927,7 +926,7 @@ module Definition =
         |>! addToClassList
 
     let Drag =
-        ChainedClassNew "Drag" <| fun chained -> 
+        ChainedClassNew "Drag" <| fun chained ->
         [
             "origin" => getSetVal chained (selectionCallback Float2)
             "on"     => (DragEvent?``type`` ^-> (O ^-> O)) + chained (DragEvent?``type`` * (O ^-> O)?listener)
@@ -942,7 +941,7 @@ module Definition =
         |>! addToClassList
 
     let Zoom =
-        ChainedClassNew "Zoom" <| fun chained -> 
+        ChainedClassNew "Zoom" <| fun chained ->
         [
             "scale"       => getSetVal chained Float
             "translate"   => getSetVal chained Float2
@@ -956,15 +955,15 @@ module Definition =
         ]
 
     let Bisector =
-        ChainedClassNew "Bisector" <| fun chained -> 
-        [   
-            Generic - fun t -> "bisectLeft" => (!|t)?array * Int?x * !?Int?lo * !?Int?hi ^-> Int  
+        ChainedClassNew "Bisector" <| fun chained ->
+        [
+            Generic - fun t -> "bisectLeft" => (!|t)?array * Int?x * !?Int?lo * !?Int?hi ^-> Int
             Generic - fun t -> "apply" => (!|t)?array * Int?x * !?Int?lo * !?Int?hi ^-> Int |> WithInline "$this($arguments)"
-            Generic - fun t -> "bisectRight" => (!|t)?array * Int?x * !?Int?lo * !?Int?hi ^-> Int  
+            Generic - fun t -> "bisectRight" => (!|t)?array * Int?x * !?Int?lo * !?Int?hi ^-> Int
         ]
 
 //    let Dispatcher =
-//        ChainedClassNew "Dispatcher" <| fun chained -> 
+//        ChainedClassNew "Dispatcher" <| fun chained ->
 //        [
 //            "on" => String
 //            //"call"
@@ -973,15 +972,15 @@ module Definition =
     let SvgTransform =
         Class "SvgTransform"
         |+> [
-            "matrix" => Float?a * Float?b * Float?c * Float?d * Float?e * Float?f ^-> String 
+            "matrix" => Float?a * Float?b * Float?c * Float?d * Float?e * Float?f ^-> String
                 |> WithInline "'matrix(' + $a + ',' + $b + ',' + $c + ',' + $d + ',' + $e + ',' + $f + ')'"
-            "translate" => Float?tx ^-> String 
+            "translate" => Float?tx ^-> String
                 |> WithInline "'translate(' + $tx + ')'"
-            "translate" => Float?tx * Float?ty ^-> String 
+            "translate" => Float?tx * Float?ty ^-> String
                 |> WithInline "'translate(' + $tx + ',' + $ty + ')'"
-            "scale" => Float?sx ^-> String 
+            "scale" => Float?sx ^-> String
                 |> WithInline "'scale(' + $sx + ')'"
-            "scale" => Float?sx * Float?sy ^-> String 
+            "scale" => Float?sx * Float?sy ^-> String
                 |> WithInline "'scale(' + $sx + ',' + $sy + ')'"
             "rotate" => Float?rotateAngle ^-> String
                 |> WithInline "'rotate(' + $rotateAngle + ')'"
@@ -999,7 +998,7 @@ module Definition =
     let xhrMime xhrType = String?url * !?String?mimeType * (Error?error * xhrType?response ^-> O)?callback ^-> O
     let xhr xhrType = String?url * (xhrType?response ^-> O)?callback ^-> O
 
-    let D3 = 
+    let D3 =
         Class "d3"
         |+> [
             // Selections
@@ -1008,8 +1007,8 @@ module Definition =
             "selection"   => O ^-> Selection
             "event"       =? Event
             "mouse"       => Element?container ^-> Int2
-            "touches"     => Element?container * !?Obj?touches ^-> !|Int2x2 
-            
+            "touches"     => Element?container * !?Obj?touches ^-> !|Int2x2
+
             // Transitions
             "transition"  => !?Selection?selection ^-> Transition
             "ease"        => (!+Float * String?``type``) ^-> easing
@@ -1028,24 +1027,24 @@ module Definition =
             "interpolateZoom" => interpolate Float3
             //geo.Interpolate
             "interpolators" =? T<(obj * obj -> obj)[]>
-            
+
             // Working with Arrays
             "ascending"   => Float?a * Float?b ^-> Int
             "descending"  => Float?a * Float?b ^-> Int
             Generic - fun t   -> "min" => (!|t)?array ^-> t
-            Generic - fun t u -> "min" => (!|t)?array * (t ^-> u)?accessor ^-> u   
+            Generic - fun t u -> "min" => (!|t)?array * (t ^-> u)?accessor ^-> u
             Generic - fun t   -> "max" => (!|t)?array ^-> t
-            Generic - fun t u -> "max" => (!|t)?array * (t ^-> u)?accessor ^-> u   
+            Generic - fun t u -> "max" => (!|t)?array * (t ^-> u)?accessor ^-> u
             Generic - fun t   -> "extent" => (!|t)?array ^-> t * t
-            Generic - fun t u -> "extent" => (!|t)?array * (t ^-> u)?accessor ^-> u * u   
+            Generic - fun t u -> "extent" => (!|t)?array * (t ^-> u)?accessor ^-> u * u
             Generic - fun t   -> "mean" => (!|t)?array ^-> t
-            Generic - fun t u -> "mean" => (!|t)?array * (t ^-> u)?accessor ^-> u   
+            Generic - fun t u -> "mean" => (!|t)?array * (t ^-> u)?accessor ^-> u
             Generic - fun t   -> "median" => (!|t)?array ^-> t
-            Generic - fun t u -> "median" => (!|t)?array * (t ^-> u)?accessor ^-> u   
-            Generic - fun t   -> "quantile" => (!|t)?numbers * Float?p ^-> t            
-            Generic - fun t   -> "bisectLeft" => (!|t)?array * Int?x * !?Int?lo * !?Int?hi ^-> Int  
-            Generic - fun t   -> "bisect" => (!|t)?array * Int?x * !?Int?lo * !?Int?hi ^-> Int  
-            Generic - fun t   -> "bisectRight" => (!|t)?array * Int?x * !?Int?lo * !?Int?hi ^-> Int  
+            Generic - fun t u -> "median" => (!|t)?array * (t ^-> u)?accessor ^-> u
+            Generic - fun t   -> "quantile" => (!|t)?numbers * Float?p ^-> t
+            Generic - fun t   -> "bisectLeft" => (!|t)?array * Int?x * !?Int?lo * !?Int?hi ^-> Int
+            Generic - fun t   -> "bisect" => (!|t)?array * Int?x * !?Int?lo * !?Int?hi ^-> Int
+            Generic - fun t   -> "bisectRight" => (!|t)?array * Int?x * !?Int?lo * !?Int?hi ^-> Int
             Generic - fun t u -> "bisector" => (t ^-> u) ^-> Bisector
             Generic - fun t   -> "shuffle" => (!|t)?array ^-> !|t
             "keys"    => Obj?``object`` ^-> !|String
@@ -1057,14 +1056,14 @@ module Definition =
             "range"     => !?Float?start * Float?stop * !?Float?step ^-> !|Float
             Generic - fun t -> "permute" => (!|t)?array * (!|Int)?indexes ^-> !|t
             "zip" => !+ !|Obj ^-> !|Obj
-            Generic - fun t -> "transpose" => (!| !|t)?matrix ^-> !| !|t 
+            Generic - fun t -> "transpose" => (!| !|t)?matrix ^-> !| !|t
             Generic - fun t -> "pairs" => (!|t)?array ^-> !|(t * t)
-            
+
             "nest" => O ^-> Nest
-            
+
             "transform" => String?string ^-> Transform
-            
-            "xhr" => String?url * !?String?mimeType ^-> Xhr 
+
+            "xhr" => String?url * !?String?mimeType ^-> Xhr
             "xhr" => xhrMime Xhr.Type
 
             "text" => xhrMime String
@@ -1076,7 +1075,7 @@ module Definition =
             "dsv"  => xhr (!| !|Obj)
 
             "format" => String?specifier ^-> Float?number ^-> String
-            //"fomatPefix" => 
+            //"fomatPefix" =>
             "requote" => String ^-> String
             "round" => Float?x * Int?n ^-> Float
 
@@ -1085,8 +1084,8 @@ module Definition =
             //"dispatch" => !+String ^-> Dispatcher
         ]
         |=> Nested [
-            Class "d3.timer" 
-            |+> [    
+            Class "d3.timer"
+            |+> [
                 "flush" => O ^-> O
             ]
             Class "d3.random"
@@ -1153,7 +1152,7 @@ module Definition =
                 "threshold" => O ^-> DiscreteScale
                 "quantile"  => O ^-> QuantileScale
                 "identity"  => O ^-> IdentityScale
-                "ordinal"   => O ^-> OrdinalScale   
+                "ordinal"   => O ^-> OrdinalScale
             ]
             Class "d3.svg"
             |+> [
@@ -1162,8 +1161,8 @@ module Definition =
                 Generic - fun tData -> "area"        => O ^-> Area       tData
                 Generic - fun tData -> "area.radial" => O ^-> RadialArea tData
                 Generic - fun tData -> "arc"         => O ^-> Arc        tData
-                "symbol"          => O ^-> Symbol                        
-                "symbolTypes"     =? !|SymbolType                        
+                "symbol"          => O ^-> Symbol
+                "symbolTypes"     =? !|SymbolType
                 Generic - fun tData -> "chord"       => O ^-> Chord      tData
                 "diagonal"        => O ^-> Diagonal
                 "diagonal.radial" => O ^-> Diagonal
@@ -1181,7 +1180,7 @@ module Definition =
                 "distance"  => Float2?a * Float2?b ^-> Float
                 "rotation"  => (!|Float)?rotate ^-> Rotation
                 "projection" => (Float2 ^-> Float2)?raw ^-> Projection
-                "projectionMutator" => (Float2 ^-> Float2 ^-> Float2)?rawFactory ^-> Projection 
+                "projectionMutator" => (Float2 ^-> Float2 ^-> Float2)?rawFactory ^-> Projection
 
                 "albersUsa"            => O ^-> Projection
                 "azimuthalEqualArea"   => O ^-> Projection
