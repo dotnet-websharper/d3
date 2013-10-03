@@ -1221,11 +1221,13 @@ module Definition =
         ]
         |>! addToClassList
 
-    let D3Assembly = Assembly [ Namespace "IntelliFactory.WebSharper.D3" classList ]
-
-//[<Sealed>]
-//type D3Resource() =
-//    inherit IntelliFactory.WebSharper.Core.Resources.BaseResource("d3js.org/d3.v3.min.js")
+    let D3Assembly =
+        Assembly [
+            Namespace "IntelliFactory.WebSharper.D3" classList
+            Namespace "IntelliFactory.WebSharper.D3.Resources" [
+                (Resource "D3" "d3.v3.min.js").AssemblyWide()
+            ]
+        ]
 
 [<Sealed>]
 type D3Extension() =
@@ -1233,5 +1235,4 @@ type D3Extension() =
         member ext.Assembly = Definition.D3Assembly
 
 [<assembly: Extension(typeof<D3Extension>)>]
-//[<assembly: IntelliFactory.WebSharper.Core.Attributes.Require(typeof<D3Resource>)>]
 do ()
