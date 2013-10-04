@@ -30,7 +30,17 @@ bt.Solution [
     web
 
     bt.NuGet.CreatePackage()
-        .Description("Bindings to D3")
+        .Description("WebSharper bindings to D3 (d3js.org) version d3v3.")
+        .ProjectUrl("http://github.com/intellifactory/websharper.d3")
+        .Configure(fun c ->
+            {
+                c with
+                    Authors = ["IntelliFactory"]
+                    Id = "WebSharper.D3"
+                    LicenseUrl = Some "http://github.com/intellifactory/websharper.d3/blob/master/LICENSE.md"
+                    RequiresLicenseAcceptance = true
+                    Title = Some "WebSharper.D3 (d3v3)"
+            })
         .Add(main)
 
 ]
