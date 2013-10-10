@@ -962,6 +962,11 @@ module Definition =
             Generic - fun t -> "bisectRight" => (!|t)?array * Int?x * !?Int?lo * !?Int?hi ^-> Int
         ]
 
+    let Prefix =
+        ObjType "Prefix" [
+            "symbol" , String
+            "scale"  , Float ^-> Float
+        ]
 //    let Dispatcher =
 //        ChainedClassNew "Dispatcher" <| fun chained ->
 //        [
@@ -1075,13 +1080,13 @@ module Definition =
             "dsv"  => xhr (!| !|Obj)
 
             "format" => String?specifier ^-> Float?number ^-> String
-            //"fomatPefix" =>
+            "fomatPefix" => Float?value * !?Float?precision ^-> Prefix
             "requote" => String ^-> String
             "round" => Float?x * Int?n ^-> Float
 
             Generic - fun t -> "functor" => t ^-> O ^-> t
-            //"rebind" - crazy JS stuff
-            //"dispatch" => !+String ^-> Dispatcher
+            "rebind" => !+ String * Obj?target * Obj?source ^-> O
+//            "dispatch" => !+String ^-> Dispatcher
         ]
         |=> Nested [
             Class "d3.timer"

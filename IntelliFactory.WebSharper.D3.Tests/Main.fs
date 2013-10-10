@@ -69,7 +69,6 @@ module FocusBrushing =
                     .Y1(fun d -> y2.Apply(d.Price))
 
             let svg =
-
                 D3.Select("body").Append("svg")
                     .Attr("width", width + margin.Left + margin.Right)
                     .Attr("height", height + margin.Top + margin.Bottom);

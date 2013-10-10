@@ -3,7 +3,7 @@
   <PropertyGroup>
     <ProjectGuid>54bb594a-fdfe-4d11-9ce9-b58fbe769aaf</ProjectGuid>
     <Name>IntelliFactory.WebSharper.D3.Tests</Name>
-    <WebSharperProject>InterfaceGenerator</WebSharperProject>
+    <WebSharperProject>Library</WebSharperProject>
     <OutputPath>../build/net45</OutputPath>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>

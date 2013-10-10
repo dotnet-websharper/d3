@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2012 for Web
+# Visual Studio 2012
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "IntelliFactory.WebSharper.D3", "IntelliFactory.WebSharper.D3\IntelliFactory.WebSharper.D3.fsproj", "{6FC4DB6A-79D0-4715-97AC-ABB2CC58012B}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "IntelliFactory.WebSharper.D3.Tests", "IntelliFactory.WebSharper.D3.Tests\IntelliFactory.WebSharper.D3.Tests.fsproj", "{54BB594A-FDFE-4D11-9CE9-B58FBE769AAF}"
@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		build.fsx = build.fsx
 		ivy.xml = ivy.xml
+		LICENSE.md = LICENSE.md
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "Web\Web.csproj", "{5F0C9660-4263-4612-8B3D-ACF7C5D7128A}"
