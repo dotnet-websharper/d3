@@ -11,7 +11,7 @@ module Definition =
         f x
         x
 
-    let ObjType name propList =
+    let Record name propList =
         Class name
         |+> Protocol (
             propList |> List.map (fun (n, t) -> upcast (n =@ t))
@@ -43,7 +43,13 @@ module Definition =
 
     let nameArg = String?name
 
-    let selectionCallback ret = Element -* Obj?d * Int?i ^-> ret
+    let WithThis t ps r = (t -* ps ^-> r) + (ps ^-> r)
+
+//    let WithNum n = (n Int) + (n Float)
+
+    let selectionCallback ret = WithThis Element (Obj?d * Int?i) ret
+
+//    let selectionCallback ret = (Element -* Obj?d * Int?i ^-> ret) + (Obj?d * Int?i ^-> ret)
 
     let getVal t = O ^-> t
 //    let setVal chained t = chained t?value
@@ -58,7 +64,7 @@ module Definition =
     let getSetProp chained (t: Type.Type) = getProp t + chained (setProp t)
 
     let NameValuePair =
-        ObjType "NameValuePair" [
+        Record "NameValuePair" [
             "name"  , String
             "value" , String
         ]
@@ -78,11 +84,11 @@ module Definition =
     let ChainedClassNew name members =
         ChainedClass name (Type.New()) members
 
-    let ChainedClassNewG name members =
-        ChainedClassG name (Type.New()) members
-
     let ChainedClassNewInherits name inherits members =
         ChainedClassNew name members |=> Inherits inherits
+
+    let ChainedClassInheritsG name t inherits members =
+        ChainedClassG name t members |=> Inherits inherits
 
     let Selection =
         let self = Type.New()
@@ -97,7 +103,7 @@ module Definition =
             "append"     => chained nameArg
             "insert"     => chained (nameArg * !?(String + selectionCallback Element)?before)
             "remove"     => chained O
-            "data"       => (!|Obj + selectionCallback !|Obj)?values * !?(selectionCallback String)?key ^-> UpdateSelection + O ^-> !|Obj
+            "data"       => ((!|Obj + selectionCallback !|Obj)?values * !?(selectionCallback String)?key ^-> UpdateSelection) + (O ^-> !|Obj)
             "datum"      => chained (Obj + selectionCallback Obj)?value
             "filter"     => chained (String + selectionCallback Bool)?selector
             "sort"       => chained O
@@ -114,9 +120,9 @@ module Definition =
             "selectAll"  => chained selector
         ]
 
-    //let UpdateSelectionClass =
     addToClassList (
         Class "UpdateSelection"
+        |=> UpdateSelection
         |=> Inherits Selection
         |+> Protocol [
             "enter" => O ^-> Selection
@@ -124,8 +130,8 @@ module Definition =
         ]
     )
 
-    let tweenCallback   = Element -* Obj?d * Int?i * Obj?a ^-> (Float?t ^-> Obj)
-    let factoryCallback = Element -* O ^-> (Element -* Float?t ^-> Obj)
+    let tweenCallback   = (Element -* Obj?d * Int?i * Obj?a ^-> (Float?t ^-> Obj))
+    let factoryCallback = (Element -* O ^-> (Element -* Float?t ^-> Obj))
 
     let easing = T<float -> float>
 
@@ -154,7 +160,7 @@ module Definition =
         ]
 
     let KeyValuePair =
-        ObjType "KeyValuePair" [
+        Record "KeyValuePair" [
             "key"   , String
             "value" , Obj
         ]
@@ -171,7 +177,7 @@ module Definition =
             "keys"    => O ^-> !|String
             "values"  => O ^-> !|Obj
             "entries" => O ^-> !|KeyValuePair
-            "forEach" => self -* String?key * Obj?value ^-> O
+            "forEach" => WithThis self (String?key * Obj?value) O
         ]
 
     let Set =
@@ -183,7 +189,7 @@ module Definition =
             "add"     => String?value ^-> String
             "remove"  => String?value ^-> Bool
             "values"  => O ^-> !|String
-            "forEach" => self -* String?value ^-> O
+            "forEach" => WithThis self String?value O
         ]
 
     let Nest =
@@ -235,7 +241,6 @@ module Definition =
     let Rgb = Type.New()
 
     let ColorType name convName convType =
-        // ChainedClass
         let chained args = args ^-> Rgb
         Class name
         |+> Protocol (
@@ -257,7 +262,7 @@ module Definition =
     let RgbClass = ColorType "rgb" "hsl" Hsl |=> Rgb
 
     let QualifiedNs =
-        ObjType "QualifiedNs" [
+        Record "QualifiedNs" [
             "space" , String
             "local" , String
         ]
@@ -312,18 +317,23 @@ module Definition =
         ]
 
     let OrdinalScale =
-        ChainedClassNewInherits "OrdinalScale" Scale <| fun chained ->
-        [
-            "apply"           => Obj?x ^-> Obj |> WithInline "$this($x)"
-            "domain"          => getSetVal chained !|Obj
-            "range"           => getSetVal chained !|Obj
-            "rangePoints"     => chained (Float2?interval * !?Float?padding)
-            "rangeBands"      => chained (Float2?interval * !?Float?padding * !?Float?outerPadding)
-            "rangeRoundBands" => chained (Float2?interval * !?Float?padding * !?Float?outerPadding)
-            "rangeBand"       => O ^-> Float
-            "rangeExtent"     => O ^-> Float2
-            "copy"            => chained O
-        ]
+        let self = Type.New()
+        let gen =
+            Generic / fun tData ->
+            ChainedClassInheritsG "OrdinalScale" self.[tData] Scale <| fun chained ->
+            [
+                "apply"           => tData?x ^-> Float |> WithInline "$this($x)"
+                "domain"          => getSetVal chained !|tData
+                "range"           => getSetVal chained !|Float
+                "rangePoints"     => chained (Float2?interval * !?Float?padding)
+                "rangeBands"      => chained (Float2?interval * !?Float?padding * !?Float?outerPadding)
+                "rangeRoundBands" => chained (Float2?interval * !?Float?padding * !?Float?outerPadding)
+                "rangeBand"       => O ^-> Float
+                "rangeExtent"     => O ^-> Float2
+                "copy"            => chained O
+            ]
+        addToClassList <| Generic - gen
+        gen
 
     let TimeScale = getQuantScale "TimeScale" Date
 
@@ -505,7 +515,7 @@ module Definition =
 
     let BundleNode =
         let self = Type.New()
-        ObjType "BundleNode" [
+        Record "BundleNode" [
             "parent" , self
         ]
 
@@ -516,7 +526,7 @@ module Definition =
         ]
 
     let ChordNode =
-        ObjType "ChordObject" [
+        Record "ChordObject" [
             "index"      , Int
             "subIndex"   , Int
             "startAngle" , Float
@@ -538,7 +548,7 @@ module Definition =
 
     let ClusterNode =
         let self = Type.New()
-        ObjType "ClusterNode" [
+        Record "ClusterNode" [
             "parent"   , self
             "children" , !|self
             "depth"    , Int
@@ -561,7 +571,7 @@ module Definition =
         ]
 
     let ForceNode =
-        ObjType "ForceNode" [
+        Record "ForceNode" [
             "index"  , Int
             "x"      , Int
             "y"      , Int
@@ -595,7 +605,7 @@ module Definition =
 
     let HierarchyNode =
         let self = Type.New()
-        ObjType "HierarchyNode" [
+        Record "HierarchyNode" [
             "parent"   , self
             "children" , !|self
             "value"    , Obj
@@ -627,7 +637,7 @@ module Definition =
 
     let PackNode =
         let self = Type.New()
-        ObjType "PackNode" [
+        Record "PackNode" [
             "parent"   , self
             "children" , !|self
             "value"    , Obj
@@ -653,7 +663,7 @@ module Definition =
 
     let PartitionNode =
         let self = Type.New()
-        ObjType "PartitionNode" [
+        Record "PartitionNode" [
             "parent"   , self
             "children" , !|self
             "value"    , Obj
@@ -715,7 +725,7 @@ module Definition =
 
     let TreeNode =
         let self = Type.New()
-        ObjType "TreeNode" [
+        Record "TreeNode" [
             "parent"   , self
             "children" , !|self
             "depth"    , Int
@@ -963,16 +973,17 @@ module Definition =
         ]
 
     let Prefix =
-        ObjType "Prefix" [
+        Record "Prefix" [
             "symbol" , String
             "scale"  , Float ^-> Float
         ]
-//    let Dispatcher =
-//        ChainedClassNew "Dispatcher" <| fun chained ->
-//        [
-//            "on" => String
-//            //"call"
-//        ]
+
+    let Dispatcher =
+        ChainedClassNew "Dispatcher" <| fun chained ->
+        [
+            "on" => String
+            "type" => String?``type`` *+ Obj ^-> O |> WithInline "$0.$type($arguments)"
+        ]
 
     let SvgTransform =
         Class "SvgTransform"
@@ -1016,7 +1027,7 @@ module Definition =
 
             // Transitions
             "transition"  => !?Selection?selection ^-> Transition
-            "ease"        => (!+Float * String?``type``) ^-> easing
+            "ease"        => (String?``type`` *+ Float) ^-> easing
             "timer"       => O ^-> Bool?``function`` * !?Int?delay * !?T<System.DateTime>?time ^-> O
             Generic - fun t -> "interpolate" => interpolate t
             "interpolateNumber" => interpolate Float
@@ -1058,7 +1069,7 @@ module Definition =
             "map"     => !?Obj?``object`` ^-> Map
             "set"     => !?(!|String)?array ^-> Set
             Generic - fun t -> "merge" => !+ !|t ^-> !|t
-            "range"     => !?Float?start * Float?stop * !?Float?step ^-> !|Float
+            "range"     => (!?Float?start * Float?stop * !?Float?step ^-> !|Float) + (!?Int?start * Int?stop * !?Int?step ^-> !|Int)
             Generic - fun t -> "permute" => (!|t)?array * (!|Int)?indexes ^-> !|t
             "zip" => !+ !|Obj ^-> !|Obj
             Generic - fun t -> "transpose" => (!| !|t)?matrix ^-> !| !|t
@@ -1085,8 +1096,8 @@ module Definition =
             "round" => Float?x * Int?n ^-> Float
 
             Generic - fun t -> "functor" => t ^-> O ^-> t
-            "rebind" => !+ String * Obj?target * Obj?source ^-> O
-//            "dispatch" => !+String ^-> Dispatcher
+            "rebind" => Obj?target * Obj?source *+ String ^-> O
+            "dispatch" => !+ String ^-> Dispatcher
         ]
         |=> Nested [
             Class "d3.timer"
@@ -1157,7 +1168,7 @@ module Definition =
                 "threshold" => O ^-> DiscreteScale
                 "quantile"  => O ^-> QuantileScale
                 "identity"  => O ^-> IdentityScale
-                "ordinal"   => O ^-> OrdinalScale
+                Generic - fun tData -> "ordinal"   => O ^-> OrdinalScale tData
             ]
             Class "d3.svg"
             |+> [

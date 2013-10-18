@@ -226,6 +226,47 @@ module AreaChart =
 
             upcast Div []
 
+module Snake =
+    open IntelliFactory.WebSharper.Html
+    open System.Collections.Generic
+    open IntelliFactory.WebSharper.JQuery
+
+    type Control() =
+        inherit Web.Control()
+
+        [<JavaScript>]
+        override this.Body =
+            let snake = [| 4, 4 ; 3, 4 ; 2, 4 |]
+            let food = [| 4, 4 |]
+            let direction = 1, 0
+            //let nextMoves = [| |]
+             //let iterval_id = JavaScript.SetInterval(tick, 100)
+            let gridsize = 40
+                        
+            let scale =
+                D3.Scale.Ordinal()
+                    .Domain(D3.Range(gridsize))
+                    .RangeRoundBands((0., float <| JQuery.Of("svg").Height()), 0.)
+
+            let update_snake() =
+                let svg = D3.Select("svg")
+                let cells = 
+                    svg.SelectAll("rect.snake")
+                        .Data(As<obj[]> snake, fun (d, _) -> Json.Stringify(d))
+
+                cells.Enter()
+                   .Append("rect")
+                   .Attr("class", "snake")
+                   .Attr("width", scale.RangeBand())
+                   .Attr("height", scale.RangeBand())
+                   .Attr("x", fun (x, _) -> scale.Apply(x))
+                   .Attr("y", fun (_, y) -> scale.Apply(y))
+                   |> ignore
+
+                cells.Exit().Remove()
+
+            upcast Div []
+
 type Action =
     | Home
 
