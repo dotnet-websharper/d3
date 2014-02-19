@@ -259,8 +259,8 @@ module Snake =
                    .Attr("class", "snake")
                    .Attr("width", scale.RangeBand())
                    .Attr("height", scale.RangeBand())
-                   .Attr("x", fun (x, _) -> scale.Apply(x))
-                   .Attr("y", fun (_, y) -> scale.Apply(y))
+                   .Attr("x", fun (x, _) -> scale.Apply(As<int> x))
+                   .Attr("y", fun (_, y) -> scale.Apply(As<int> y))
                    |> ignore
 
                 cells.Exit().Remove()

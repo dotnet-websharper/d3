@@ -2,8 +2,8 @@
 open IntelliFactory.Build
 
 let bt =
-    BuildTool().PackageId("WebSharper.D3", "2.5")
-        .References(fun r -> [r.Assembly "System.Web"])
+    let bt = BuildTool().PackageId("WebSharper.D3", "2.5").References(fun r -> [r.Assembly "System.Web"])
+    bt.WithFramework(bt.Framework.Net40)
 
 let main =
     bt.WebSharper.Extension("IntelliFactory.WebSharper.D3")
