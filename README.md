@@ -19,7 +19,7 @@ D3 is not a monolithic framework that seeks to provide every conceivable feature
 
 # Selections
 
-For modifying DOM elements, D3 employs a declarative approach, operating on arbitrary sets of nodes called selections. For example:
+For modifying DOM elements, D3 employs a declarative approach, operating on arbitrary sets of nodes called selections. For example, you can change the text color of paragraph elements:
 
 ```
 D3.SelectAll("p").Style("color", "white") |> ignore
@@ -29,13 +29,13 @@ Yet, you can still manipulate individual nodes as needed:
 ```
 D3.Select("body").Style("background-color", "black") |> ignore
 ```
-Selectors are defined by the W3C Selectors API and supported natively by modern browsers. Backwards-compatibility for older browsers can be provided by Sizzle. The above examples select nodes by tag name ("p" and "body", respectively). Elements may be selected using a variety of predicates, including containment, attribute values, class and ID.
+Selectors are defined by the [W3C Selectors API][w3cselectorsapi] and supported natively by modern browsers. Backwards-compatibility for older browsers can be provided by [Sizzle][sizzle]. The above examples select nodes by tag name (`p` and `body`, respectively). Elements may be selected using a variety of predicates, including containment, attribute values, class and ID.
 
 D3 provides numerous methods for mutating nodes: setting attributes or styles; registering event listeners; adding, removing or sorting nodes; and changing HTML or text content. These suffice for the vast majority of needs. Direct access to the underlying DOM is also possible, as each D3 selection is simply an array of nodes.
 
 # Dynamic Properties
 
-Readers familiar with other DOM frameworks such as jQuery or Prototype should immediately recognize similarities with D3. Yet styles, attributes, and other properties can be specified as functions of data in D3, not just simple constants. Despite their apparent simplicity, these functions can be surprisingly powerful; the d3.geo.path function, for example, projects geographic coordinates into SVG path data. D3 provides many built-in reusable functions and function factories, such as graphical primitives for area, line and pie charts.
+Readers familiar with other DOM frameworks such as [jQuery][jquery] or [Prototype][prototypejs] should immediately recognize similarities with D3. Yet styles, attributes, and other properties can be specified as functions of data in D3, not just simple constants. Despite their apparent simplicity, these functions can be surprisingly powerful; the `d3.geo.path` function, for example, projects [geographic coordinates][geocoordinates] into [SVG path data][pathdata]. D3 provides many built-in reusable functions and function factories, such as graphical primitives for area, line and pie charts.
 
 For example, to randomly color paragraphs:
 
@@ -44,6 +44,7 @@ D3.SelectAll("p").Style("color", fun _ ->
   "hsl(" + string (EcmaScript.Math.random() * 360.) + ",100%,50%)"
 ) |> ignore
 ```
+
 To alternate shades of gray for even and odd nodes:
 
 ```
@@ -51,34 +52,36 @@ D3.SelectAll("p").Style("color", fun (_, i) ->
   if i % 2 = 0 then "#eee" else "#fff"
 ) |> ignore
 ```
-Computed properties often refer to bound data. Data is specified as an array of values, and each value is passed as the first argument (d) to selection functions. With the default join-by-index, the first element in the data array is passed to the first node in the selection, the second element to the second node, and so on. For example, if you bind an array of numbers to paragraph elements, you can use these numbers to compute dynamic font sizes:
+
+Computed properties often refer to bound data. Data is specified as an array of values, and each value is passed as the first argument (`d`) to selection functions. With the default join-by-index, the first element in the data array is passed to the first node in the selection, the second element to the second node, and so on. For example, if you bind an array of numbers to paragraph elements, you can use these numbers to compute dynamic font sizes:
 
 ```
 D3.SelectAll("p")
     .Data([|4; 8; 15; 16; 23; 42|])
     .Style("font-size", fun (d, _) -> string d + "px") |> ignore
 ```
-Once the data has been bound to the document, you can omit the data operator; D3 will retrieve the previously-bound data. This allows you to recompute properties without rebinding.
+Once the data has been bound to the document, you can omit the `data` operator; D3 will retrieve the previously-bound data. This allows you to recompute properties without rebinding.
 
 # Enter and Exit
 
-Using D3's enter and exit selections, you can create new nodes for incoming data and remove outgoing nodes that are no longer needed.
+Using D3's "enter" and "exit" selections, you can create new nodes for incoming data and remove outgoing nodes that are no longer needed.
 
-When data is bound to a selection, each element in the data array is paired with the corresponding node in the selection. If there are fewer nodes than data, the extra data elements form the enter selection, which you can instantiate by appending to the enter selection. For example:
+When data is bound to a selection, each element in the data array is paired with the corresponding node in the selection. If there are fewer nodes than data, the extra data elements form the enter selection, which you can instantiate by appending to the `Enter` selection. For example:
 
 ```
 D3.Select("body").SelectAll("p")
-    .Data([|4; 8; 15; 16; 23; 42|])
+  .Data([|4; 8; 15; 16; 23; 42|])
   .Enter().Append("p")
-    .Text(fun d -> "I'm number " + string d + "!") |> ignore
+  .Text(fun d -> "I'm number " + string d + "!") |> ignore
 ```
-Updating nodes are the default selection—the result of the data operator. Thus, if you forget about the enter and exit selections, you will automatically select only the elements for which there exists corresponding data. A common pattern is to break the initial selection into three parts: the updating nodes to modify, the entering nodes to add, and the exiting nodes to remove.
+Updating nodes are the default selection—the result of the `Data` operator. Thus, if you forget about the enter and exit selections, you will automatically select only the elements for which there exists corresponding data. A common pattern is to break the initial selection into three parts: the updating nodes to modify, the entering nodes to add, and the exiting nodes to remove.
 
 ```
 // Update...
-let p = D3.Select("body").SelectAll("p")
-    .Data([|4; 8; 15; 16; 23; 42|])
-    .Text("updated") |> ignore
+let p =
+    D3.Select("body").SelectAll("p")
+      .Data([|4; 8; 15; 16; 23; 42|])
+      .Text("updated") |> ignore
 
 // Enter...
 p.Enter().Append("p")
@@ -93,7 +96,7 @@ D3 lets you transform documents based on data; this includes both creating and d
 
 # Transformation, not Representation
 
-D3 is not a new graphical representation. Unlike Processing, Raphaël, or Protovis, the vocabulary of marks comes directly from web standards: HTML, SVG and CSS. For example, you can create SVG elements using D3 and style them with external stylesheets. You can use composite filter effects, dashed strokes and clipping. If browser vendors introduce new features tomorrow, you'll be able to use them immediately—no toolkit update required. And, if you decide in the future to use a toolkit other than D3, you can take your knowledge of standards with you!
+D3 is not a new graphical representation. Unlike [Processing][processing], [Raphaël][raphael], or [Protovis][protovis], the vocabulary of marks comes directly from web standards: HTML, SVG and CSS. For example, you can create SVG elements using D3 and style them with external stylesheets. You can use composite filter effects, dashed strokes and clipping. If browser vendors introduce new features tomorrow, you'll be able to use them immediately—no toolkit update required. And, if you decide in the future to use a toolkit other than D3, you can take your knowledge of standards with you!
 
 Best of all, D3 is easy to debug using the browser's built-in element inspector: the nodes that you manipulate with D3 are exactly those that the browser understands natively.
 
@@ -117,6 +120,8 @@ d3.SelectAll("circle").Transition()
 ```
 By modifying only the attributes that actually change, D3 reduces overhead and allows greater graphical complexity at high frame rates. D3 also allows sequencing of complex transitions via events. And, you can still use CSS3 transitions; D3 does not replace the browser’s toolbox, but exposes it in a way that is easier to use.
 
+# Quick links
+
 * [License][license]
 * [Git sources at GitHub](http://github.com/intellifactory/websharper.d3)
 * [Mercurial sources at Bitbucket](http://bitbucket.org/IntelliFactory/websharper.d3)
@@ -127,3 +132,12 @@ By modifying only the attributes that actually change, D3 reduces overhead and a
 [issues]: http://github.com/intellifactory/websharper.d3/issues
 [license]: http://github.com/intellifactory/websharper.d3/blob/master/LICENSE.md
 [ws]: http://github.com/intellifactory/websharper
+[w3cselectorsapi]: http://www.w3.org/TR/selectors-api
+[sizzle]: http://sizzlejs.com
+[jquery]: http://jquery.com
+[prototypejs]: http://www.prototypejs.org
+[geocoordinates]: http://geojson.org
+[pathdata]: http://www.w3.org/TR/SVG/paths.html#PathData
+[processing]: http://processing.org
+[raphael]: http://raphaeljs.com
+[protovis]: http://vis.stanford.edu/protovis
