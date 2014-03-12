@@ -1,19 +1,12 @@
-# WebSharper.D3
+D3 is a JavaScript library for manipulating documents based on data.
+Its emphasis on web standards gives you the full capabilities of
+modern browsers without tying yourself to a proprietary framework,
+combining powerful visualization components and a data-driven approach
+to DOM manipulation.
 
 This WebSharper Extension provides a set of classes and functions 
 almost identical to the ones documented in the [D3 API][d3api], 
-as of 20130910 (version 3.3.6). When used in WebSharper projects, these stub classes 
-delegate the work to the actual classes implemented by the D3 library.
-
-D3.js is a JavaScript library for manipulating documents based on data.
-D3 helps you bring data to life using HTML, SVG and CSS.
-This binding is a one-to-one mapping as far as possible.
-D3 is very functional in nature, you need to often set accessor functions
-to get the visualized data from the underlying data objects. This binding
-uses generics to constrain the type of data you use in a chart
-
-To use this library, install binaries with [NuGet][nuget], the
-package ID is `WebSharper.D3`.
+as of 20130910 (version 3.3.6).
 
 The following is the introduction from [d3js.org][d3] with samples 
 translated to F#, and some comments on typing.
@@ -133,5 +126,4 @@ By modifying only the attributes that actually change, D3 reduces overhead and a
 [d3api]: https://github.com/mbostock/d3/wiki/API-Reference
 [issues]: http://github.com/intellifactory/websharper.d3/issues
 [license]: http://github.com/intellifactory/websharper.d3/blob/master/LICENSE.md
-[nuget]: http://nuget.org
 [ws]: http://github.com/intellifactory/websharper
