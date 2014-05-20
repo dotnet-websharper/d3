@@ -590,10 +590,12 @@ module Definition =
         |>! addToClassList
 
     let Force =
-        ChainedClassNew "Force" <| fun chained ->
+        let Force = Type.New ()
+        ChainedClass "Force" Force <| fun chained ->
         [
             "on" => (ForceEvent?``type`` ^-> (O ^-> O)) + chained (ForceEvent?``type`` * (O ^-> O)?listener)
-            "nodes" => ForceNode?root ^-> !|ForceNode
+            "nodes" => O ^-> !|ForceNode
+            "nodes" => !|ForceNode ^-> Force
             "links" => getSetVal chained !|(Link ForceNode)
             "start" => O ^-> O
             "alpha" => getSetVal chained Float
