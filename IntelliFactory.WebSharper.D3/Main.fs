@@ -597,10 +597,9 @@ module Definition =
             "nodes" => O ^-> !|ForceNode
             "nodes" => !|ForceNode ^-> Force
             "links" => getSetVal chained !|(Link ForceNode)
-            "start" => O ^-> O
+            "start" => O ^-> Force
             "alpha" => getSetVal chained Float
             "resume" => O ^-> O
-            "start" => O ^-> O
             "tick"  => O ^-> O
             "drag"  => O ^-> O
         ]
