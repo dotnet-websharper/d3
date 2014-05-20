@@ -596,6 +596,9 @@ module Definition =
             "on" => (ForceEvent?``type`` ^-> (O ^-> O)) + chained (ForceEvent?``type`` * (O ^-> O)?listener)
             "nodes" => O ^-> !|ForceNode
             "nodes" => !|ForceNode ^-> Force
+            "size" => T<double> * T<double> ^-> Force
+            |> WithInline "$0.size([$1,$2])"
+            "size" => O ^-> T<double*double>
             "links" => getSetVal chained !|(Link ForceNode)
             "start" => O ^-> Force
             "alpha" => getSetVal chained Float
