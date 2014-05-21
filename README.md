@@ -120,12 +120,6 @@ d3.SelectAll("circle").Transition()
 ```
 By modifying only the attributes that actually change, D3 reduces overhead and allows greater graphical complexity at high frame rates. D3 also allows sequencing of complex transitions via events. And, you can still use CSS3 transitions; D3 does not replace the browser’s toolbox, but exposes it in a way that is easier to use.
 
-# Quick links
-
-* [License][license]
-* [Git sources at GitHub](http://github.com/intellifactory/websharper.d3)
-* [Mercurial sources at Bitbucket](http://bitbucket.org/IntelliFactory/websharper.d3)
-* [Issue tracker][issues]
 
 [d3]: http://d3js.org
 [d3api]: https://github.com/mbostock/d3/wiki/API-Reference
