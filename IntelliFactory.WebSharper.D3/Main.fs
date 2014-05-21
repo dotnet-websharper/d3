@@ -10,13 +10,14 @@ module Definition =
     let ( |>! ) x f =
         f x
         x
+    
+    let EnumStrings name words = Pattern.EnumStrings name words |>! addToClassList
 
     let Record name propList =
         Class name
         |+> Protocol (
             propList |> List.map (fun (n, t) -> upcast (n =@ t))
         )
-        |>! addToClassList
 
     let O = T<unit>
     let String = T<string>
@@ -120,7 +121,7 @@ module Definition =
             "selectAll"  => chained selector
         ]
 
-    addToClassList (
+    let UpdateSelectionClass =
         Class "UpdateSelection"
         |=> UpdateSelection
         |=> Inherits Selection
@@ -128,7 +129,7 @@ module Definition =
             "enter" => O ^-> Selection
             "exit"  => O ^-> Selection
         ]
-    )
+        |>! addToClassList
 
     let tweenCallback   = (Element -* Obj?d * Int?i * Obj?a ^-> (Float?t ^-> Obj))
     let factoryCallback = (Element -* O ^-> (Element -* Float?t ^-> Obj))
@@ -255,6 +256,7 @@ module Definition =
             convName   => O ^-> convType
             "toString" => O ^-> String
         ]
+        |>! addToClassList
 
     let Hsl = ColorType "hsl" "rgb" Rgb
     let Lab = ColorType "lab" "rgb" Rgb
@@ -338,7 +340,7 @@ module Definition =
     let TimeScale = getQuantScale "TimeScale" Date
 
     let Interpolation =
-        Pattern.EnumStrings "Interpolation" [
+        EnumStrings "Interpolation" [
             "linear"
             "step"
             "step-before"
@@ -349,7 +351,6 @@ module Definition =
             "cardinal-open"
             "monotone"
         ]
-        |>! addToClassList
 
     let ChainedClassCoord name members =
         let self = Type.New()
@@ -416,7 +417,7 @@ module Definition =
         ]
 
     let SymbolType =
-        Pattern.EnumStrings "SymbolType" [
+        EnumStrings "SymbolType" [
             "circle"
             "cross"
             "diamond"
@@ -424,7 +425,6 @@ module Definition =
             "triange-down"
             "triange-up"
         ]
-        |>! addToClassList
 
     let Symbol =
         ChainedClassNew "Symbol" <| fun chained ->
@@ -454,13 +454,12 @@ module Definition =
         ]
 
     let Orientation =
-        Pattern.EnumStrings "Orientation" [
+        EnumStrings "Orientation" [
             "top"
             "bottom"
             "left"
             "right"
         ]
-        |>! addToClassList
 
     let Axis =
         ChainedClassNew "Axis" <| fun chained ->
@@ -478,12 +477,11 @@ module Definition =
         ]
 
     let BrushEvent =
-        Pattern.EnumStrings "BrushEvent" [
+        EnumStrings "BrushEvent" [
             "brushstart"
             "brush"
             "brushend"
         ]
-        |>! addToClassList
 
     let Brush =
         ChainedClassNew "Brush" <| fun chained ->
@@ -582,25 +580,20 @@ module Definition =
         ]
 
     let ForceEvent =
-        Pattern.EnumStrings "ForceEvent" [
+        EnumStrings "ForceEvent" [
             "start"
             "tick"
             "end"
         ]
-        |>! addToClassList
 
     let Force =
-        let Force = Type.New ()
-        ChainedClass "Force" Force <| fun chained ->
+        ChainedClassNew "Force" <| fun chained ->
         [
             "on" => (ForceEvent?``type`` ^-> (O ^-> O)) + chained (ForceEvent?``type`` * (O ^-> O)?listener)
-            "nodes" => O ^-> !|ForceNode
-            "nodes" => !|ForceNode ^-> Force
-            "size" => T<double> * T<double> ^-> Force
-            |> WithInline "$0.size([$1,$2])"
-            "size" => O ^-> T<double*double>
+            "nodes" => getSetVal chained !|ForceNode
+            "size" => getSetVal chained Float2
             "links" => getSetVal chained !|(Link ForceNode)
-            "start" => O ^-> Force
+            "start" => chained O
             "alpha" => getSetVal chained Float
             "resume" => O ^-> O
             "tick"  => O ^-> O
@@ -700,21 +693,19 @@ module Definition =
         ]
 
     let StackOffset =
-        Pattern.EnumStrings "StackOffset" [
+        EnumStrings "StackOffset" [
             "silhouette"
             "wiggle"
             "expand"
             "zero"
         ]
-        |>! addToClassList
 
     let StackOrder =
-        Pattern.EnumStrings "StackOrder" [
+        EnumStrings "StackOrder" [
             "inside-out"
             "reverse"
             "default"
         ]
-        |>! addToClassList
 
     let Stack =
         ChainedClassNew "Stack" <| fun chained ->
@@ -751,13 +742,12 @@ module Definition =
         ]
 
     let TreemapMode =
-        Pattern.EnumStrings "TreemapMode" [
+        EnumStrings "TreemapMode" [
             "squarify"
             "slice"
             "dice"
             "slice-dice"
         ]
-        |>! addToClassList
 
     let Treemap =
         ChainedClassNew "Treemap" <| fun chained ->
@@ -784,7 +774,8 @@ module Definition =
             "closePath" => O ^-> O
         ]
 
-    let Feature = Type.New()
+    let Feature =
+        ChainedClassNew "Feature" <| fun chained -> []
 
     let Path =
         ChainedClassNew "Path" <| fun chained ->
@@ -797,9 +788,14 @@ module Definition =
             "bounds"      => Feature ^-> Int2x2
         ]
 
-    let MultiLineString = Type.New()
-    let LineString = Type.New()
-    let Polygon = Type.New()
+    let MultiLineString =
+        ChainedClassNew "MultiLineString" <| fun chained -> []
+
+    let LineString =
+        ChainedClassNew "LineString" <| fun chained -> []
+
+    let Polygon =
+        ChainedClassNew "Polygon" <| fun chained -> []
 
     let Graticule =
         ChainedClassNew "Graticule" <| fun chained ->
@@ -932,12 +928,11 @@ module Definition =
         ]
 
     let DragEvent =
-        Pattern.EnumStrings "DragEvent" [
+        EnumStrings "DragEvent" [
             "dragstart"
             "drag"
             "dragend"
         ]
-        |>! addToClassList
 
     let Drag =
         ChainedClassNew "Drag" <| fun chained ->
@@ -947,12 +942,11 @@ module Definition =
         ]
 
     let ZoomEvent =
-        Pattern.EnumStrings "ZoomType" [
+        EnumStrings "ZoomType" [
             "zoomstart"
             "zoom"
             "zoomend"
         ]
-        |>! addToClassList
 
     let Zoom =
         ChainedClassNew "Zoom" <| fun chained ->
