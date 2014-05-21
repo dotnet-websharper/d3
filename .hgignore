@@ -1,8 +1,0 @@
-^build/
-^packages/
-^tools/packages/
-\.suo$
-^Web/bin/
-^Web/obj/
-^Web/Scripts/WebSharper/
-^Web/Content/WebSharper/
