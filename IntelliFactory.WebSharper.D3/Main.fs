@@ -104,7 +104,13 @@ module Definition =
             "append"     => chained nameArg
             "insert"     => chained (nameArg * !?(String + selectionCallback Element)?before)
             "remove"     => chained O
-            "data"       => ((!|Obj + selectionCallback !|Obj)?values * !?(selectionCallback String)?key ^-> UpdateSelection) + (O ^-> !|Obj)
+            "data"       =>
+                (
+                    let data = !|Obj + !|Float + !|Int + selectionCallback !|Obj
+                    let keyFunc = selectionCallback String
+                    data?values * !?keyFunc?key ^-> UpdateSelection
+                )
+            "data"       => O ^-> !|Obj
             "datum"      => chained (Obj + selectionCallback Obj)?value
             "filter"     => chained (String + selectionCallback Bool)?selector
             "sort"       => chained O
