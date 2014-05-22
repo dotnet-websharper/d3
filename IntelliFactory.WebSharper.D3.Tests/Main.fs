@@ -130,11 +130,11 @@ module FocusBrushing =
 
                 context.Append("g")
                     .Attr("class", "x brush")
-                    .Call(brush.Apply)
-                  .SelectAll("rect")
-                    .Attr("y", -6)
-                    .Attr("height", height2 + 7.)
-                    |> ignore
+                    .Call(fun s -> brush.Apply(s))
+                    .SelectAll("rect")
+                        .Attr("y", -6)
+                        .Attr("height", height2 + 7.)
+                        |> ignore
             )
 
             upcast Div []
