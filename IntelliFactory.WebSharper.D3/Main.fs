@@ -269,6 +269,7 @@ module Definition =
             "local" , String
         ]
 
+    /// TODO: check that this does not flatten arguments, when argType ~ Float3T for example.
     let interpolate argType = argType?a * argType?b ^-> argType
 
     let Scale = Class "Scale"
@@ -563,6 +564,22 @@ module Definition =
         let setter = name => O ^-> Float * Float
         [getter; setter]
 
+    /// Pseudo-property getting and setting a 2-element double array [x,y,z].
+    let propF3 self name : list<CodeModel.Member> =
+        let getter =
+            (name => Float * Float * Float ^-> self)
+            |> WithInline (sprintf "$0.%s([$1,$2,$3])" name)
+        let setter = name => O ^-> Float * Float * Float
+        [getter; setter]
+
+    /// Pseudo-property getting and setting something of the form [[x,y],[a,b]] with all floats.
+    let propF4 self name : list<CodeModel.Member> =
+        let getter =
+            (name => Float2T * Float2T ^-> self)
+            |> WithInline (sprintf "$0.%s([$1,$2])" name)
+        let setter = name => O ^-> Float2T * Float2T
+        [getter; setter]
+
     let Cluster =
         let self = Type.New()
         ChainedClass "Cluster" self <| fun chained ->
@@ -631,7 +648,7 @@ module Definition =
             "revalue"  => chained HierarchyNode?root
         ]
 
-    let binningFunc = Float2T * !|Obj * Int ^-> !|Float
+    let binningFunc = Float2T?range * !|Obj * Int ^-> !|Float
 
     let Histogram =
         ChainedClassNew "Histogram" <| fun chained ->
@@ -812,26 +829,29 @@ module Definition =
     let Polygon = Type.New()
 
     let Graticule =
-        ChainedClassNew "Graticule" <| fun chained ->
-        [
-            "lines" => O ^-> !|LineString
-            "outline" => O ^-> Polygon
-            "extent" => getSetVal chained Float2x2T
-            "majorExtent" => getSetVal chained Float2x2T
-            "minorExtent" => getSetVal chained Float2x2T
-            "step" => getSetVal chained Float2T
-            "majorStep" => getSetVal chained Float2T
-            "minorStep" => getSetVal chained Float2T
-            "precision" => getSetVal chained Float
-        ]
+        let self = Type.New()
+        ChainedClass "Graticule" self <| fun chained ->
+            [
+                "lines" => O ^-> !|LineString
+                "outline" => O ^-> Polygon
+                "precision" => getSetVal chained Float
+            ]
+            @ propF4 self "extent"
+            @ propF4 self "minorExtent"
+            @ propF4 self "majorExtent"
+            @ propF2 self "step"
+            @ propF2 self "majorStep"
+            @ propF2 self "minorStep"
 
     let Circle =
-        ChainedClassNew "Circle" <| fun chained ->
-        [
-            "origin"    => getVal Float2T + chained (Float2T + Obj ^-> Float2T)
-            "angle"     => getSetVal chained Float
-            "precision" => getSetVal chained Float
-        ]
+        let self = Type.New()
+        ChainedClass "Circle" self <| fun chained ->
+            [
+                "origin"    => (Float2T + Obj ^-> Float2T) ^-> self
+                "angle"     => getSetVal chained Float
+                "precision" => getSetVal chained Float
+            ]
+            @ propF2 self "origin"
 
     let Rotation =
         ChainedClassNew "Rotation" <| fun chained ->
@@ -853,25 +873,27 @@ module Definition =
         |>! addToClassList
 
     let Projection =
-        ChainedClassNew "Projection" <| fun chained ->
-        [
-            "apply"      => Float2T?location ^-> Float2T |> WithInline "$this($location)"
-            "invert"     => Float2T?location ^-> Float2T
-            "rotate"     => getSetVal chained Float3T
-            "center"     => getSetVal chained Float2T
-            "translate"  => getSetVal chained Float2T
-            "scale"      => getSetVal chained Float
-            "clipAngle"  => getSetVal chained Float
-            "clipExtent" => getSetVal chained Float2x2T
-            "precision"  => getSetVal chained Int
-            "stream"     => Listener?listener ^-> Listener
-        ]
+        let self = Type.New()
+        ChainedClass "Projection" self <| fun chained ->
+            [
+                "apply"      => Float2T?location ^-> Float2T |> WithInline "$this($location)"
+                "invert"     => Float2T?location ^-> Float2T
+                "scale"      => getSetVal chained Float
+                "clipAngle"  => getSetVal chained Float
+                "clipExtent" => getSetVal chained Float2x2T
+                "precision"  => getSetVal chained Int
+                "stream"     => Listener?listener ^-> Listener
+            ]
+            @ propF2 self "center"
+            @ propF2 self "translate"
+            @ propF3 self "rotate"
 
     let AlbersProjection =
-        ChainedClassNewInherits "AlbersProjection" Projection <| fun chained ->
-        [
-            "parallels" => getVal Float2T + chained Float2T
-        ]
+        let self = Type.New()
+        Class "AlbersProjection"
+        |=> Projection
+        |=> self
+        |+> Protocol [ yield! propF2 self "parallels" ]
 
     let StreamTransform =
         ChainedClassNew "StreamTransform" <| fun chained ->
@@ -882,7 +904,7 @@ module Definition =
     let ClipTransform =
         ChainedClassNewInherits "ClipTransform" StreamTransform <| fun chained ->
         [
-            "extent" => getSetVal chained Float2x2T
+            "extent" => getSetVal chained Float2x2T // TODO: check
         ]
 
     let Voronoi =
