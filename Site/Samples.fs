@@ -40,7 +40,7 @@ let Build (fn: string) =
     {
         BFileName = fn
         BKeywords = []
-        BRender = fun _ -> JavaScript.Log("RENDER/0")
+        BRender = ignore
         BTitle = "Sample"
     }
 
@@ -58,8 +58,7 @@ type Sample with
         s.Render(mainRight)
         let url = "http://gist-it.appspot.com/github/intellifactory/websharper.d3/blob/master/Site/" + s.FileName
         let s = Script [Attr.Src url]
-        // s.AppendTo("main-left")
-        ()
+        s.AppendTo("main-left")
 
 type Set =
     private
