@@ -1,5 +1,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/j3imr7tbvfrpu08f)](https://ci.appveyor.com/project/t0yv0/websharper-d3)
 
+Quick links:
+
 D3 is a JavaScript library for manipulating documents based on data.
 Its emphasis on web standards gives you the full capabilities of
 modern browsers without tying yourself to a proprietary framework,
@@ -9,6 +11,8 @@ to DOM manipulation.
 This WebSharper Extension provides a set of classes and functions 
 almost identical to the ones documented in the [D3 API][d3api], 
 as of 20130910 (version 3.3.6).
+
+See [Examples](http://intellifactory.github.io/websharper.d3)
 
 The following is the introduction from [d3js.org][d3] with samples 
 translated to F#, and some comments on typing.
