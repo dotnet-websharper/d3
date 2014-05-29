@@ -10,7 +10,7 @@
     <RootNamespace>IntelliFactory.WebSharper.D3</RootNamespace>
     <AssemblyName>IntelliFactory.WebSharper.D3</AssemblyName>
     <NuGetPackageImportStamp>58982506</NuGetPackageImportStamp>
-    <KeyOriginatorFile Condition=" Exists('$(INTELLIFACTORY)/keys/IntelliFactory.snk') ">$(INTELLIFACTORY)/keys/IntelliFactory.snk</KeyOriginatorFile>
+    <KeyOriginatorFile>../tools/pub.snk</KeyOriginatorFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
