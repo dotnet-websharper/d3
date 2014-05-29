@@ -1,7 +1,5 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/j3imr7tbvfrpu08f)](https://ci.appveyor.com/project/t0yv0/websharper-d3)
 
-Quick links:
-
 D3 is a JavaScript library for manipulating documents based on data.
 Its emphasis on web standards gives you the full capabilities of
 modern browsers without tying yourself to a proprietary framework,
