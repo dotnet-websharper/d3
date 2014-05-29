@@ -56,9 +56,9 @@ type Sample with
         Clear mainLeft
         Clear mainRight
         s.Render(mainRight)
-        let url = "http://gist-it.appspot.com/github/intellifactory/websharper.d3/blob/master/Site/" + s.FileName
-        let s = Script [Attr.Src url]
-        s.AppendTo("main-left")
+        let url = "http://github.com/intellifactory/websharper.d3/blob/master/Site/" + s.FileName
+        let label = A [Attr.Class "btn btn-primary btn-lg"; HRef url] -< [Text "Source"]
+        label.AppendTo("main-left")
 
 type Set =
     private
