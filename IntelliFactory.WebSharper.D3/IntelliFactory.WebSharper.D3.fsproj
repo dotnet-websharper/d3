@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
@@ -9,7 +9,7 @@
     <Name>IntelliFactory.WebSharper.D3</Name>
     <RootNamespace>IntelliFactory.WebSharper.D3</RootNamespace>
     <AssemblyName>IntelliFactory.WebSharper.D3</AssemblyName>
-    <NuGetPackageImportStamp>76157dc3</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>58982506</NuGetPackageImportStamp>
     <KeyOriginatorFile Condition=" Exists('$(INTELLIFACTORY)/keys/IntelliFactory.snk') ">$(INTELLIFACTORY)/keys/IntelliFactory.snk</KeyOriginatorFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -46,12 +46,12 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
-  <Import Project="..\packages\WebSharper.2.5.111\build\WebSharper.targets" Condition="Exists('..\packages\WebSharper.2.5.111\build\WebSharper.targets')" />
+  <Import Project="..\packages\WebSharper.2.5.111.45\build\WebSharper.targets" Condition="Exists('..\packages\WebSharper.2.5.111.45\build\WebSharper.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\WebSharper.2.5.111\build\WebSharper.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WebSharper.2.5.111\build\WebSharper.targets'))" />
+    <Error Condition="!Exists('..\packages\WebSharper.2.5.111.45\build\WebSharper.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WebSharper.2.5.111.45\build\WebSharper.targets'))" />
   </Target>
   <ItemGroup>
     <Compile Include="Main.fs" />
@@ -70,8 +70,6 @@
     <BuildNumber Condition=" '$(BuildNumber)' == '' ">0</BuildNumber>
   </PropertyGroup>
   <Target Name="NuGetPack" AfterTargets="Build">
-    <Exec Command="..\tools\NuGet\NuGet.exe pack -nonInteractive -outputDirectory ..\build -version 2.5.$(BuildNumber) WebSharper.D3.nuspec"
-          WorkingDirectory="$(MSBuildThisFileDirectory)"
-          ContinueOnError="false" />
+    <Exec Command="..\tools\NuGet\NuGet.exe pack -nonInteractive -outputDirectory ..\build -version 2.5.$(BuildNumber) WebSharper.D3.nuspec" WorkingDirectory="$(MSBuildThisFileDirectory)" ContinueOnError="false" />
   </Target>
 </Project>

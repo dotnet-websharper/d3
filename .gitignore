@@ -1,4 +1,5 @@
 *.suo
+Site/Content/
 */Content/WebSharper/
 */Scripts/WebSharper/
 */bin/
