@@ -70,6 +70,7 @@
     <BuildNumber Condition=" '$(BuildNumber)' == '' ">0</BuildNumber>
   </PropertyGroup>
   <Target Name="NuGetPack" AfterTargets="Build">
+    <MakeDir Directories="..\build" />
     <Exec Command="..\tools\NuGet\NuGet.exe pack -nonInteractive -outputDirectory ..\build -version 2.5.$(BuildNumber) WebSharper.D3.nuspec" WorkingDirectory="$(MSBuildThisFileDirectory)" ContinueOnError="false" />
   </Target>
 </Project>
