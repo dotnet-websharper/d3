@@ -73,7 +73,7 @@ module Definition =
     let UpdateSelection = Type.New()
     let Transition      = Type.New()
 
-    let selector = (String + selectionCallback !|Element + selectionCallback NodeList)?selector
+    let selector = (String + Element + selectionCallback !|Element + selectionCallback NodeList)?selector
 
     let ChainedClassG name (t: Type.Type) (members : ((Type.IParameters -> Type.Type) -> CodeModel.Member list)) =
         Class name |=> t |+> Protocol (members <| fun args -> args ^-> t)
@@ -1292,4 +1292,5 @@ type D3Extension() =
         member ext.Assembly = Definition.D3Assembly
 
 [<assembly: Extension(typeof<D3Extension>)>]
+[<assembly: System.Reflection.AssemblyVersion("2.5.0.0")>]
 do ()

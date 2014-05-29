@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2013 for Web
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{22726ABE-9379-46B6-8BA4-44594C8F7B13}"
+	ProjectSection(SolutionItems) = preProject
+		ivy.xml = ivy.xml
+		LICENSE.md = LICENSE.md
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Site", "Site\Site.fsproj", "{8DECFBCA-2A4D-486C-B635-E9B4E79BB11E}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "IntelliFactory.WebSharper.D3", "IntelliFactory.WebSharper.D3\IntelliFactory.WebSharper.D3.fsproj", "{0EBF780A-8E9B-4EC8-8B1B-A1ADAF5E027D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8DECFBCA-2A4D-486C-B635-E9B4E79BB11E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DECFBCA-2A4D-486C-B635-E9B4E79BB11E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DECFBCA-2A4D-486C-B635-E9B4E79BB11E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DECFBCA-2A4D-486C-B635-E9B4E79BB11E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EBF780A-8E9B-4EC8-8B1B-A1ADAF5E027D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EBF780A-8E9B-4EC8-8B1B-A1ADAF5E027D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EBF780A-8E9B-4EC8-8B1B-A1ADAF5E027D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EBF780A-8E9B-4EC8-8B1B-A1ADAF5E027D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
