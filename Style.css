@@ -1,0 +1,26 @@
+body {
+    font-family: Georgia;
+    font-size: large;
+}
+
+svg.FocusBrushing {
+    font: 10px sans-serif;
+}
+
+    svg.FocusBrushing .area {
+        fill: steelblue;
+        clip-path: url(#clip);
+    }
+
+    svg.FocusBrushing .axis path,
+    svg.FocusBrushing .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+    svg.FocusBrushing .brush .extent {
+        stroke: #fff;
+        fill-opacity: .125;
+        shape-rendering: crispEdges;
+    }
