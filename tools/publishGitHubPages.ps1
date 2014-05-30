@@ -30,7 +30,7 @@ git checkout gh-pages 2>git.log
 cp -r -force ../html/* .
 git add . 2>git.log
 git commit -am $msg 2>git.log
-git push origin gh-pages 2>git.log
+git push -f -u origin gh-pages
 cd ../..
 clearDir
 write-host -foregroundColor "green" "=====> DONE"
