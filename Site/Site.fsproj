@@ -137,6 +137,7 @@
   <Target Name="DeploySite" AfterTargets="Build">
     <ItemGroup>
       <SiteFiles Include="*.html" />
+      <SiteFiles Include="*.json" />
       <SiteFiles Include="*.css" />
       <SiteFiles Include="*.csv" />
       <SiteFiles Include="*.tsv" />
