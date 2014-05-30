@@ -3136,13 +3136,6 @@ declare module Site {
         };
     }
     module Samples {
-        module Sample {
-            var Create : {
-                (title: string, fileName: string, keywords: __ABBREV.__List.T<string>, render: {
-                    (x: __ABBREV.__Dom.Element): void;
-                }): __ABBREV.__Samples.Sample;
-            };
-        }
         module Set {
             var Create : {
                 (ss: __ABBREV.__WebSharper.seq<__ABBREV.__Samples.Set>): __ABBREV.__Samples.Set;
@@ -3157,6 +3150,7 @@ declare module Site {
         interface Sample {
             Show(): void;
             FileName: string;
+            Id: string;
             Keywords: __ABBREV.__List.T<string>;
             Render: {
                 (x: __ABBREV.__Dom.Element): void;
@@ -3165,24 +3159,83 @@ declare module Site {
         }
         interface Builder {
             Create(): __ABBREV.__Samples.Sample;
+            FileName(x: string): __ABBREV.__Samples.Builder;
+            Id(x: string): __ABBREV.__Samples.Builder;
             Keywords(x: __ABBREV.__List.T<string>): __ABBREV.__Samples.Builder;
             Render(x: {
                 (x: __ABBREV.__Dom.Element): void;
             }): __ABBREV.__Samples.Builder;
             Title(x: string): __ABBREV.__Samples.Builder;
-            BFileName: string;
+            BFileName: __ABBREV.__WebSharper.OptionProxy<string>;
+            BId: __ABBREV.__WebSharper.OptionProxy<string>;
             BKeywords: __ABBREV.__List.T<string>;
-            BRender: {
+            BRender: __ABBREV.__WebSharper.OptionProxy<{
                 (x: __ABBREV.__Dom.Element): void;
-            };
-            BTitle: string;
+            }>;
+            BTitle: __ABBREV.__WebSharper.OptionProxy<string>;
         }
+        var op_PlusPlus : {
+            <_M1>(a: __ABBREV.__WebSharper.OptionProxy<_M1>, b: __ABBREV.__WebSharper.OptionProxy<_M1>): __ABBREV.__WebSharper.OptionProxy<_M1>;
+        };
+        var req : {
+            <_M1>(name: string, f: __ABBREV.__WebSharper.OptionProxy<_M1>): _M1;
+        };
         var Build : {
-            (fn: string): __ABBREV.__Samples.Builder;
+            (): __ABBREV.__Samples.Builder;
         };
         var Clear : {
             (el: __ABBREV.__Dom.Element): void;
         };
+    }
+    module CompaniesGraph {
+        module UI {
+            module Data {
+                var Load : {
+                    (): any;
+                };
+            }
+            interface Config<_T1> {
+                CanvasHeight: number;
+                CanvasWidth: number;
+                DataSet: any;
+                OnMouseOver: {
+                    (x: _T1): void;
+                };
+                Parent: __ABBREV.__Dom.Element;
+                Radius: {
+                    (x: _T1): number;
+                };
+            }
+            var Render : {
+                <_M1>(config: any): void;
+            };
+            var Start : {
+                (parent: __ABBREV.__Dom.Element, out: __ABBREV.__Html.Element): void;
+            };
+            var Show : {
+                (ctx: __ABBREV.__Dom.Element): void;
+            };
+            var Sample : {
+                (): __ABBREV.__Samples.Sample;
+            };
+        }
+        module Data {
+            interface Label {
+            }
+            var FileName : {
+                (): string;
+            };
+        }
+    }
+    module Graphs {
+        interface Node<_T1> {
+        }
+        interface Link {
+        }
+        interface DataSet<_T1> {
+            Links: __ABBREV.__Graphs.Link[];
+            Nodes: __ABBREV.__Graphs.Node<_T1>[];
+        }
     }
     module FocusBrushing {
         interface Margin {
@@ -3222,9 +3275,11 @@ declare module __ABBREV {
     
     export import __Samples = Site.Samples;
     export import __JQuery = IntelliFactory.WebSharper.JQuery;
+    export import __WebSharper = IntelliFactory.WebSharper;
     export import __List = IntelliFactory.WebSharper.List;
     export import __Dom = IntelliFactory.WebSharper.Dom;
-    export import __WebSharper = IntelliFactory.WebSharper;
+    export import __Html = IntelliFactory.WebSharper.Html;
+    export import __Graphs = Site.Graphs;
     export import __EcmaScript = IntelliFactory.WebSharper.EcmaScript;
 }
 

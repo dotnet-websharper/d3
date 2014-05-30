@@ -1,6 +1,10 @@
 body {
-    font-family: Georgia;
+    font-family: Lato, sans-serif;
     font-size: large;
+}
+
+.skip {
+    height: 1em;
 }
 
 svg.FocusBrushing {
@@ -23,4 +27,24 @@ svg.FocusBrushing {
         stroke: #fff;
         fill-opacity: .125;
         shape-rendering: crispEdges;
+    }
+
+svg.CompaniesGraph {
+}
+
+    svg.CompaniesGraph .node {
+        fill: white;
+        cursor: pointer;
+        stroke: #3182bd;
+        stroke-width: 1.5px;
+    }
+
+        svg.CompaniesGraph .node:hover {
+            fill: red;
+        }
+
+    svg.CompaniesGraph .link {
+        fill: none;
+        stroke: #9ecae1;
+        stroke-width: 1.5px;
     }
