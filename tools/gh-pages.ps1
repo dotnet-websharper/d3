@@ -2,18 +2,18 @@
 
 param ([string] $env = "local", [string] $action = "publish")
 
-$msg = 'publishGitHubPages: build/html -> gh-pages'
+$msg = 'gh-pages.ps1: build/html -> gh-pages'
 $gitURL = "https://github.com/intellifactory/websharper.d3.git"
 
 write-host -foregroundColor "green" "=====> $msg"
 
 function clearDir() {
-  echo rm -r build/gh-pages -errorAction ignore
+  rm -r build/gh-pages -errorAction ignore
 }
 
 if ($env -eq "appveyor") {
   clearDir
-  mkdir build
+  $d = mkdir -force build
   git clone $gitURL build/gh-pages 2>git.log
   cd build/gh-pages
   git config credential.helper "store --file=.git/credentials"
@@ -31,6 +31,7 @@ if ($env -eq "appveyor") {
 }
 
 git checkout gh-pages 2>git.log
+rm -r -force *
 cp -r -force ../html/* .
 git add . 2>git.log
 git commit -am $msg 2>git.log
