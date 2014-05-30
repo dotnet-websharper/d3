@@ -10,6 +10,7 @@ module Client =
         Samples.Set.Create [
             !+ Circles.Sample
             !+ FocusBrushing.Sample
+            !+ CompaniesGraph.UI.Sample
         ]
 
     let Main = All.Show()

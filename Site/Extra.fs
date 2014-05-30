@@ -28,3 +28,16 @@ module Extra =
 
         [<Inline "$0.data($1)">]
         member s.Data<'T>(data: 'T []) : UpdateSelection<'T> = X
+
+    type ForceNode with
+
+        [<Inline "({})">]
+        static member Create() =
+            Unchecked.defaultof<ForceNode>
+
+    type Link<'T> with
+
+        [<Inline "({})">]
+        static member Create() =
+            Unchecked.defaultof<Link<'T>>
+
