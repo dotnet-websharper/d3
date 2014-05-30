@@ -18,7 +18,7 @@ artifacts:
 on_success:
   - ps: ./tools/publishGitHubPages.ps1
 
-deploy:
-  - provider: NuGet
-    api_key:
-      secure: DNlnRj4Pz5OWJJhdyDt4KXOCY/jJubNywiNvL22JgwcfkVL4LJ1pmtCXQLTQDSHi
+# deploy:
+#   - provider: NuGet
+#     api_key:
+#       secure: DNlnRj4Pz5OWJJhdyDt4KXOCY/jJubNywiNvL22JgwcfkVL4LJ1pmtCXQLTQDSHi
