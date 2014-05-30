@@ -134,7 +134,8 @@ module FocusBrushing =
                     |> ignore)
 
     let Sample =
-        Samples.Build(__SOURCE_FILE__)
-            .Title("FocusBrushing")
+        Samples.Build()
+            .Id("FocusBrushing")
+            .FileName(__SOURCE_FILE__)
             .Render(Render)
             .Create()

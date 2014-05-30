@@ -11,40 +11,55 @@ module Samples =
     type Sample =
         private {
             FileName : string
+            Id : string
             Keywords : list<string>
             Render : Dom.Element -> unit
             Title : string
         }
 
-        static member Create(title, fileName, keywords, render) =
-            {
-                FileName = fileName
-                Keywords = keywords
-                Render = render
-                Title = title
-            }
+    let private ( ++ ) a b =
+        match a with
+        | Some _ -> a
+        | None -> b
+
+    let private req name f =
+        match f with
+        | None -> failwith ("Required property not set: " + name)
+        | Some r -> r
 
     type Builder =
         private {
-            BFileName : string
+            mutable BFileName : option<string>
+            mutable BId : option<string>
             mutable BKeywords : list<string>
-            mutable BRender : Dom.Element -> unit
-            mutable BTitle : string
+            mutable BRender : option<Dom.Element -> unit>
+            mutable BTitle : option<string>
         }
 
         member b.Create() =
-            Sample.Create(b.BTitle, b.BFileName, b.BKeywords, b.BRender)
+            let id = req "Id" (b.BId ++ b.BTitle)
+            let title = defaultArg (b.BTitle ++ b.BId) "Sample"
+            {
+                FileName = req "FileName" b.BFileName
+                Id = id
+                Keywords = b.BKeywords
+                Render = req "Render" b.BRender
+                Title = title
+            }
 
+        member b.FileName(x) = b.BFileName <- Some x; b
+        member b.Id(x) = b.BId <- Some x; b
         member b.Keywords(x) = b.BKeywords <- x; b
-        member b.Render(x) = b.BRender <- x; b
-        member b.Title(x) = b.BTitle <- x; b
+        member b.Render(x) = b.BRender <- Some x; b
+        member b.Title(x) = b.BTitle <- Some x; b
 
-    let Build (fn: string) =
+    let Build () =
         {
-            BFileName = fn
+            BId = None
+            BFileName = None
             BKeywords = []
-            BRender = ignore
-            BTitle = "Sample"
+            BRender = None
+            BTitle = None
         }
 
     let private Clear (el: Dom.Element) =
@@ -54,14 +69,25 @@ module Samples =
     type Sample with
 
         member s.Show() =
-            let mainLeft = Dom.Document.Current.GetElementById("main-left")
-            let mainRight = Dom.Document.Current.GetElementById("main-right")
-            Clear mainLeft
-            Clear mainRight
-            s.Render(mainRight)
+            let sMain = Dom.Document.Current.GetElementById("sample-main")
+            let sSide = Dom.Document.Current.GetElementById("sample-side")
+            Clear sMain
+            Clear sSide
+            s.Render(sMain)
             let url = "http://github.com/intellifactory/websharper.d3/blob/master/Site/" + s.FileName
-            let label = A [Attr.Class "btn btn-primary btn-lg"; HRef url] -< [Text "Source"]
-            label.AppendTo("main-left")
+            let side =
+                Div [
+                    Div []
+                    |>! OnAfterRender (fun self ->
+                        match Dom.Document.Current.GetElementById(s.Id) with
+                        | null -> ()
+                        | el ->
+                            let copy = el.CloneNode(true)
+                            copy.Attributes.RemoveNamedItem("id") |> ignore
+                            self.Append(copy))
+                    A [Attr.Class "btn btn-primary btn-lg"; HRef url] -< [Text "Source"]
+                ]
+            side.AppendTo("sample-side")
 
     type Set =
         private

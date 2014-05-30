@@ -22,8 +22,9 @@ module Circles =
         |> ignore
 
     let Sample =
-        Samples.Build(__SOURCE_FILE__)
-            .Title("Circles")
+        Samples.Build()
+            .Id("Circles")
+            .FileName(__SOURCE_FILE__)
             .Keywords(["basic"])
             .Render(Render data)
             .Create()

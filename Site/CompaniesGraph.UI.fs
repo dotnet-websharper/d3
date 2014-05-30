@@ -28,6 +28,7 @@ module UI =
             CanvasWidth : double
             DataSet : Graphs.DataSet<'T>
             OnMouseOver : 'T -> unit
+            Parent : Dom.Element
             Radius : 'T -> double
         }
 
@@ -68,7 +69,7 @@ module UI =
                 .On(ForceEvent.Tick, tick)
                 .Start()
         and svg =
-            D3.Select("body").Append("svg")
+            D3.Select(config.Parent).Append("svg")
                 .Attr("class", "CompaniesGraph")
                 .Attr("width", width)
                 .Attr("height", height)
@@ -90,13 +91,14 @@ module UI =
         ()
 
     [<JavaScript>]
-    let Start (el: Element) =
+    let Start (parent: Dom.Element) (out: Element) =
         async {
             let! data = Data.Load()
             return Render {
                 CanvasHeight = 500.
                 CanvasWidth = 960.
                 DataSet = data
+                Parent = parent
                 Radius = fun label ->
                     match label with
                     | Data.Company (n, 0.0) -> 4.
@@ -107,7 +109,7 @@ module UI =
                         match label with
                         | Data.Company (n, r) -> n + " (revenue: " + string r + ")"
                         | Data.Industry i -> i
-                    el.Text <- t
+                    out.Text <- t
             }
         }
         |> Async.Start
@@ -119,14 +121,15 @@ module UI =
                 Span [Text "In Focus: "]
                 label
             ]
-            |>! OnAfterRender (fun _ ->
-                Start label)
+            |>! OnAfterRender (fun parent ->
+                Start parent.Dom label)
         ctx.AppendChild(main.Body) |> ignore
         (main :> IPagelet).Render()
 
     let Sample =
-        Samples.Build(__SOURCE_FILE__)
-            .Title("CompaniesGraph")
+        Samples.Build()
+            .Id("CompaniesGraph")
+            .FileName(__SOURCE_FILE__)
             .Keywords(["force"])
             .Render(Show)
             .Create()
