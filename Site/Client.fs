@@ -1,13 +1,15 @@
-[<ReflectedDefinition>]
-module Site.Client
+namespace Site
 
 open IntelliFactory.WebSharper
 
-let All =
-    let ( !+ ) x = Samples.Set.Singleton(x)
-    Samples.Set.Create [
-        !+ Circles.Sample
-        !+ FocusBrushing.Sample
-    ]
+[<JavaScript>]
+module Client =
 
-let Main = All.Show()
+    let All =
+        let ( !+ ) x = Samples.Set.Singleton(x)
+        Samples.Set.Create [
+            !+ Circles.Sample
+            !+ FocusBrushing.Sample
+        ]
+
+    let Main = All.Show()

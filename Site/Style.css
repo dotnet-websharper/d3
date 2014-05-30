@@ -3,6 +3,14 @@ body {
     font-size: large;
 }
 
+svg {
+    border: 1px solid black;
+}
+
+.skip {
+    height: 1em;
+}
+
 svg.FocusBrushing {
     font: 10px sans-serif;
 }
