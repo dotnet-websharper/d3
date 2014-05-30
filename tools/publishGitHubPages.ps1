@@ -1,8 +1,8 @@
+param ([string]$env = "local")
+
 # pushes build/html to gh-pages branch
 $msg = 'publishGitHubPages: build/html -> gh-pages'
 $gitURL = "https://github.com/intellifactory/websharper.d3.git"
-$inAV = false
-if ($env:APPVEYOR_BUILD_NUMBER) { $inAV = true; }
 
 write-host -foregroundColor "green" "=====> $msg"
 
@@ -10,7 +10,7 @@ function clearDir() {
   rm -r build/gh-pages -errorAction ignore
 }
 
-if ($inAV) {
+if ($env -eq "appveyor") {
   git config credential.helper "store --file=.git/credentials"
   echo ("https://$GH_TOKEN" + ":@github.com") > .git/credentials	
   git config user.name "AppVeyor"

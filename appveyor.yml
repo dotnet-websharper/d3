@@ -16,7 +16,7 @@ artifacts:
   - path: build\*.nupkg
 
 on_success:
-  - ps: ./tools/publishGitHubPages.ps1
+  - ps: ./tools/publishGitHubPages.ps1 -env appveyor
 
 # deploy:
 #   - provider: NuGet
