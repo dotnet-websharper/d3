@@ -22,9 +22,11 @@ module FocusBrushing =
         }
 
     let private Render (canvas: Dom.Element) =
+        let w = JQuery.JQuery.Of(canvas).Width() |> float
         let margin  = { Top = 10.; Right = 10.; Bottom = 100.; Left = 40. }
         let margin2 = { Top = 430.; Right = 10.; Bottom = 20.; Left = 40. }
-        let width   = 960. / 2. - margin.Left - margin.Right
+
+        let width   = w - margin.Left - margin.Right
         let height  = 500. - margin.Top - margin.Bottom
         let height2 = 500. - margin2.Top - margin2.Bottom
 
@@ -58,8 +60,7 @@ module FocusBrushing =
         let svg =
             D3.Select(canvas).Append("svg")
                 .Attr("class", "FocusBrushing")
-                .Attr("width", width + margin.Left + margin.Right)
-                .Attr("height", height + margin.Top + margin.Bottom);
+                .Attr("height", height + margin.Top + margin.Bottom)
 
         svg.Append("defs").Append("clipPath")
             .Attr("id", "clip")

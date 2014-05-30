@@ -12,6 +12,7 @@ module Circles =
     let private Render (data: double[]) (canvas: Dom.Element) =
         D3.Select(canvas)
             .Append("svg")
+            .Attr("height", 500)
             .SelectAll("circle")
             .Data<double>(data)
             .Enter()
