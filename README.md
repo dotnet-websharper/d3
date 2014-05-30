@@ -10,6 +10,8 @@ This WebSharper Extension provides a set of classes and functions
 almost identical to the ones documented in the [D3 API][d3api], 
 as of 20130910 (version 3.3.6).
 
+See [Examples](http://intellifactory.github.io/websharper.d3)
+
 The following is the introduction from [d3js.org][d3] with samples 
 translated to F#, and some comments on typing.
 
