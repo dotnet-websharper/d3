@@ -188,6 +188,7 @@ module Definition =
             "styleTween" => chained (nameArg * tweenCallback?value * !? String?priority)
             "text"       => chained (setValF String)
             "tween"      => chained (nameArg * factoryCallback?factory)
+            "tween"      => chained (nameArg * (O ^-> (Float?t ^-> O)))
             "remove"     => chained O
             "select"     => chained selector
             "selectAll"  => chained selector
@@ -858,11 +859,17 @@ module Definition =
     let Feature =
         ChainedClassNew "Feature" <| fun chained -> []
 
+    let ProjectionType = Type.New()
+
     let Path =
         ChainedClassNew "Path" <| fun chained ->
         [
-            "projection"  => getSetVal chained (Float2T ^-> Float2T)
-            "context"     => getSetVal chained PathContext.Type
+            "call" => Obj?feature ^-> String
+            |> WithInline "$0($1)"
+            "call" => Obj?feature * Int?ix ^-> String
+            |> WithInline "$0($1,$2)"
+            "projection"  => getSetVal chained ((Float2T ^-> Float2T) + ProjectionType)
+            "context"     => getSetVal chained (PathContext.Type + Obj)
             "pointRadius" => getSetVal chained Float
             "area"        => Feature ^-> Int
             "centroid"    => Feature ^-> Int2T
@@ -922,7 +929,7 @@ module Definition =
         |>! addToClassList
 
     let Projection =
-        let self = Type.New()
+        let self = ProjectionType
         ChainedClass "Projection" self <| fun chained ->
             [
                 "apply"      => Float2T?location ^-> Float2T |> WithInline "$this($location)"
@@ -1093,11 +1100,6 @@ module Definition =
         ]
         |>! addToClassList
 
-    let interpolateTo argType resType = argType?a * argType?b ^-> resType
-
-    let xhrMime xhrType = String?url * !?String?mimeType * (Error?error * xhrType?response ^-> O)?callback ^-> O
-    let xhr xhrType = String?url * (xhrType?response ^-> O)?callback ^-> O
-
     let D3 =
         Class "d3"
         |+> [
@@ -1113,20 +1115,6 @@ module Definition =
             "transition"  => !?(Selection Obj)?selection ^-> Transition
             "ease"        => (String?``type`` *+ Float) ^-> easing
             "timer"       => O ^-> Bool?``function`` * !?Int?delay * !?T<System.DateTime>?time ^-> O
-            Generic - fun t -> "interpolate" => interpolate t
-            "interpolateNumber" => interpolate Float
-            "interpolateRound"  => interpolateTo Float Int
-            "interpolateString" => interpolate String
-            "interpolateRgb"    => interpolateTo (Rgb + String) String
-            "interpolateHsl"    => interpolateTo (Hsl + String) String
-            "interpolateLab"    => interpolateTo (Lab + String) String
-            "interpolateHcl"    => interpolateTo (Hcl + String) String
-            Generic - fun t -> "interpolateArray" => interpolate !|T
-            Generic - fun t -> "interpolateObject" => interpolate t
-            "interpolateTransform" => interpolate Transform.Type
-            "interpolateZoom" => interpolate Float3T
-            //geo.Interpolate
-            "interpolators" =? T<(obj * obj -> obj)[]>
 
             // Working with Arrays
             "ascending"   => Float?a * Float?b ^-> Int
@@ -1163,17 +1151,6 @@ module Definition =
 
             "transform" => String?string ^-> Transform
 
-            "xhr" => String?url * !?String?mimeType ^-> Xhr
-            "xhr" => xhrMime Xhr.Type
-
-            "text" => xhrMime String
-            "json" => xhr Obj
-            "html" => xhr T<IntelliFactory.WebSharper.Dom.Document>
-            "xml"  => xhrMime T<IntelliFactory.WebSharper.Dom.Document>
-            "csv"  => xhr (!| !|Obj)
-            "tsv"  => xhr (!| !|Obj)
-            "dsv"  => xhr (!| !|Obj)
-
             "format" => String?specifier ^-> Float?number ^-> String
             "fomatPefix" => Float?value * !?Float?precision ^-> Prefix
             "requote" => String ^-> String
@@ -1183,6 +1160,59 @@ module Definition =
             "rebind" => Obj?target * Obj?source *+ String ^-> O
             "dispatch" => !+ String ^-> Dispatcher
         ]
+        |+> (
+                // interpolation section
+                let ipr t = Float ^-> t
+                let ipFactory x y = x?arg1 * x?arg2 ^-> ipr y
+                let ipF x = ipFactory x x
+                [
+                    Generic - fun t -> "interpolate" => ipF t
+                    "interpolateNumber" => ipF Float
+                    "interpolateRound" => ipFactory Float Int
+                    "interpolateString" => ipF String
+                    "interpolateRgb" => ipFactory (Rgb + String) String
+                    "interpolateHsl" => ipFactory (Hsl + String) String
+                    "interpolateLab" => ipFactory (Lab + String) String
+                    "interpolateHcl" => ipFactory (Hcl + String) String
+                    Generic - fun t -> "interpolateArray" => ipF !|T
+                    Generic - fun t -> "interpolateObject" => ipF t
+                    "interpolateTransform" => ipF Transform.Type
+                    "interpolateZoom" => ipF Float3T
+                    // TODO: incomplete
+                    // geo.Interpolate
+                    "interpolators" =? !|(ipF Obj)
+                ]
+            )
+        |+> (   // xhr section
+                // approximate: need xhr-returning API (TODO)
+                // note: turns out d3 detects callback arity dynamically, and calls it differently!
+                // therefore need extra care with tupled functions.
+                let remote name t : list<CodeModel.IClassMember> =
+                    [
+                        name => String?url * (t ^-> O) ^-> O
+                        name => String?url * (Obj?err * t ^-> O) ^-> O
+                        |> WithInline (sprintf "$global.d3.%s($0, function (x,y) { return $1(x,y); })" name)
+                    ]
+                let remoteMime name t : list<CodeModel.IClassMember> =
+                    [
+                        name => String?url * !?String?mimeType * (t ^-> O) ^-> O
+                        name => String?url * (Obj?err * t ^-> O) ^-> O
+                        |> WithInline (sprintf "$global.d3.%s($0, function (x,y) { return $1(x,y); })" name)
+                        name => String?url * String?mimeType * (Obj?err * t ^-> O) ^-> O
+                        |> WithInline (sprintf "$global.d3.%s($0, $1, function (x,y) { return $2(x,y); })" name)
+                    ]
+                let doc = T<IntelliFactory.WebSharper.Dom.Document>
+                List.concat [
+                    remoteMime "text" String
+                    remote "json" Obj
+                    remoteMime "xml" doc
+                    remote "html" doc
+                    remote "csv" !|Obj
+                    remote "tsv" !|Obj
+                    ["xhr" => String?url * !?String?mimeType ^-> Xhr]
+                    remoteMime "xhr" Xhr.Type
+                ]
+            )
         |=> Nested [
             Class "d3.timer"
             |+> [

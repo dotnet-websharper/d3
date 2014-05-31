@@ -97,8 +97,7 @@ module FocusBrushing =
                     {
                         Date  = parseDate(d?date)
                         Price = +d?price
-                    }
-                )
+                    })
 
             x.Domain(As <| D3.Extent(parsedData, fun d -> d.Date)) |> ignore
             y.Domain([|0.; D3.Max(parsedData, fun d -> d.Price)|]) |> ignore
