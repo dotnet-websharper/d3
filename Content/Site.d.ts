@@ -3187,6 +3187,34 @@ declare module Site {
             (el: __ABBREV.__Dom.Element): void;
         };
     }
+    module WorldTour {
+        interface ITopoJson {
+            feature(topology: __ABBREV.__WebSharper.ObjectProxy, geoObject: __ABBREV.__WebSharper.ObjectProxy): __ABBREV.__WebSharper.ObjectProxy;
+            mesh(topology: __ABBREV.__WebSharper.ObjectProxy, geoObject: __ABBREV.__WebSharper.ObjectProxy, filter: __ABBREV.__WebSharper.F2<__ABBREV.__WebSharper.ObjectProxy, __ABBREV.__WebSharper.ObjectProxy, boolean>): __ABBREV.__WebSharper.ObjectProxy;
+        }
+        var Render : {
+            (ctx: __ABBREV.__Dom.Element): void;
+        };
+        var topojson : {
+            (): __ABBREV.__WorldTour.ITopoJson;
+        };
+        var Sample : {
+            (): __ABBREV.__Samples.Sample;
+        };
+    }
+    module D3Extras {
+        var Defer : {
+            <_M1>(job: {
+                (x: __ABBREV.__WebSharper.F2<__ABBREV.__WebSharper.ObjectProxy, _M1, void>): void;
+            }): any;
+        };
+        var D3_Json_Static : {
+            (url: string): any;
+        };
+        var D3_Tsv_Static : {
+            (url: string): any;
+        };
+    }
     module CompaniesGraph {
         module UI {
             module Data {
@@ -3267,6 +3295,17 @@ declare module Site {
         };
     }
 }
+declare module IntelliFactory {
+    module WebSharper {
+        interface F2<_T1, _T2, _T3> {
+            (a1: _T1, a2: _T2): _T3;
+            (tuple: {
+                0: _T1;
+                1: _T2;
+            }): _T3;
+        }
+    }
+}
 declare module __ABBREV {
     
     export import __Samples = Site.Samples;
@@ -3274,6 +3313,7 @@ declare module __ABBREV {
     export import __WebSharper = IntelliFactory.WebSharper;
     export import __List = IntelliFactory.WebSharper.List;
     export import __Dom = IntelliFactory.WebSharper.Dom;
+    export import __WorldTour = Site.WorldTour;
     export import __Html = IntelliFactory.WebSharper.Html;
     export import __Graphs = Site.Graphs;
     export import __EcmaScript = IntelliFactory.WebSharper.EcmaScript;
