@@ -8,7 +8,7 @@ Provides [WebSharper](http://websharper.com) bindings to [D3](http://d3js.org), 
 | Version  | 20130910 (version 3.3.6) |
 | Learn    | [WebSharper.D3 Examples](http://intellifactory.github.io/websharper.d3) |
 | CI       | [![Build status](https://ci.appveyor.com/api/projects/status/j3imr7tbvfrpu08f)](https://ci.appveyor.com/project/t0yv0/websharper-d3)  |
-| NuGet    | [WebSharper.D3](http://http://www.nuget.org/packages/WebSharper.D3/) |
+| NuGet    | [WebSharper.D3](http://nuget.org/packages/WebSharper.D3/) |
 
 The following is the introduction from [d3js.org][d3] with samples 
 translated to F#, and some comments on typing.
