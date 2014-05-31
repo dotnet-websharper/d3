@@ -3256,10 +3256,10 @@ declare module Site {
         };
     }
     module Circles {
-        var Render : {
-            (data: number[], canvas: __ABBREV.__Dom.Element): void;
+        var Join : {
+            (data: number[], context: __ABBREV.__Dom.Element): void;
         };
-        var data : {
+        var Data : {
             (): number[];
         };
         var Sample : {
