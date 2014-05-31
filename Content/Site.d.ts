@@ -3266,10 +3266,6 @@ declare module Site {
             (): __ABBREV.__Samples.Sample;
         };
     }
-    module Extra {
-        interface UpdateSelection<_T1> {
-        }
-    }
 }
 declare module __ABBREV {
     

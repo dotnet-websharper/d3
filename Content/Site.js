@@ -11748,11 +11748,11 @@ for(var e in n)t.push({key:e,value:n[e]});return t},mo.merge=function(n){return 
       array=config.DataSet.Nodes;
       x=Arrays.map(function(_arg1)
       {
-       var label,i,node;
+       var label,node;
        label=_arg1.$1;
-       i=_arg1.$0;
-       node={};
-       node.index=i;
+       node={
+        index:_arg1.$0
+       };
        node.Label=label;
        return node;
       },array);
@@ -11763,39 +11763,36 @@ for(var e in n)t.push({key:e,value:n[e]});return t},mo.merge=function(n){return 
       x1=config.DataSet.Links;
       forceLinks=Arrays.map(function(_arg2)
       {
-       var t,s,lnk;
-       t=_arg2.$1;
-       s=_arg2.$0;
-       lnk={};
-       lnk.source=forceNodes[s];
-       lnk.target=forceNodes[t];
-       return lnk;
+       return{
+        source:forceNodes[_arg2.$0],
+        target:forceNodes[_arg2.$1]
+       };
       },x1);
       tick=function()
       {
-       link.attr("x1",Runtime.Tupled(function(tupledArg)
+       link.attr("x1",function(d)
        {
-        return tupledArg[0].source.x;
-       })).attr("y1",Runtime.Tupled(function(tupledArg)
+        return d.source.x;
+       }).attr("y1",function(d)
        {
-        return tupledArg[0].source.y;
-       })).attr("x2",Runtime.Tupled(function(tupledArg)
+        return d.source.y;
+       }).attr("x2",function(d)
        {
-        return tupledArg[0].target.x;
-       })).attr("y2",Runtime.Tupled(function(tupledArg)
+        return d.target.x;
+       }).attr("y2",function(d)
        {
-        return tupledArg[0].target.y;
-       }));
-       node1.attr("cx",Runtime.Tupled(function(tupledArg)
+        return d.target.y;
+       });
+       node1.attr("cx",function(d)
        {
-        return forceNodes[tupledArg[1]].x;
-       })).attr("cy",Runtime.Tupled(function(tupledArg)
+        return d.x;
+       }).attr("cy",function(d)
        {
-        return forceNodes[tupledArg[1]].y;
-       })).attr("r",Runtime.Tupled(function(tupledArg)
+        return d.y;
+       }).attr("r",function(d)
        {
-        return config.Radius.call(null,forceNodes[tupledArg[1]].Label);
-       }));
+        return config.Radius.call(null,d.Label);
+       });
        return;
       };
       force=d3.layout.force().nodes(forceNodes).links(forceLinks).size([width,height]).on("tick",tick).start();
@@ -11805,6 +11802,7 @@ for(var e in n)t.push({key:e,value:n[e]});return t},mo.merge=function(n){return 
        return config.OnMouseOver.call(null,tupledArg[0].Label);
       }));
       link=svg.selectAll(".link").data(forceLinks).enter().insert("line",".node").attr("class","link");
+      link.attr("x1",0);
       return null;
      },
      Sample:Runtime.Field(function()
