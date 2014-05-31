@@ -11723,7 +11723,7 @@ for(var e in n)t.push({key:e,value:n[e]});return t},mo.merge=function(n){return 
        {
         var ok;
         ok=tupledArg[0];
-        jQuery.getJSON("/"+Data.FileName(),Runtime.Tupled(function(tupledArg1)
+        jQuery.getJSON(Data.FileName(),Runtime.Tupled(function(tupledArg1)
         {
          return ok(tupledArg1[0]);
         }));
