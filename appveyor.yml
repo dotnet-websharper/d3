@@ -22,7 +22,7 @@ environment:
   GH_TOKEN:
     secure: JZ+3Cp4KpFEnyoBGS2SSPnv6uPt4exUh5XMHw8SLrL/v6LcI/XL5PyxbH9ydo6of
 
-# deploy:
-#   - provider: NuGet
-#     api_key:
-#       secure: DNlnRj4Pz5OWJJhdyDt4KXOCY/jJubNywiNvL22JgwcfkVL4LJ1pmtCXQLTQDSHi
+deploy:
+  - provider: NuGet
+    api_key:
+      secure: DNlnRj4Pz5OWJJhdyDt4KXOCY/jJubNywiNvL22JgwcfkVL4LJ1pmtCXQLTQDSHi
