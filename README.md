@@ -4,9 +4,9 @@ Provides [WebSharper](http://websharper.com) bindings to [D3](http://d3js.org), 
 
 |          |                             |
 | -------- | --------------------------- |
-| Home     | [D3js.org](http://d3js.org) |
+| Library  | [D3js.org](http://d3js.org) |
 | Version  | 20130910 (version 3.3.6) |
-| Examples | [Browse..](http://intellifactory.github.io/websharper.d3) |
+| Learn    | [WebSharper.D3 Examples](http://intellifactory.github.io/websharper.d3) |
 | CI       | [![Build status](https://ci.appveyor.com/api/projects/status/j3imr7tbvfrpu08f)](https://ci.appveyor.com/project/t0yv0/websharper-d3)  |
 | NuGet    | [WebSharper.D3](http://http://www.nuget.org/packages/WebSharper.D3/) |
 
