@@ -10,9 +10,11 @@
     <projectUrl>http://github.com/intellifactory/websharper.d3</projectUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>WebSharper bindings to D3 (d3js.org) version d3v3.</description>
+    <copyright>Copyright (c) 2008-2014 IntelliFactory</copyright>
     <dependencies>
       <dependency id="WebSharper" version="2.5.111" />
     </dependencies>
+    <tags>f# d3 data web websharper javascript visualization</tags>
   </metadata>
   <files>
     <file src="bin/Release/IntelliFactory.WebSharper.D3.dll" target="lib/net40" />
