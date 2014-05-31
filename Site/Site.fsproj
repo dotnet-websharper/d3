@@ -99,7 +99,6 @@
     </VisualStudio>
   </ProjectExtensions>
   <ItemGroup>
-    <Compile Include="Extra.fs" />
     <Compile Include="Samples.fs" />
     <Compile Include="Circles.fs" />
     <Compile Include="FocusBrushing.fs" />
@@ -107,6 +106,7 @@
     <Compile Include="CompaniesGraph.Data.fs" />
     <Compile Include="CompaniesGraph.UI.fs" />
     <None Include="CompaniesGraph.fsx" />
+    <None Include="CompaniesGraph.json" />
     <Compile Include="Client.fs" />
     <Content Include="index.html" />
     <Content Include="Web.config" />

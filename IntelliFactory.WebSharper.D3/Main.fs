@@ -14,9 +14,12 @@ module Definition =
 
     let EnumStrings name words = Pattern.EnumStrings name words |>! addToClassList
 
-    let Record name propList =
+    let DefineRecord name propList =
         Class name
         |+> Protocol (propList |> List.map (fun (n, t) -> upcast (n =@ t)))
+
+    let Record name propList =
+        DefineRecord name propList
         |>! addToClassList
 
     let O = T<unit>
@@ -46,14 +49,10 @@ module Definition =
 
     let WithThis t ps r = (t -* ps ^-> r) + (ps ^-> r)
 
-//    let WithNum n = (n Int) + (n Float)
-
     let selectionCallback ret = WithThis Element (Obj?d * Int?i) ret
 
-//    let selectionCallback ret = (Element -* Obj?d * Int?i ^-> ret) + (Obj?d * Int?i ^-> ret)
-
     let getVal t = O ^-> t
-//    let setVal chained t = chained t?value
+    //let setVal chained (t: obj) = chained t?value
     let setValF t = (t + selectionCallback t)?value
     let getSetValF chained t = getVal t + chained (setValF t)
     let getSetVal chained (t: Type.IType) = getVal t + chained t
@@ -70,8 +69,7 @@ module Definition =
             "value" , String
         ]
 
-    let UpdateSelection = Type.New()
-    let Transition      = Type.New()
+    let Transition = Type.New()
 
     let selector = (String + Element + selectionCallback !|Element + selectionCallback NodeList)?selector
 
@@ -91,52 +89,87 @@ module Definition =
     let ChainedClassInheritsG name t inherits members =
         ChainedClassG name t members |=> Inherits inherits
 
-    let Selection =
-        let self = Type.New()
-        ChainedClass "Selection" self <| fun chained ->
-        [
-            "attr"       => getProp Obj + chained (setPropF Obj) + chained NameValuePair?attrValueMap
-            "classed"    => getSetPropF chained Bool
-            "style"      => getProp Obj + chained (setPropF Obj * !?String?priority)
-            "property"   => getSetPropF chained Obj
-            "text"       => getSetValF chained String
-            "html"       => getSetValF chained String
-            "append"     => chained nameArg
-            "insert"     => chained (nameArg * !?(String + selectionCallback Element)?before)
-            "remove"     => chained O
-            "data"       =>
-                (
-                    let data = !|Obj + !|Float + !|Int + selectionCallback !|Obj
-                    let keyFunc = selectionCallback String
-                    data?values * !?keyFunc?key ^-> UpdateSelection
-                )
-            "data"       => O ^-> !|Obj
-            "datum"      => chained (Obj + selectionCallback Obj)?value
-            "filter"     => chained (String + selectionCallback Bool)?selector
-            "sort"       => chained O
-            "order"      => chained O
-            "on"         => String?``type`` * !?(selectionCallback O)?listener ^-> self
-            "transition" => O ^-> Transition
-            "interrupt"  => chained O
-            "each"       => chained (selectionCallback O)
-            "call"       => (self ^-> O) ^-> self
-            "call"       => T<IntelliFactory.WebSharper.EcmaScript.Function> ^-> self
-            "empty"      => O ^-> Bool
-            "node"       => O ^-> Element
-            "size"       => O ^-> Int
-            "select"     => chained selector
-            "selectAll"  => chained selector
-        ]
+//    let Selection = Type.New()
 
-    let UpdateSelectionClass =
-        Class "UpdateSelection"
-        |=> UpdateSelection
-        |=> Inherits Selection
-        |+> Protocol [
-            "enter" => O ^-> Selection
-            "exit"  => O ^-> Selection
-        ]
-        |>! addToClassList
+//    let UpdateSelectionT =
+//        Generic / fun t ->
+//            Class "UpdateSelection"
+//            |=> Inherits Selection
+////            |+> Protocol
+////                [
+////                    "data" =>
+////                        (
+////                            let data = !|Obj + !|Float + !|Int + selectionCallback !|Obj
+////                            let keyFunc = selectionCallback String
+////                            data?values * !?keyFunc?key ^-> UpdateSelection
+////                        )
+////                    "data"       => O ^-> !|Obj
+////                    "datum"      => chained (Obj + selectionCallback Obj)?value
+////                    "filter"     => chained (String + selectionCallback Bool)?selector
+////                    "sort"       => chained O
+////                    "order"      => chained O
+////                    "each"       => chained (selectionCallback O)
+////                ]
+//
+//    addToClassList <| Generic - UpdateSelectionT
+
+    let Selection =
+        let selfG = Type.New()
+        let attrValue = String + Float + Int + Obj
+        Generic / fun (t: Type.Type) ->
+            let self = selfG.[t]
+            let chained x = x ^-> self
+            let data : CodeModel.Member list = // .data(..)
+                let elFunc x y = WithThis Element (x?datum * T<int>?index) y
+                [
+                    Generic - fun x -> "data" => (!|x)?data ^-> selfG.[x]
+                    Generic - fun x y -> "data" => (elFunc x !|y)?proj ^-> selfG.[x]
+                    Generic - fun x y -> "data" => (!|x)?data * (elFunc x y)?key ^-> selfG.[x]
+                    "data" => O ^-> !|t
+                ]
+            Class "Selection"
+            |=> selfG
+            |+> Protocol
+                [
+                    // TODO: NameValuePair
+                    "attr" => String ^-> Obj
+                    "attr" => String * Obj ^-> self
+                    "attr" => String * (WithThis Element t attrValue) ^-> self
+                    |> WithSourceName "AttrFn" // disambiguating for better completion
+                    ("attr" => String * (WithThis Element (t * Int) attrValue) ^-> self)
+                    |> WithSourceName "AttrIx" // same as above
+                    "classed"    => getSetPropF chained Bool
+                    "style"      => getProp Obj + chained (setPropF Obj * !?String?priority)
+                    "property"   => getSetPropF chained Obj
+                    "text"       => getSetValF chained String
+                    "html"       => getSetValF chained String
+                    "append"     => chained nameArg
+                    "insert"     => chained (nameArg * !?(String + selectionCallback Element)?before)
+                    "remove"     => chained O
+
+                    // TODO: datum, filter, sort, order, each - can make use of `t` parameter
+                    "datum"      => chained (Obj + selectionCallback Obj)?value
+                    "filter"     => chained (String + selectionCallback Bool)?selector
+                    "sort"       => chained O
+                    "order"      => chained O
+                    "each"       => chained (selectionCallback O)
+
+                    "enter" => O ^-> self
+                    "exit" => O ^-> self
+                    "on"         => String?``type`` * !?(selectionCallback O)?listener ^-> self
+                    "transition" => O ^-> Transition
+                    "interrupt"  => chained O
+                    "call"       => (self ^-> O) ^-> self
+                    "call"       => T<IntelliFactory.WebSharper.EcmaScript.Function> ^-> self
+                    "empty"      => O ^-> Bool
+                    "node"       => O ^-> Element
+                    "size"       => O ^-> Int
+                    "select"     => chained selector
+                    "selectAll"  => chained selector
+                ]
+            |+> Protocol data
+
+    addToClassList (Generic - Selection)
 
     let tweenCallback   = (Element -* Obj?d * Int?i * Obj?a ^-> (Float?t ^-> Obj))
     let factoryCallback = (Element -* O ^-> (Element -* Float?t ^-> Obj))
@@ -161,7 +194,7 @@ module Definition =
             "filter"     => chained (String + selectionCallback Bool)?selector
             "transition" => chained O
             "each"       => chained (!?String?``type`` * selectionCallback O)
-            "call"       => chained (!+Obj * (Selection ^-> O)?callback)
+            "call"       => chained (!+Obj * (Selection Obj ^-> O)?callback)
             "empty"      => O ^-> Bool
             "node"       => O ^-> Element
             "size"       => O ^-> Int
@@ -471,7 +504,7 @@ module Definition =
     let Axis =
         ChainedClassNew "Axis" <| fun chained ->
         [
-            "apply"  => (Selection + Transition)?selection ^-> O |> WithInline "$this($selection)"
+            "apply"  => (Selection Obj + Transition)?selection ^-> O |> WithInline "$this($selection)"
             "scale"  => getSetVal chained Scale.Type
             "orient" => getSetVal chained Orientation.Type
             "ticks"  => chained !+Obj
@@ -493,7 +526,7 @@ module Definition =
     let Brush =
         ChainedClassNew "Brush" <| fun chained ->
         [
-            "apply" => (Selection + Transition)?selection ^-> O |> WithInline "$this($selection)"
+            "apply" => (Selection Obj + Transition)?selection ^-> O |> WithInline "$this($selection)"
             "x" => getSetVal chained Scale.Type
             "y" => getSetVal chained Scale.Type
             "extent" => getSetVal chained (Int2T + Int2x2T)
@@ -501,7 +534,7 @@ module Definition =
             "clear" => chained O
             "empty" => O ^-> Bool
             "on"    => (BrushEvent?``type`` ^-> (O ^-> O)) + chained (BrushEvent?``type`` * (O ^-> O)?listener)
-            "event" => (Selection + Transition)?selection ^-> O
+            "event" => (Selection Obj + Transition)?selection ^-> O
         ]
 
     let TimeInterval =
@@ -509,13 +542,21 @@ module Definition =
         [
         ]
 
+    let WithDefaultConstructor (x: CodeModel.Class) =
+        x |+> [
+            Constructor O
+            |> WithInline "({})"
+        ]
+
     let Link =
         Generic / fun t ->
             Class "Link"
+            |> WithDefaultConstructor
             |+> Protocol [
                 "source" =@ t
                 "target" =@ t
             ]
+
     addToClassList <| Generic - Link
 
     let BundleNode =
@@ -601,7 +642,7 @@ module Definition =
             @ propF2 self "size"
 
     let ForceNode =
-        Record "ForceNode" [
+        DefineRecord "ForceNode" [
             "index"  , Int
             "x"      , Int
             "y"      , Int
@@ -610,6 +651,8 @@ module Definition =
             "fixed"  , Bool
             "weight" , Int
         ]
+        |> WithDefaultConstructor
+        |>! addToClassList
 
     let ForceEvent =
         EnumStrings "ForceEvent" [
@@ -998,7 +1041,7 @@ module Definition =
                 "x"           => getSetVal chained Scale
                 "y"           => getSetVal chained Scale
                 "on"          => (ZoomEvent?``type`` ^-> (O ^-> O)) + chained (ZoomEvent?``type`` * (O ^-> O)?listener)
-                "event"       => (Selection + Transition)?selection ^-> O
+                "event"       => (Selection Obj + Transition)?selection ^-> O
             ]
             @ propF2 self "center"
             @ propF2 self "size"
@@ -1059,15 +1102,15 @@ module Definition =
         Class "d3"
         |+> [
             // Selections
-            "select"      => selector ^-> Selection
-            "selectAll"   => selector ^-> Selection
-            "selection"   => O ^-> Selection
+            "select"      => selector ^-> Selection Obj
+            "selectAll"   => selector ^-> Selection Obj
+            "selection"   => O ^-> Selection Obj
             "event"       =? Event
             "mouse"       => Element?container ^-> Int2T
             "touches"     => Element?container * !?Obj?touches ^-> !|Int2x2T
 
             // Transitions
-            "transition"  => !?Selection?selection ^-> Transition
+            "transition"  => !?(Selection Obj)?selection ^-> Transition
             "ease"        => (String?``type`` *+ Float) ^-> easing
             "timer"       => O ^-> Bool?``function`` * !?Int?delay * !?T<System.DateTime>?time ^-> O
             Generic - fun t -> "interpolate" => interpolate t

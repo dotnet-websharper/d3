@@ -14,11 +14,11 @@ module Circles =
             .Append("svg")
             .Attr("height", 500)
             .SelectAll("circle")
-            .Data<double>(data)
+            .Data(data)
             .Enter()
                 .Append("circle")
-                .Attr("cx", fun x -> x * 10.)
-                .Attr("cy", fun x -> x * 10.)
+                .AttrFn("cx", fun x -> x * 10.)
+                .AttrFn("cy", fun x -> x * 10.)
                 .Attr("r", 15.)
         |> ignore
 
