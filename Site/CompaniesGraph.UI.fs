@@ -18,7 +18,7 @@ module UI =
 
         let Load () =
             Async.FromContinuations (fun (ok, _, _) ->
-                JQuery.GetJSON("/" + Data.FileName, fun (x, _) ->
+                JQuery.GetJSON(Data.FileName, fun (x, _) ->
                     ok (x :?> Data.DataSet))
                 |> ignore)
 
