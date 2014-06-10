@@ -1,3 +1,9 @@
+NOTE: please refer to http://github.com/intellifactory/websharper.d3
+
+This is kept for archiving only.
+
+
+
 D3 is a JavaScript library for manipulating documents based on data.
 Its emphasis on web standards gives you the full capabilities of
 modern browsers without tying yourself to a proprietary framework,
