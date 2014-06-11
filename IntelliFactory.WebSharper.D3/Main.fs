@@ -792,6 +792,7 @@ module Definition =
     let Stack =
         ChainedClassNew "Stack" <| fun chained ->
         [
+            "apply"      => (!|Obj)?layers * !?Int?index ^-> !|Obj |> WithInline "$this($layers, $index)"
             "values" => getSetVal chained (Obj ^-> Obj)
             "offset" => getVal (!|Float2T ^-> !|Float) + chained (StackOffset + (Float2T ^-> !|Float))
             "order"  => getVal (!|Float2T ^-> !|Int) + chained (StackOrder + (!|Float2T ^-> !|Int))
