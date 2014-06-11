@@ -674,6 +674,8 @@ module Definition =
                 "resume" => O ^-> O
                 "tick" => O ^-> O
                 "drag" =? T<IntelliFactory.WebSharper.EcmaScript.Function>
+                "linkDistance" => chained !?(Int + (Obj?d * Int?i ^-> Int))?distance
+                "charge" => chained !?(Int + (Obj?d * Int?i ^-> Int))?charge
             ]
             @ propF2 self "size"
 
