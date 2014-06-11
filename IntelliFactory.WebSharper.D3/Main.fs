@@ -765,6 +765,7 @@ module Definition =
     let Pie =
         ChainedClassNew "Pie" <| fun chained ->
         [
+            "apply"      => (!|Obj)?values * !?Int?index ^-> !|Obj |> WithInline "$this($values, $index)"
             "value"    => getSetVal chained (Obj ^-> Float)
             "sort"     => getSetVal chained Comparator
             "startAngle" => getVal Float + chained (Float + Obj * Int ^-> Float)
