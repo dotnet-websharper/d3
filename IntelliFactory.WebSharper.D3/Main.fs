@@ -150,7 +150,7 @@ module Definition =
                     // TODO: datum, filter, sort, order, each - can make use of `t` parameter
                     "datum"      => chained (Obj + selectionCallback Obj)?value
                     "filter"     => chained (String + selectionCallback Bool)?selector
-                    "sort"       => chained O
+                    "sort"       => chained !?Comparator?comparator
                     "order"      => chained O
                     "each"       => chained (selectionCallback O)
 
