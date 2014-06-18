@@ -180,6 +180,7 @@ module Definition =
         ChainedClass "Transition" Transition <| fun chained ->
         [
             "delay"      => chained Int?delay
+            "delay"      => chained (Obj * Int ^-> Int)?delayFn
             "duration"   => chained Int?duration
             "ease"       => chained (!+Float * String?value) + chained easing?value
             "attr"       => chained (nameArg * (Obj + selectionCallback Obj)?value)
