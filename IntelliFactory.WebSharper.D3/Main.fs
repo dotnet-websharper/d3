@@ -150,7 +150,7 @@ module Definition =
                     // TODO: datum, filter, sort, order, each - can make use of `t` parameter
                     "datum"      => chained (Obj + selectionCallback Obj)?value
                     "filter"     => chained (String + selectionCallback Bool)?selector
-                    "sort"       => chained O
+                    "sort"       => chained !?Comparator?comparator
                     "order"      => chained O
                     "each"       => chained (selectionCallback O)
 
@@ -674,6 +674,8 @@ module Definition =
                 "resume" => O ^-> O
                 "tick" => O ^-> O
                 "drag" =? T<IntelliFactory.WebSharper.EcmaScript.Function>
+                "linkDistance" => chained !?(Int + (Obj?d * Int?i ^-> Int))?distance
+                "charge" => chained !?(Int + (Obj?d * Int?i ^-> Int))?charge
             ]
             @ propF2 self "size"
 
@@ -765,6 +767,7 @@ module Definition =
     let Pie =
         ChainedClassNew "Pie" <| fun chained ->
         [
+            "apply"      => (!|Obj)?values * !?Int?index ^-> !|Obj |> WithInline "$this($values, $index)"
             "value"    => getSetVal chained (Obj ^-> Float)
             "sort"     => getSetVal chained Comparator
             "startAngle" => getVal Float + chained (Float + Obj * Int ^-> Float)
@@ -789,6 +792,7 @@ module Definition =
     let Stack =
         ChainedClassNew "Stack" <| fun chained ->
         [
+            "apply"      => (!|Obj)?layers * !?Int?index ^-> !|Obj |> WithInline "$this($layers, $index)"
             "values" => getSetVal chained (Obj ^-> Obj)
             "offset" => getVal (!|Float2T ^-> !|Float) + chained (StackOffset + (Float2T ^-> !|Float))
             "order"  => getVal (!|Float2T ^-> !|Int) + chained (StackOrder + (!|Float2T ^-> !|Int))
