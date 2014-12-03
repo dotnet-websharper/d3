@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>WebSharper.D3</id>
-    <version>2.5.0</version>
+    <version>3.0.0-alpha</version>
     <title>WebSharper.D3 (d3v3)</title>
     <authors>IntelliFactory</authors>
     <owners>IntelliFactory</owners>
@@ -11,7 +11,7 @@
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>WebSharper bindings to D3 (d3js.org) version d3v3.</description>
     <dependencies>
-      <dependency id="WebSharper" version="2.5.111" />
+      <dependency id="WebSharper" version="3.0.0-alpha" />
     </dependencies>
   </metadata>
   <files>
