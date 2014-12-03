@@ -1292,5 +1292,5 @@ type D3Extension() =
         member ext.Assembly = Definition.D3Assembly
 
 [<assembly: Extension(typeof<D3Extension>)>]
-[<assembly: System.Reflection.AssemblyVersion("2.5.0.0")>]
+[<assembly: System.Reflection.AssemblyVersion("3.0.0.0")>]
 do ()

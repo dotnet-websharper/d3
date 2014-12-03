@@ -46,12 +46,12 @@
     </Otherwise>
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
-  <Import Project="..\packages\WebSharper.2.5.111.45\build\WebSharper.targets" Condition="Exists('..\packages\WebSharper.2.5.111.45\build\WebSharper.targets')" />
+  <Import Project="..\packages\WebSharper.3.0.1.73-alpha\build\WebSharper.targets" Condition="Exists('..\packages\WebSharper.3.0.1.73-alpha\build\WebSharper.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\WebSharper.2.5.111.45\build\WebSharper.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WebSharper.2.5.111.45\build\WebSharper.targets'))" />
+    <Error Condition="!Exists('..\packages\WebSharper.3.0.1.73-alpha\build\WebSharper.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WebSharper.3.0.1.73-alpha\build\WebSharper.targets'))" />
   </Target>
   <ItemGroup>
     <Compile Include="Main.fs" />
@@ -71,6 +71,6 @@
   </PropertyGroup>
   <Target Name="NuGetPack" AfterTargets="Build">
     <MakeDir Directories="..\build" />
-    <Exec Command="..\tools\NuGet\NuGet.exe pack -nonInteractive -outputDirectory ..\build -version 2.5.$(BuildNumber) WebSharper.D3.nuspec" WorkingDirectory="$(MSBuildThisFileDirectory)" ContinueOnError="false" />
+    <Exec Command="..\tools\NuGet\NuGet.exe pack -nonInteractive -outputDirectory ..\build -version 3.0.$(BuildNumber) WebSharper.D3.nuspec" WorkingDirectory="$(MSBuildThisFileDirectory)" ContinueOnError="false" />
   </Target>
 </Project>

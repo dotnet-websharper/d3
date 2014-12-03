@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
@@ -133,7 +133,7 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="..\packages\WebSharper.2.5.111.45\build\WebSharper.targets" Condition="Exists('..\packages\WebSharper.2.5.111.45\build\WebSharper.targets')" />
+  <Import Project="..\packages\WebSharper.3.0.1.73-alpha\build\WebSharper.targets" Condition="Exists('..\packages\WebSharper.3.0.1.73-alpha\build\WebSharper.targets')" />
   <Target Name="DeploySite" AfterTargets="Build">
     <ItemGroup>
       <SiteFiles Include="*.html" />
