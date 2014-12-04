@@ -11,7 +11,7 @@ svg.FocusBrushing {
     font: 10px sans-serif;
 }
 
-    svg.FocusBrushing .area {
+    svg.FocusBrushing path {
         fill: steelblue;
         clip-path: url(#clip);
     }

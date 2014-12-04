@@ -11,6 +11,7 @@ module Client =
             !+ Circles.Sample
             !+ FocusBrushing.Sample
             !+ CompaniesGraph.UI.Sample
+            !+ WorldTour.Sample
         ]
 
     let Main = All.Show()

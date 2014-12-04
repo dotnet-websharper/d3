@@ -3,7 +3,11 @@
 open IntelliFactory.WebSharper
 open IntelliFactory.WebSharper.D3
 
-/// Translation of http://bl.ocks.org/mbostock/1667367
+/// This is a translation of an example by mbostock to WebSharper.D3:
+/// http://bl.ocks.org/mbostock/1667367
+///
+/// This examples demonstrates how to use D3's brush component to implement
+/// focus + context zooming. Click and drag in the small chart below to pan or zoom.
 [<JavaScript>]
 module FocusBrushing =
 
@@ -47,14 +51,14 @@ module FocusBrushing =
             D3.Svg.Area()
                 .Interpolate(Interpolation.Monotone)
                 .X(fun d -> x.Apply(d.Date))
-                .Y0(float height)
+                .Y0(height)
                 .Y1(fun d -> y.Apply(d.Price))
 
         let area2 =
             D3.Svg.Area()
                 .Interpolate(Interpolation.Monotone)
                 .X(fun d -> x2.Apply(d.Date))
-                .Y0(float height2)
+                .Y0(height2)
                 .Y1(fun d -> y2.Apply(d.Price))
 
         let svg =
@@ -93,8 +97,7 @@ module FocusBrushing =
                     {
                         Date  = parseDate(d?date)
                         Price = +d?price
-                    }
-                )
+                    })
 
             x.Domain(As <| D3.Extent(parsedData, fun d -> d.Date)) |> ignore
             y.Domain([|0.; D3.Max(parsedData, fun d -> d.Price)|]) |> ignore

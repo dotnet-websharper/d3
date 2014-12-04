@@ -14,9 +14,12 @@ module Definition =
 
     let EnumStrings name words = Pattern.EnumStrings name words |>! addToClassList
 
-    let Record name propList =
+    let DefineRecord name propList =
         Class name
         |+> Protocol (propList |> List.map (fun (n, t) -> upcast (n =@ t)))
+
+    let Record name propList =
+        DefineRecord name propList
         |>! addToClassList
 
     let O = T<unit>
@@ -46,14 +49,10 @@ module Definition =
 
     let WithThis t ps r = (t -* ps ^-> r) + (ps ^-> r)
 
-//    let WithNum n = (n Int) + (n Float)
-
     let selectionCallback ret = WithThis Element (Obj?d * Int?i) ret
 
-//    let selectionCallback ret = (Element -* Obj?d * Int?i ^-> ret) + (Obj?d * Int?i ^-> ret)
-
     let getVal t = O ^-> t
-//    let setVal chained t = chained t?value
+    //let setVal chained (t: obj) = chained t?value
     let setValF t = (t + selectionCallback t)?value
     let getSetValF chained t = getVal t + chained (setValF t)
     let getSetVal chained (t: Type.IType) = getVal t + chained t
@@ -70,8 +69,7 @@ module Definition =
             "value" , String
         ]
 
-    let UpdateSelection = Type.New()
-    let Transition      = Type.New()
+    let Transition = Type.New()
 
     let selector = (String + Element + selectionCallback !|Element + selectionCallback NodeList)?selector
 
@@ -91,52 +89,87 @@ module Definition =
     let ChainedClassInheritsG name t inherits members =
         ChainedClassG name t members |=> Inherits inherits
 
-    let Selection =
-        let self = Type.New()
-        ChainedClass "Selection" self <| fun chained ->
-        [
-            "attr"       => getProp Obj + chained (setPropF Obj) + chained NameValuePair?attrValueMap
-            "classed"    => getSetPropF chained Bool
-            "style"      => getProp Obj + chained (setPropF Obj * !?String?priority)
-            "property"   => getSetPropF chained Obj
-            "text"       => getSetValF chained String
-            "html"       => getSetValF chained String
-            "append"     => chained nameArg
-            "insert"     => chained (nameArg * !?(String + selectionCallback Element)?before)
-            "remove"     => chained O
-            "data"       =>
-                (
-                    let data = !|Obj + !|Float + !|Int + selectionCallback !|Obj
-                    let keyFunc = selectionCallback String
-                    data?values * !?keyFunc?key ^-> UpdateSelection
-                )
-            "data"       => O ^-> !|Obj
-            "datum"      => chained (Obj + selectionCallback Obj)?value
-            "filter"     => chained (String + selectionCallback Bool)?selector
-            "sort"       => chained O + chained (Obj?a * Obj?b ^-> Int)?comparator
-            "order"      => chained O
-            "on"         => String?``type`` * !?(selectionCallback O)?listener ^-> self
-            "transition" => O ^-> Transition
-            "interrupt"  => chained O
-            "each"       => chained (selectionCallback O)
-            "call"       => (self ^-> O) ^-> self
-            "call"       => T<IntelliFactory.WebSharper.EcmaScript.Function> ^-> self
-            "empty"      => O ^-> Bool
-            "node"       => O ^-> Element
-            "size"       => O ^-> Int
-            "select"     => chained selector
-            "selectAll"  => chained selector
-        ]
+//    let Selection = Type.New()
 
-    let UpdateSelectionClass =
-        Class "UpdateSelection"
-        |=> UpdateSelection
-        |=> Inherits Selection
-        |+> Protocol [
-            "enter" => O ^-> Selection
-            "exit"  => O ^-> Selection
-        ]
-        |>! addToClassList
+//    let UpdateSelectionT =
+//        Generic / fun t ->
+//            Class "UpdateSelection"
+//            |=> Inherits Selection
+////            |+> Protocol
+////                [
+////                    "data" =>
+////                        (
+////                            let data = !|Obj + !|Float + !|Int + selectionCallback !|Obj
+////                            let keyFunc = selectionCallback String
+////                            data?values * !?keyFunc?key ^-> UpdateSelection
+////                        )
+////                    "data"       => O ^-> !|Obj
+////                    "datum"      => chained (Obj + selectionCallback Obj)?value
+////                    "filter"     => chained (String + selectionCallback Bool)?selector
+////                    "sort"       => chained O
+////                    "order"      => chained O
+////                    "each"       => chained (selectionCallback O)
+////                ]
+//
+//    addToClassList <| Generic - UpdateSelectionT
+
+    let Selection =
+        let selfG = Type.New()
+        let attrValue = String + Float + Int + Obj
+        Generic / fun (t: Type.Type) ->
+            let self = selfG.[t]
+            let chained x = x ^-> self
+            let data : CodeModel.Member list = // .data(..)
+                let elFunc x y = WithThis Element (x?datum * T<int>?index) y
+                [
+                    Generic - fun x -> "data" => (!|x)?data ^-> selfG.[x]
+                    Generic - fun x y -> "data" => (elFunc x !|y)?proj ^-> selfG.[x]
+                    Generic - fun x y -> "data" => (!|x)?data * (elFunc x y)?key ^-> selfG.[x]
+                    "data" => O ^-> !|t
+                ]
+            Class "Selection"
+            |=> selfG
+            |+> Protocol
+                [
+                    // TODO: NameValuePair
+                    "attr" => String ^-> Obj
+                    "attr" => String * Obj ^-> self
+                    "attr" => String * (WithThis Element t attrValue) ^-> self
+                    |> WithSourceName "AttrFn" // disambiguating for better completion
+                    ("attr" => String * (WithThis Element (t * Int) attrValue) ^-> self)
+                    |> WithSourceName "AttrIx" // same as above
+                    "classed"    => getSetPropF chained Bool
+                    "style"      => getProp Obj + chained (setPropF Obj * !?String?priority)
+                    "property"   => getSetPropF chained Obj
+                    "text"       => getSetValF chained String
+                    "html"       => getSetValF chained String
+                    "append"     => chained nameArg
+                    "insert"     => chained (nameArg * !?(String + selectionCallback Element)?before)
+                    "remove"     => chained O
+
+                    // TODO: datum, filter, sort, order, each - can make use of `t` parameter
+                    "datum"      => chained (Obj + selectionCallback Obj)?value
+                    "filter"     => chained (String + selectionCallback Bool)?selector
+                    "sort"       => chained !?Comparator?comparator
+                    "order"      => chained O
+                    "each"       => chained (selectionCallback O)
+
+                    "enter" => O ^-> self
+                    "exit" => O ^-> self
+                    "on"         => String?``type`` * !?(selectionCallback O)?listener ^-> self
+                    "transition" => O ^-> Transition
+                    "interrupt"  => chained O
+                    "call"       => (self ^-> O) ^-> self
+                    "call"       => T<IntelliFactory.WebSharper.EcmaScript.Function> ^-> self
+                    "empty"      => O ^-> Bool
+                    "node"       => O ^-> Element
+                    "size"       => O ^-> Int
+                    "select"     => chained selector
+                    "selectAll"  => chained selector
+                ]
+            |+> Protocol data
+
+    addToClassList (Generic - Selection)
 
     let tweenCallback   = (Element -* Obj?d * Int?i * Obj?a ^-> (Float?t ^-> Obj))
     let factoryCallback = (Element -* O ^-> (Element -* Float?t ^-> Obj))
@@ -147,6 +180,7 @@ module Definition =
         ChainedClass "Transition" Transition <| fun chained ->
         [
             "delay"      => chained Int?delay
+            "delay"      => chained (Obj * Int ^-> Int)?delayFn
             "duration"   => chained Int?duration
             "ease"       => chained (!+Float * String?value) + chained easing?value
             "attr"       => chained (nameArg * (Obj + selectionCallback Obj)?value)
@@ -155,13 +189,14 @@ module Definition =
             "styleTween" => chained (nameArg * tweenCallback?value * !? String?priority)
             "text"       => chained (setValF String)
             "tween"      => chained (nameArg * factoryCallback?factory)
+            "tween"      => chained (nameArg * (O ^-> (Float?t ^-> O)))
             "remove"     => chained O
             "select"     => chained selector
             "selectAll"  => chained selector
             "filter"     => chained (String + selectionCallback Bool)?selector
             "transition" => chained O
             "each"       => chained (!?String?``type`` * selectionCallback O)
-            "call"       => chained (!+Obj * (Selection ^-> O)?callback)
+            "call"       => chained (!+Obj * (Selection Obj ^-> O)?callback)
             "empty"      => O ^-> Bool
             "node"       => O ^-> Element
             "size"       => O ^-> Int
@@ -471,7 +506,7 @@ module Definition =
     let Axis =
         ChainedClassNew "Axis" <| fun chained ->
         [
-            "apply"  => (Selection + Transition)?selection ^-> O |> WithInline "$this($selection)"
+            "apply"  => (Selection Obj + Transition)?selection ^-> O |> WithInline "$this($selection)"
             "scale"  => getSetVal chained Scale.Type
             "orient" => getSetVal chained Orientation.Type
             "ticks"  => chained !+Obj
@@ -493,7 +528,7 @@ module Definition =
     let Brush =
         ChainedClassNew "Brush" <| fun chained ->
         [
-            "apply" => (Selection + Transition)?selection ^-> O |> WithInline "$this($selection)"
+            "apply" => (Selection Obj + Transition)?selection ^-> O |> WithInline "$this($selection)"
             "x" => getSetVal chained Scale.Type
             "y" => getSetVal chained Scale.Type
             "extent" => getSetVal chained (Int2T + Int2x2T)
@@ -501,7 +536,7 @@ module Definition =
             "clear" => chained O
             "empty" => O ^-> Bool
             "on"    => (BrushEvent?``type`` ^-> (O ^-> O)) + chained (BrushEvent?``type`` * (O ^-> O)?listener)
-            "event" => (Selection + Transition)?selection ^-> O
+            "event" => (Selection Obj + Transition)?selection ^-> O
         ]
 
     let TimeInterval =
@@ -509,13 +544,21 @@ module Definition =
         [
         ]
 
+    let WithDefaultConstructor (x: CodeModel.Class) =
+        x |+> [
+            Constructor O
+            |> WithInline "({})"
+        ]
+
     let Link =
         Generic / fun t ->
             Class "Link"
+            |> WithDefaultConstructor
             |+> Protocol [
                 "source" =@ t
                 "target" =@ t
             ]
+
     addToClassList <| Generic - Link
 
     let BundleNode =
@@ -601,7 +644,7 @@ module Definition =
             @ propF2 self "size"
 
     let ForceNode =
-        Record "ForceNode" [
+        DefineRecord "ForceNode" [
             "index"  , Int
             "x"      , Int
             "y"      , Int
@@ -610,6 +653,8 @@ module Definition =
             "fixed"  , Bool
             "weight" , Int
         ]
+        |> WithDefaultConstructor
+        |>! addToClassList
 
     let ForceEvent =
         EnumStrings "ForceEvent" [
@@ -630,6 +675,8 @@ module Definition =
                 "resume" => O ^-> O
                 "tick" => O ^-> O
                 "drag" =? T<IntelliFactory.WebSharper.EcmaScript.Function>
+                "linkDistance" => chained !?(Int + (Obj?d * Int?i ^-> Int))?distance
+                "charge" => chained !?(Int + (Obj?d * Int?i ^-> Int))?charge
             ]
             @ propF2 self "size"
 
@@ -721,6 +768,7 @@ module Definition =
     let Pie =
         ChainedClassNew "Pie" <| fun chained ->
         [
+            "apply"      => (!|Obj)?values * !?Int?index ^-> !|Obj |> WithInline "$this($values, $index)"
             "value"    => getSetVal chained (Obj ^-> Float)
             "sort"     => getSetVal chained Comparator
             "startAngle" => getVal Float + chained (Float + Obj * Int ^-> Float)
@@ -745,6 +793,7 @@ module Definition =
     let Stack =
         ChainedClassNew "Stack" <| fun chained ->
         [
+            "apply"      => (!|Obj)?layers * !?Int?index ^-> !|Obj |> WithInline "$this($layers, $index)"
             "values" => getSetVal chained (Obj ^-> Obj)
             "offset" => getVal (!|Float2T ^-> !|Float) + chained (StackOffset + (Float2T ^-> !|Float))
             "order"  => getVal (!|Float2T ^-> !|Int) + chained (StackOrder + (!|Float2T ^-> !|Int))
@@ -815,11 +864,17 @@ module Definition =
     let Feature =
         ChainedClassNew "Feature" <| fun chained -> []
 
+    let ProjectionType = Type.New()
+
     let Path =
         ChainedClassNew "Path" <| fun chained ->
         [
-            "projection"  => getSetVal chained (Float2T ^-> Float2T)
-            "context"     => getSetVal chained PathContext.Type
+            "call" => Obj?feature ^-> String
+            |> WithInline "$0($1)"
+            "call" => Obj?feature * Int?ix ^-> String
+            |> WithInline "$0($1,$2)"
+            "projection"  => getSetVal chained ((Float2T ^-> Float2T) + ProjectionType)
+            "context"     => getSetVal chained (PathContext.Type + Obj)
             "pointRadius" => getSetVal chained Float
             "area"        => Feature ^-> Int
             "centroid"    => Feature ^-> Int2T
@@ -879,7 +934,7 @@ module Definition =
         |>! addToClassList
 
     let Projection =
-        let self = Type.New()
+        let self = ProjectionType
         ChainedClass "Projection" self <| fun chained ->
             [
                 "apply"      => Float2T?location ^-> Float2T |> WithInline "$this($location)"
@@ -998,7 +1053,7 @@ module Definition =
                 "x"           => getSetVal chained Scale
                 "y"           => getSetVal chained Scale
                 "on"          => (ZoomEvent?``type`` ^-> (O ^-> O)) + chained (ZoomEvent?``type`` * (O ^-> O)?listener)
-                "event"       => (Selection + Transition)?selection ^-> O
+                "event"       => (Selection Obj + Transition)?selection ^-> O
             ]
             @ propF2 self "center"
             @ propF2 self "size"
@@ -1050,40 +1105,21 @@ module Definition =
         ]
         |>! addToClassList
 
-    let interpolateTo argType resType = argType?a * argType?b ^-> resType
-
-    let xhrMime xhrType = String?url * !?String?mimeType * (Error?error * xhrType?response ^-> O)?callback ^-> O
-    let xhr xhrType = String?url * (xhrType?response ^-> O)?callback ^-> O
-
     let D3 =
         Class "d3"
         |+> [
             // Selections
-            "select"      => selector ^-> Selection
-            "selectAll"   => selector ^-> Selection
-            "selection"   => O ^-> Selection
+            "select"      => selector ^-> Selection Obj
+            "selectAll"   => selector ^-> Selection Obj
+            "selection"   => O ^-> Selection Obj
             "event"       =? Event
             "mouse"       => Element?container ^-> Int2T
             "touches"     => Element?container * !?Obj?touches ^-> !|Int2x2T
 
             // Transitions
-            "transition"  => !?Selection?selection ^-> Transition
+            "transition"  => !?(Selection Obj)?selection ^-> Transition
             "ease"        => (String?``type`` *+ Float) ^-> easing
             "timer"       => O ^-> Bool?``function`` * !?Int?delay * !?T<System.DateTime>?time ^-> O
-            Generic - fun t -> "interpolate" => interpolate t
-            "interpolateNumber" => interpolate Float
-            "interpolateRound"  => interpolateTo Float Int
-            "interpolateString" => interpolate String
-            "interpolateRgb"    => interpolateTo (Rgb + String) String
-            "interpolateHsl"    => interpolateTo (Hsl + String) String
-            "interpolateLab"    => interpolateTo (Lab + String) String
-            "interpolateHcl"    => interpolateTo (Hcl + String) String
-            Generic - fun t -> "interpolateArray" => interpolate !|T
-            Generic - fun t -> "interpolateObject" => interpolate t
-            "interpolateTransform" => interpolate Transform.Type
-            "interpolateZoom" => interpolate Float3T
-            //geo.Interpolate
-            "interpolators" =? T<(obj * obj -> obj)[]>
 
             // Working with Arrays
             "ascending"   => Float?a * Float?b ^-> Int
@@ -1120,17 +1156,6 @@ module Definition =
 
             "transform" => String?string ^-> Transform
 
-            "xhr" => String?url * !?String?mimeType ^-> Xhr
-            "xhr" => xhrMime Xhr.Type
-
-            "text" => xhrMime String
-            "json" => xhr Obj
-            "html" => xhr T<IntelliFactory.WebSharper.Dom.Document>
-            "xml"  => xhrMime T<IntelliFactory.WebSharper.Dom.Document>
-            "csv"  => xhr (!| !|Obj)
-            "tsv"  => xhr (!| !|Obj)
-            "dsv"  => xhr (!| !|Obj)
-
             "format" => String?specifier ^-> Float?number ^-> String
             "fomatPefix" => Float?value * !?Float?precision ^-> Prefix
             "requote" => String ^-> String
@@ -1140,6 +1165,59 @@ module Definition =
             "rebind" => Obj?target * Obj?source *+ String ^-> O
             "dispatch" => !+ String ^-> Dispatcher
         ]
+        |+> (
+                // interpolation section
+                let ipr t = Float ^-> t
+                let ipFactory x y = x?arg1 * x?arg2 ^-> ipr y
+                let ipF x = ipFactory x x
+                [
+                    Generic - fun t -> "interpolate" => ipF t
+                    "interpolateNumber" => ipF Float
+                    "interpolateRound" => ipFactory Float Int
+                    "interpolateString" => ipF String
+                    "interpolateRgb" => ipFactory (Rgb + String) String
+                    "interpolateHsl" => ipFactory (Hsl + String) String
+                    "interpolateLab" => ipFactory (Lab + String) String
+                    "interpolateHcl" => ipFactory (Hcl + String) String
+                    Generic - fun t -> "interpolateArray" => ipF !|T
+                    Generic - fun t -> "interpolateObject" => ipF t
+                    "interpolateTransform" => ipF Transform.Type
+                    "interpolateZoom" => ipF Float3T
+                    // TODO: incomplete
+                    // geo.Interpolate
+                    "interpolators" =? !|(ipF Obj)
+                ]
+            )
+        |+> (   // xhr section
+                // approximate: need xhr-returning API (TODO)
+                // note: turns out d3 detects callback arity dynamically, and calls it differently!
+                // therefore need extra care with tupled functions.
+                let remote name t : list<CodeModel.IClassMember> =
+                    [
+                        name => String?url * (t ^-> O) ^-> O
+                        name => String?url * (Obj?err * t ^-> O) ^-> O
+                        |> WithInline (sprintf "$global.d3.%s($0, function (x,y) { return $1(x,y); })" name)
+                    ]
+                let remoteMime name t : list<CodeModel.IClassMember> =
+                    [
+                        name => String?url * !?String?mimeType * (t ^-> O) ^-> O
+                        name => String?url * (Obj?err * t ^-> O) ^-> O
+                        |> WithInline (sprintf "$global.d3.%s($0, function (x,y) { return $1(x,y); })" name)
+                        name => String?url * String?mimeType * (Obj?err * t ^-> O) ^-> O
+                        |> WithInline (sprintf "$global.d3.%s($0, $1, function (x,y) { return $2(x,y); })" name)
+                    ]
+                let doc = T<IntelliFactory.WebSharper.Dom.Document>
+                List.concat [
+                    remoteMime "text" String
+                    remote "json" Obj
+                    remoteMime "xml" doc
+                    remote "html" doc
+                    remote "csv" !|Obj
+                    remote "tsv" !|Obj
+                    ["xhr" => String?url * !?String?mimeType ^-> Xhr]
+                    remoteMime "xhr" Xhr.Type
+                ]
+            )
         |=> Nested [
             Class "d3.timer"
             |+> [

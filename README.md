@@ -1,20 +1,14 @@
-NOTE: please refer to http://github.com/intellifactory/websharper.d3
+# WebSharper.D3
 
-This is kept for archiving only.
+Provides [WebSharper](http://websharper.com) bindings to [D3](http://d3js.org), the JavaScript library for Data-Driven Documents.
 
-
-
-D3 is a JavaScript library for manipulating documents based on data.
-Its emphasis on web standards gives you the full capabilities of
-modern browsers without tying yourself to a proprietary framework,
-combining powerful visualization components and a data-driven approach
-to DOM manipulation.
-
-This WebSharper Extension provides a set of classes and functions 
-almost identical to the ones documented in the [D3 API][d3api], 
-as of 20130910 (version 3.3.6).
-
-See [Examples](http://intellifactory.github.io/websharper.d3)
+|          |                             |
+| -------- | --------------------------- |
+| Library  | [D3js.org](http://d3js.org) |
+| Version  | 20130910 (version 3.3.6) |
+| Learn    | [WebSharper.D3 Examples](http://intellifactory.github.io/websharper.d3) |
+| CI       | [![Build status](https://ci.appveyor.com/api/projects/status/j3imr7tbvfrpu08f)](https://ci.appveyor.com/project/t0yv0/websharper-d3)  |
+| NuGet    | [WebSharper.D3](http://nuget.org/packages/WebSharper.D3/) |
 
 The following is the introduction from [d3js.org][d3] with samples 
 translated to F#, and some comments on typing.

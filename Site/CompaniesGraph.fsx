@@ -23,8 +23,8 @@ module FCC = Site.CompaniesGraph.Data
 
 [<Literal>]
 let FreebaseApiKey =
-    "AIzaSyBaPgw0syzLgnWLW4H-dzzQl3BTd-kQx3U"
-
+    "<<ENTER-KEY-HERE>>"
+    
 type FreebaseDataWithKey =
     FreebaseDataProvider<Key=FreebaseApiKey>
 

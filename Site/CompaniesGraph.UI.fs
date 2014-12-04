@@ -18,7 +18,7 @@ module UI =
 
         let Load () =
             Async.FromContinuations (fun (ok, _, _) ->
-                JQuery.GetJSON("/" + Data.FileName, fun (x, _) ->
+                JQuery.GetJSON(Data.FileName, fun (x, _) ->
                     ok (x :?> Data.DataSet))
                 |> ignore)
 
@@ -36,30 +36,26 @@ module UI =
     let Render config =
         let height = config.CanvasHeight
         let width = config.CanvasWidth
-        let forceNodes =
+        let forceNodes : ForceNode[] =
             config.DataSet.Nodes
             |> Array.map (fun (Graphs.Node (i, label)) ->
-                let node = ForceNode.Create()
-                node.Index <- i
+                let node = ForceNode(Index = i)
                 node?Label <- label
                 node)
             |> Array.sortBy (fun node -> node.Index)
         let forceLinks =
             config.DataSet.Links
             |> Array.map (fun (Graphs.Link (s, t)) ->
-                let lnk = Link<ForceNode>.Create()
-                lnk.Source <- forceNodes.[s]
-                lnk.Target <- forceNodes.[t]
-                lnk)
+                Link(Source = forceNodes.[s], Target = forceNodes.[t]))
         let rec tick () =
-            link.Attr("x1", fun (d, i) -> As<Link<ForceNode>>(d).Source.X)
-                .Attr("y1", fun (d, i) -> As<Link<ForceNode>>(d).Source.Y)
-                .Attr("x2", fun (d, i) -> As<Link<ForceNode>>(d).Target.X)
-                .Attr("y2", fun (d, i) -> As<Link<ForceNode>>(d).Target.Y)
+            link.AttrFn("x1", fun d -> d.Source.X)
+                .AttrFn("y1", fun d -> d.Source.Y)
+                .AttrFn("x2", fun d -> d.Target.X)
+                .AttrFn("y2", fun d -> d.Target.Y)
             |> ignore
-            node.Attr("cx", fun (d, i) -> forceNodes.[i].X)
-                .Attr("cy", fun (d, i) -> forceNodes.[i].Y)
-                .Attr("r", fun (d, i) -> config.Radius forceNodes.[i]?Label)
+            node.AttrFn("cx", fun d -> d.X)
+                .AttrFn("cy", fun d -> d.Y)
+                .AttrFn("r", fun d -> config.Radius d?Label)
             |> ignore
         and force =
             D3.Layout.Force()
@@ -73,21 +69,23 @@ module UI =
                 .Attr("class", "CompaniesGraph")
                 .Attr("width", width)
                 .Attr("height", height)
-        and node : Selection =
+        and node : Selection<ForceNode> =
             svg.SelectAll(".node")
-                .Data(As<obj[]> forceNodes)
+                .Data(forceNodes)
                 .Enter()
                 .Append("circle")
                     .Attr("class", "node")
                 .Call(force.Drag)
                 .On("mouseover", fun (d, i) ->
                     config.OnMouseOver(d?Label))
-        and link : Selection =
+        and link : Selection<Link<ForceNode>> =
             svg.SelectAll(".link")
-                .Data(As<obj[]> forceLinks)
+                .Data(forceLinks)
                 .Enter()
                 .Insert("line", ".node")
                 .Attr("class", "link")
+        link.Attr("x1", 0)
+        |> ignore
         ()
 
     [<JavaScript>]
