@@ -2,7 +2,7 @@
 open IntelliFactory.Build
 
 let bt =
-    BuildTool().PackageId("WebSharper.D3", "3.0")
+    BuildTool().PackageId("WebSharper.D3", "3.0-alpha")
         .References(fun r -> [r.Assembly "System.Web"])
     |> fun bt -> bt.WithFramework(bt.Framework.Net40)
 
