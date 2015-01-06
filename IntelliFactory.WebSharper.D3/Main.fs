@@ -1,6 +1,8 @@
 namespace IntelliFactory.WebSharper.D3
 
+open IntelliFactory.WebSharper
 open IntelliFactory.WebSharper.InterfaceGenerator
+open IntelliFactory.WebSharper.JavaScript.Dom
 
 module Definition =
     let mutable classList = [] : CodeModel.NamespaceEntity list
@@ -38,12 +40,12 @@ module Definition =
     let Float2x2T = Type.Tuple [Float2T; Float2T]
     let Comparator = Obj * Obj ^-> Int
 
-    let Date = T<IntelliFactory.WebSharper.EcmaScript.Date>
+    let Date = T<JavaScript.Date>
     let DateTime = T<System.DateTime>
 
-    let Element = T<IntelliFactory.WebSharper.Dom.Element>
-    let NodeList = T<IntelliFactory.WebSharper.Dom.NodeList>
-    let Event = T<IntelliFactory.WebSharper.Dom.Event>
+    let Element = T<Element>
+    let NodeList = T<NodeList>
+    let Event = T<Event>
 
     let nameArg = String?name
 
@@ -160,7 +162,7 @@ module Definition =
                     "transition" => O ^-> Transition
                     "interrupt"  => chained O
                     "call"       => (self ^-> O) ^-> self
-                    "call"       => T<IntelliFactory.WebSharper.EcmaScript.Function> ^-> self
+                    "call"       => T<JavaScript.Function> ^-> self
                     "empty"      => O ^-> Bool
                     "node"       => O ^-> Element
                     "size"       => O ^-> Int
@@ -674,7 +676,7 @@ module Definition =
                 "alpha" => getSetVal chained Float
                 "resume" => O ^-> O
                 "tick" => O ^-> O
-                "drag" =? T<IntelliFactory.WebSharper.EcmaScript.Function>
+                "drag" =? T<JavaScript.Function>
                 "linkDistance" => chained !?(Int + (Obj?d * Int?i ^-> Int))?distance
                 "charge" => chained !?(Int + (Obj?d * Int?i ^-> Int))?charge
             ]
@@ -1206,7 +1208,7 @@ module Definition =
                         name => String?url * String?mimeType * (Obj?err * t ^-> O) ^-> O
                         |> WithInline (sprintf "$global.d3.%s($0, $1, function (x,y) { return $2(x,y); })" name)
                     ]
-                let doc = T<IntelliFactory.WebSharper.Dom.Document>
+                let doc = T<Document>
                 List.concat [
                     remoteMime "text" String
                     remote "json" Obj
