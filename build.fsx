@@ -8,6 +8,7 @@ let bt =
 
 let main =
     bt.WebSharper.Extension("IntelliFactory.WebSharper.D3")
+        .Embed(["d3.v3.min.js"])
         .SourcesFromProject()
 
 bt.Solution [
