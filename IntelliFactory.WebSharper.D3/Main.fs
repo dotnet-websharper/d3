@@ -18,7 +18,7 @@ module Definition =
 
     let DefineRecord name propList =
         Class name
-        |+> Protocol (propList |> List.map (fun (n, t) -> upcast (n =@ t)))
+        |+> Instance (propList |> List.map (fun (n, t) -> upcast (n =@ t)))
 
     let Record name propList =
         DefineRecord name propList
@@ -75,11 +75,11 @@ module Definition =
 
     let selector = (String + Element + selectionCallback !|Element + selectionCallback NodeList)?selector
 
-    let ChainedClassG name (t: Type.Type) (members : ((Type.IParameters -> Type.Type) -> CodeModel.Member list)) =
-        Class name |=> t |+> Protocol (members <| fun args -> args ^-> t)
+    let ChainedClassG name (t: Type.Type) (members : ((Type.IParameters -> Type.Type) -> CodeModel.IClassMember list)) =
+        Class name |=> t |+> Instance (members <| fun args -> args ^-> t)
 
-    let ChainedClass name (t: Type.Type) (members : ((Type.IParameters -> Type.Type) -> CodeModel.Member list)) =
-        Class name |=> t |+> Protocol (members <| fun args -> args ^-> t)
+    let ChainedClass name (t: Type.Type) (members : ((Type.IParameters -> Type.Type) -> CodeModel.IClassMember list)) =
+        Class name |=> t |+> Instance (members <| fun args -> args ^-> t)
         |>! addToClassList
 
     let ChainedClassNew name members =
@@ -97,7 +97,7 @@ module Definition =
 //        Generic / fun t ->
 //            Class "UpdateSelection"
 //            |=> Inherits Selection
-////            |+> Protocol
+////            |+> Instance
 ////                [
 ////                    "data" =>
 ////                        (
@@ -118,10 +118,10 @@ module Definition =
     let Selection =
         let selfG = Type.New()
         let attrValue = String + Float + Int + Obj
-        Generic / fun (t: Type.Type) ->
+        Generic - fun (t: CodeModel.TypeParameter) ->
             let self = selfG.[t]
             let chained x = x ^-> self
-            let data : CodeModel.Member list = // .data(..)
+            let data : CodeModel.IClassMember list = // .data(..)
                 let elFunc x y = WithThis Element (x?datum * T<int>?index) y
                 [
                     Generic - fun x -> "data" => (!|x)?data ^-> selfG.[x]
@@ -131,7 +131,7 @@ module Definition =
                 ]
             Class "Selection"
             |=> selfG
-            |+> Protocol
+            |+> Instance
                 [
                     // TODO: NameValuePair
                     "attr" => String ^-> Obj
@@ -169,9 +169,9 @@ module Definition =
                     "select"     => chained selector
                     "selectAll"  => chained selector
                 ]
-            |+> Protocol data
+            |+> Instance data
 
-    addToClassList (Generic - Selection)
+    addToClassList Selection
 
     let tweenCallback   = (Element -* Obj?d * Int?i * Obj?a ^-> (Float?t ^-> Obj))
     let factoryCallback = (Element -* O ^-> (Element -* Float?t ^-> Obj))
@@ -198,7 +198,7 @@ module Definition =
             "filter"     => chained (String + selectionCallback Bool)?selector
             "transition" => chained O
             "each"       => chained (!?String?``type`` * selectionCallback O)
-            "call"       => chained (!+Obj * (Selection Obj ^-> O)?callback)
+            "call"       => chained (!+Obj * (Selection.[Obj] ^-> O)?callback)
             "empty"      => O ^-> Bool
             "node"       => O ^-> Element
             "size"       => O ^-> Int
@@ -214,7 +214,7 @@ module Definition =
         let self = Type.New()
         Class "Map"
         |=> self
-        |+> Protocol [
+        |+> Instance [
             "has"     => String?key ^-> Bool
             "get"     => String?key ^-> Float
             "set"     => String?key * Obj?value ^-> O
@@ -229,7 +229,7 @@ module Definition =
         let self = Type.New()
         Class "Set"
         |=> self
-        |+> Protocol [
+        |+> Instance [
             "has"     => String?value ^-> Bool
             "add"     => String?value ^-> String
             "remove"  => String?value ^-> Bool
@@ -251,7 +251,7 @@ module Definition =
 
     let TimeFormat =
         Class "TimeFormat"
-        |+> Protocol [
+        |+> Instance [
             "apply" => Date?date ^-> String
             "parse" => String?string ^-> Date
         ]
@@ -259,7 +259,7 @@ module Definition =
 
     let Transform =
         Class "Transform"
-        |+> Protocol [
+        |+> Instance [
             "rotate"    =@ Float
             "translate" =@ Int2T
             "skew"      =@ Float
@@ -287,13 +287,13 @@ module Definition =
     let ColorType name convName convType =
         let chained args = args ^-> Rgb
         Class name
-        |+> Protocol (
+        |+> Instance (
             name |> Seq.map (fun n ->
-                string n =@ Int :> CodeModel.Member
+                string n =@ Int :> CodeModel.IClassMember
             )
             |> List.ofSeq
         )
-        |+> Protocol [
+        |+> Instance [
             "brighter" => chained !?Float?k
             "darker"   => chained !?Float?k
             convName   => O ^-> convType
@@ -365,7 +365,7 @@ module Definition =
     let OrdinalScale =
         let self = Type.New()
         let gen =
-            Generic / fun tData ->
+            Generic - fun tData ->
             ChainedClassInheritsG "OrdinalScale" self.[tData] Scale <| fun chained ->
             [
                 "apply"           => tData?x ^-> Float |> WithInline "$this($x)"
@@ -378,7 +378,7 @@ module Definition =
                 "rangeExtent"     => O ^-> Float2T
                 "copy"            => chained O
             ]
-        addToClassList <| Generic - gen
+        addToClassList gen
         gen
 
     let TimeScale = getQuantScale "TimeScale" Date
@@ -399,11 +399,11 @@ module Definition =
     let ChainedClassCoord name members =
         let self = Type.New()
         let gen =
-            Generic / fun tData ->
+            Generic - fun tData ->
             ChainedClassG name self.[tData] <| fun chained ->
             let coord name = name => getSetVal chained (tData ^-> Float) + chained Float
             members chained coord tData
-        addToClassList <| Generic - gen
+        addToClassList gen
         gen
 
     let Line =
@@ -508,7 +508,7 @@ module Definition =
     let Axis =
         ChainedClassNew "Axis" <| fun chained ->
         [
-            "apply"  => (Selection Obj + Transition)?selection ^-> O |> WithInline "$this($selection)"
+            "apply"  => (Selection.[Obj] + Transition)?selection ^-> O |> WithInline "$this($selection)"
             "scale"  => getSetVal chained Scale.Type
             "orient" => getSetVal chained Orientation.Type
             "ticks"  => chained !+Obj
@@ -530,7 +530,7 @@ module Definition =
     let Brush =
         ChainedClassNew "Brush" <| fun chained ->
         [
-            "apply" => (Selection Obj + Transition)?selection ^-> O |> WithInline "$this($selection)"
+            "apply" => (Selection.[Obj] + Transition)?selection ^-> O |> WithInline "$this($selection)"
             "x" => getSetVal chained Scale.Type
             "y" => getSetVal chained Scale.Type
             "extent" => getSetVal chained (Int2T + Int2x2T)
@@ -538,7 +538,7 @@ module Definition =
             "clear" => chained O
             "empty" => O ^-> Bool
             "on"    => (BrushEvent?``type`` ^-> (O ^-> O)) + chained (BrushEvent?``type`` * (O ^-> O)?listener)
-            "event" => (Selection Obj + Transition)?selection ^-> O
+            "event" => (Selection.[Obj] + Transition)?selection ^-> O
         ]
 
     let TimeInterval =
@@ -547,21 +547,21 @@ module Definition =
         ]
 
     let WithDefaultConstructor (x: CodeModel.Class) =
-        x |+> [
+        x |+> Static [
             Constructor O
             |> WithInline "({})"
         ]
 
     let Link =
-        Generic / fun t ->
+        Generic - fun t ->
             Class "Link"
             |> WithDefaultConstructor
-            |+> Protocol [
+            |+> Instance [
                 "source" =@ t
                 "target" =@ t
             ]
 
-    addToClassList <| Generic - Link
+    addToClassList Link
 
     let BundleNode =
         let self = Type.New()
@@ -572,7 +572,7 @@ module Definition =
     let Bundle =
         ChainedClassNew "Bundle" <| fun chained ->
         [
-            "links"      => (!|BundleNode)?nodes ^-> !|(Link BundleNode)
+            "links"      => (!|BundleNode)?nodes ^-> !|Link.[BundleNode]
         ]
 
     let ChordNode =
@@ -592,8 +592,8 @@ module Definition =
             "sortGroups"    => getSetVal chained Comparator
             "sortSubGroups" => getSetVal chained Comparator
             "sortChords"    => getSetVal chained Comparator
-            "chords" => O ^-> !|(Link ChordNode)
-            "groups" => O ^-> !|(Link ChordNode)
+            "chords" => O ^-> !|Link.[ChordNode]
+            "groups" => O ^-> !|Link.[ChordNode]
         ]
 
     let ClusterNode =
@@ -608,7 +608,7 @@ module Definition =
         |=> self
 
     /// Pseudo-property getting and setting a 2-element double array [x,y].
-    let propF2 self name : list<CodeModel.Member> =
+    let propF2 self name : list<CodeModel.IClassMember> =
         let getter =
             (name => Float * Float ^-> self)
             |> WithInline (sprintf "$0.%s([$1,$2])" name)
@@ -616,7 +616,7 @@ module Definition =
         [getter; setter]
 
     /// Pseudo-property getting and setting a 2-element double array [x,y,z].
-    let propF3 self name : list<CodeModel.Member> =
+    let propF3 self name : list<CodeModel.IClassMember> =
         let getter =
             (name => Float * Float * Float ^-> self)
             |> WithInline (sprintf "$0.%s([$1,$2,$3])" name)
@@ -624,7 +624,7 @@ module Definition =
         [getter; setter]
 
     /// Pseudo-property getting and setting something of the form [[x,y],[a,b]] with all floats.
-    let propF4 self name : list<CodeModel.Member> =
+    let propF4 self name : list<CodeModel.IClassMember> =
         let getter =
             (name => Float2T * Float2T ^-> self)
             |> WithInline (sprintf "$0.%s([$1,$2])" name)
@@ -636,7 +636,7 @@ module Definition =
         ChainedClass "Cluster" self <| fun chained ->
             [
                 "nodes"      => ClusterNode?root ^-> !|ClusterNode
-                "links"      => (!|ClusterNode)?nodes ^-> !|(Link ClusterNode)
+                "links"      => (!|ClusterNode)?nodes ^-> !|Link.[ClusterNode]
                 "children"   => getSetVal chained (Obj ^-> Obj)
                 "sort"       => getSetVal chained Comparator
                 "separation" => getSetVal chained (ClusterNode * ClusterNode ^-> Int)
@@ -671,7 +671,7 @@ module Definition =
             [
                 "on" => (ForceEvent?``type`` ^-> (O ^-> O)) + chained (ForceEvent?``type`` * (O ^-> O)?listener)
                 "nodes" => getSetVal chained !|ForceNode
-                "links" => getSetVal chained !|(Link ForceNode)
+                "links" => getSetVal chained !|Link.[ForceNode]
                 "start" => chained O
                 "alpha" => getSetVal chained Float
                 "resume" => O ^-> O
@@ -696,7 +696,7 @@ module Definition =
         ChainedClassNew "Hierarchy" <| fun chained ->
         [
             "nodes"    => HierarchyNode?root ^-> !|HierarchyNode
-            "links"    => getSetVal chained !|(Link HierarchyNode)
+            "links"    => getSetVal chained !|Link.[HierarchyNode]
             "children" => getSetVal chained (Obj ^-> Obj)
             "sort"     => getSetVal chained Comparator
             "value"    => getSetVal chained (Obj ^-> Float)
@@ -732,7 +732,7 @@ module Definition =
         ChainedClass "Pack" self <| fun chained ->
             [
                 "nodes"    => PackNode?root ^-> !|PackNode
-                "links"    => getSetVal chained !|(Link PackNode)
+                "links"    => getSetVal chained !|Link.[PackNode]
                 "children" => getSetVal chained (Obj ^-> Obj)
                 "sort"     => getSetVal chained Comparator
                 "value"    => getSetVal chained (Obj ^-> Float)
@@ -760,7 +760,7 @@ module Definition =
         ChainedClass "Partition" self <| fun chained ->
             [
                 "nodes"    => PartitionNode?root ^-> !|PartitionNode
-                "links"    => getSetVal chained !|(Link PartitionNode)
+                "links"    => getSetVal chained !|Link.[PartitionNode]
                 "children" => getSetVal chained (Obj ^-> Obj)
                 "sort"     => getSetVal chained Comparator
                 "value"    => getSetVal chained (Obj ^-> Float)
@@ -820,7 +820,7 @@ module Definition =
         ChainedClass "Tree" self <| fun chained ->
             [
                 "nodes"      => TreeNode?root ^-> !|TreeNode
-                "links"      => (!|TreeNode)?nodes ^-> !|(Link TreeNode)
+                "links"      => (!|TreeNode)?nodes ^-> !|Link.[TreeNode]
                 "children"   => getSetVal chained (Obj ^-> Obj)
                 "sort"       => getSetVal chained Comparator
                 "separation" => getSetVal chained (TreeNode * TreeNode ^-> Int)
@@ -841,7 +841,7 @@ module Definition =
         ChainedClass "Treemap" self <| fun chained ->
             [
                 "nodes"     => PartitionNode?root ^-> !|PartitionNode
-                "links"     => (!|PartitionNode)?nodes ^-> !|(Link PartitionNode)
+                "links"     => (!|PartitionNode)?nodes ^-> !|Link.[PartitionNode]
                 "children"  => getSetVal chained (Obj ^-> Obj)
                 "sort"      => getSetVal chained Comparator
                 "value"     => getSetVal chained (Obj ^-> Float)
@@ -956,7 +956,7 @@ module Definition =
         Class "AlbersProjection"
         |=> Projection
         |=> self
-        |+> Protocol [ yield! propF2 self "parallels" ]
+        |+> Instance [ yield! propF2 self "parallels" ]
 
     let StreamTransform =
         ChainedClassNew "StreamTransform" <| fun chained ->
@@ -984,7 +984,7 @@ module Definition =
         let self = Type.New()
         Class "QuadtreeNode"
         |=> self
-        |+> Protocol [
+        |+> Instance [
             "nodes" =? self * self * self * self
             "leaf"  =? Bool
             "point" =? Float2T
@@ -1055,7 +1055,7 @@ module Definition =
                 "x"           => getSetVal chained Scale
                 "y"           => getSetVal chained Scale
                 "on"          => (ZoomEvent?``type`` ^-> (O ^-> O)) + chained (ZoomEvent?``type`` * (O ^-> O)?listener)
-                "event"       => (Selection Obj + Transition)?selection ^-> O
+                "event"       => (Selection.[Obj] + Transition)?selection ^-> O
             ]
             @ propF2 self "center"
             @ propF2 self "size"
@@ -1085,7 +1085,7 @@ module Definition =
 
     let SvgTransform =
         Class "SvgTransform"
-        |+> [
+        |+> Static [
             "matrix" => Float?a * Float?b * Float?c * Float?d * Float?e * Float?f ^-> String
                 |> WithInline "'matrix(' + $a + ',' + $b + ',' + $c + ',' + $d + ',' + $e + ',' + $f + ')'"
             "translate" => Float?tx ^-> String
@@ -1109,17 +1109,17 @@ module Definition =
 
     let D3 =
         Class "d3"
-        |+> [
+        |+> Static [
             // Selections
-            "select"      => selector ^-> Selection Obj
-            "selectAll"   => selector ^-> Selection Obj
-            "selection"   => O ^-> Selection Obj
+            "select"      => selector ^-> Selection.[Obj]
+            "selectAll"   => selector ^-> Selection.[Obj]
+            "selection"   => O ^-> Selection.[Obj]
             "event"       =? Event
             "mouse"       => Element?container ^-> Int2T
             "touches"     => Element?container * !?Obj?touches ^-> !|Int2x2T
 
             // Transitions
-            "transition"  => !?(Selection Obj)?selection ^-> Transition
+            "transition"  => !?Selection.[Obj]?selection ^-> Transition
             "ease"        => (String?``type`` *+ Float) ^-> easing
             "timer"       => O ^-> Bool?``function`` * !?Int?delay * !?T<System.DateTime>?time ^-> O
 
@@ -1167,13 +1167,13 @@ module Definition =
             "rebind" => Obj?target * Obj?source *+ String ^-> O
             "dispatch" => !+ String ^-> Dispatcher
         ]
-        |+> (
+        |+> Static (
                 // interpolation section
                 let ipr t = Float ^-> t
-                let ipFactory x y = x?arg1 * x?arg2 ^-> ipr y
+                let ipFactory (x: Type.Type) (y: Type.Type) = x?arg1 * x?arg2 ^-> ipr y
                 let ipF x = ipFactory x x
                 [
-                    Generic - fun t -> "interpolate" => ipF t
+                    Generic - fun t -> "interpolate" => ipF t.Type
                     "interpolateNumber" => ipF Float
                     "interpolateRound" => ipFactory Float Int
                     "interpolateString" => ipF String
@@ -1181,8 +1181,8 @@ module Definition =
                     "interpolateHsl" => ipFactory (Hsl + String) String
                     "interpolateLab" => ipFactory (Lab + String) String
                     "interpolateHcl" => ipFactory (Hcl + String) String
-                    Generic - fun t -> "interpolateArray" => ipF !|T
-                    Generic - fun t -> "interpolateObject" => ipF t
+                    Generic - fun t -> "interpolateArray" => ipF !|t.Type
+                    Generic - fun t -> "interpolateObject" => ipF t.Type
                     "interpolateTransform" => ipF Transform.Type
                     "interpolateZoom" => ipF Float3T
                     // TODO: incomplete
@@ -1190,7 +1190,7 @@ module Definition =
                     "interpolators" =? !|(ipF Obj)
                 ]
             )
-        |+> (   // xhr section
+        |+> Static (   // xhr section
                 // approximate: need xhr-returning API (TODO)
                 // note: turns out d3 detects callback arity dynamically, and calls it differently!
                 // therefore need extra care with tupled functions.
@@ -1222,22 +1222,22 @@ module Definition =
             )
         |=> Nested [
             Class "d3.timer"
-            |+> [
+            |+> Static [
                 "flush" => O ^-> O
             ]
             Class "d3.random"
-            |+> [
+            |+> Static [
                 "normal"    => !?Float?mean * !?Float?deviation ^-> Float
                 "logNormal" => !?Float?mean * !?Float?deviation ^-> Float
                 "irwinHall" => Int?count ^-> Float
             ]
             Class "d3.ns"
-            |+> [
+            |+> Static [
                 "prefix"  =? Map
                 "qualify" => nameArg ^-> QualifiedNs
             ]
             Class "d3.time"
-            |+> [
+            |+> Static [
                 "format"    => String?specifier ^-> TimeFormat
 
                 "scale"     => O ^-> TimeScale
@@ -1259,13 +1259,13 @@ module Definition =
             ]
             |=> Nested [
                 Class "d3.time.format"
-                |+> [
+                |+> Static [
                     "utc" => String?specifier ^-> TimeFormat
                     "iso" =? TimeFormat
                 ]
             ]
             Class "d3.layout"
-            |+> [
+            |+> Static [
                 "bundle"    => O ^-> Bundle
                 "chord"     => O ^-> ChordLayout
                 "cluster"   => O ^-> Cluster
@@ -1280,7 +1280,7 @@ module Definition =
                 "treemap"   => O ^-> Treemap
             ]
             Class "d3.scale"
-            |+> [
+            |+> Static [
                 "linear"    => O ^-> QuantitativeScale
                 "sqrt"      => O ^-> QuantitativeScale
                 "pow"       => O ^-> QuantitativeScale
@@ -1289,25 +1289,25 @@ module Definition =
                 "threshold" => O ^-> DiscreteScale
                 "quantile"  => O ^-> QuantileScale
                 "identity"  => O ^-> IdentityScale
-                Generic - fun tData -> "ordinal"   => O ^-> OrdinalScale tData
+                Generic - fun tData -> "ordinal"   => O ^-> OrdinalScale.[tData]
             ]
             Class "d3.svg"
-            |+> [
-                Generic - fun tData -> "line"        => O ^-> Line       tData
-                Generic - fun tData -> "line.radial" => O ^-> RadialLine tData
-                Generic - fun tData -> "area"        => O ^-> Area       tData
-                Generic - fun tData -> "area.radial" => O ^-> RadialArea tData
-                Generic - fun tData -> "arc"         => O ^-> Arc        tData
+            |+> Static [
+                Generic - fun tData -> "line"        => O ^-> Line.[tData]
+                Generic - fun tData -> "line.radial" => O ^-> RadialLine.[tData]
+                Generic - fun tData -> "area"        => O ^-> Area.[tData]
+                Generic - fun tData -> "area.radial" => O ^-> RadialArea.[tData]
+                Generic - fun tData -> "arc"         => O ^-> Arc.[tData]
                 "symbol"          => O ^-> Symbol
                 "symbolTypes"     =? !|SymbolType
-                Generic - fun tData -> "chord"       => O ^-> Chord      tData
+                Generic - fun tData -> "chord"       => O ^-> Chord.[tData]
                 "diagonal"        => O ^-> Diagonal
                 "diagonal.radial" => O ^-> Diagonal
                 "axis"            => O ^-> Axis
                 "brush"           => O ^-> Brush
             ]
             Class "d3.geo"
-            |+> [
+            |+> Static [
                 "path"      => O ^-> Path
                 "graticule" => O ^-> Graticule
                 "circle"    => O ^-> Circle
@@ -1344,14 +1344,14 @@ module Definition =
 
             ]
             Class "d3.geom"
-            |+> [
+            |+> Static [
                 "voronoi"  => O ^-> Voronoi
                 "quadtree" => O ^-> Quadtree
                 "polygon"  => (!|Float2T)?vertices ^-> Polygon
                 "hull"     => O ^-> Hull
             ]
             Class "d3.behavior"
-            |+> [
+            |+> Static [
                 "drag" => O ^-> Drag
                 "zoom" => O ^-> Zoom
             ]
