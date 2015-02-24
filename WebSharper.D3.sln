@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Site", "Site\Site.fsproj", "{8DECFBCA-2A4D-486C-B635-E9B4E79BB11E}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "IntelliFactory.WebSharper.D3", "IntelliFactory.WebSharper.D3\IntelliFactory.WebSharper.D3.fsproj", "{0EBF780A-8E9B-4EC8-8B1B-A1ADAF5E027D}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WebSharper.D3", "WebSharper.D3\WebSharper.D3.fsproj", "{0EBF780A-8E9B-4EC8-8B1B-A1ADAF5E027D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

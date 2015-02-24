@@ -17,6 +17,6 @@
     <tags>f# d3 data web websharper javascript visualization</tags>
   </metadata>
   <files>
-    <file src="bin/Release/IntelliFactory.WebSharper.D3.dll" target="lib/net40" />
+    <file src="bin/Release/WebSharper.D3.dll" target="lib/net40" />
   </files>
 </package>

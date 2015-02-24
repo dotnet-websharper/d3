@@ -1,8 +1,8 @@
-namespace IntelliFactory.WebSharper.D3
+namespace WebSharper.D3
 
-open IntelliFactory.WebSharper
-open IntelliFactory.WebSharper.InterfaceGenerator
-open IntelliFactory.WebSharper.JavaScript.Dom
+open WebSharper
+open WebSharper.InterfaceGenerator
+open WebSharper.JavaScript.Dom
 
 module Definition =
     let mutable classList = [] : CodeModel.NamespaceEntity list
@@ -1360,8 +1360,8 @@ module Definition =
 
     let D3Assembly =
         Assembly [
-            Namespace "IntelliFactory.WebSharper.D3" classList
-            Namespace "IntelliFactory.WebSharper.D3.Resources" [
+            Namespace "WebSharper.D3" classList
+            Namespace "WebSharper.D3.Resources" [
                 (Resource "D3" "d3.v3.min.js").AssemblyWide()
             ]
         ]

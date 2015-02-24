@@ -9,8 +9,8 @@
 // Paste the key below and run the script.
 
 #r "../packages/FSharp.Data.2.0.8/lib/net40/FSharp.Data.dll"
-#r "../packages/WebSharper.3.0.1.73-alpha/tools/net40/IntelliFactory.WebSharper.Core.dll"
-#r "../packages/WebSharper.3.0.1.73-alpha/tools/net40/IntelliFactory.WebSharper.dll"
+#r "../packages/WebSharper.3.0.1.73-alpha/tools/net40/WebSharper.Core.dll"
+#r "../packages/WebSharper.3.0.1.73-alpha/tools/net40/WebSharper.dll"
 #load "Graphs.fs"
 #load "CompaniesGraph.Data.fs"
 
@@ -18,7 +18,7 @@ open System
 open System.IO
 open FSharp.Data
 module D = Site.Graphs
-module J = IntelliFactory.WebSharper.Core.Json
+module J = WebSharper.Core.Json
 module FCC = Site.CompaniesGraph.Data
 
 [<Literal>]

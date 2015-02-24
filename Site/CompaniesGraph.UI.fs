@@ -1,9 +1,9 @@
 ﻿namespace Site.CompaniesGraph
 
-open IntelliFactory.WebSharper
-open IntelliFactory.WebSharper.Html
-open IntelliFactory.WebSharper.JQuery
-open IntelliFactory.WebSharper.D3
+open WebSharper
+open WebSharper.Html
+open WebSharper.JQuery
+open WebSharper.D3
 open Site
 
 #nowarn "40"

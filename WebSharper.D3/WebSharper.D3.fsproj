@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
@@ -6,9 +6,9 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{0ebf780a-8e9b-4ec8-8b1b-a1adaf5e027d}</ProjectGuid>
     <WebSharperProject>InterfaceGenerator</WebSharperProject>
-    <Name>IntelliFactory.WebSharper.D3</Name>
-    <RootNamespace>IntelliFactory.WebSharper.D3</RootNamespace>
-    <AssemblyName>IntelliFactory.WebSharper.D3</AssemblyName>
+    <Name>WebSharper.D3</Name>
+    <RootNamespace>WebSharper.D3</RootNamespace>
+    <AssemblyName>WebSharper.D3</AssemblyName>
     <NuGetPackageImportStamp>58982506</NuGetPackageImportStamp>
     <KeyOriginatorFile>../tools/pub.snk</KeyOriginatorFile>
   </PropertyGroup>

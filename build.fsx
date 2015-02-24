@@ -7,7 +7,7 @@ let bt =
     |> fun bt -> bt.WithFramework(bt.Framework.Net40)
 
 let main =
-    bt.WebSharper.Extension("IntelliFactory.WebSharper.D3")
+    bt.WebSharper.Extension("WebSharper.D3")
         .Embed(["d3.v3.min.js"])
         .SourcesFromProject()
 

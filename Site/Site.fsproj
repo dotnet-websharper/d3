@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
@@ -128,8 +128,8 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\IntelliFactory.WebSharper.D3\IntelliFactory.WebSharper.D3.fsproj">
-      <Name>IntelliFactory.WebSharper.D3</Name>
+    <ProjectReference Include="..\WebSharper.D3\WebSharper.D3.fsproj">
+      <Name>WebSharper.D3</Name>
       <Project>{0ebf780a-8e9b-4ec8-8b1b-a1adaf5e027d}</Project>
       <Private>True</Private>
     </ProjectReference>

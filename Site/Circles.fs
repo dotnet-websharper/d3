@@ -1,8 +1,8 @@
 ﻿namespace Site
 
 open System
-open IntelliFactory.WebSharper
-open IntelliFactory.WebSharper.D3
+open WebSharper
+open WebSharper.D3
 
 /// Let us get started with the famous D3!
 [<JavaScript>]

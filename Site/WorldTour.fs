@@ -1,8 +1,8 @@
 ﻿namespace Site
 
 open System
-open IntelliFactory.WebSharper
-open IntelliFactory.WebSharper.D3
+open WebSharper
+open WebSharper.D3
 
 /// This is a translation of an example by mbostock to WebSharper.D3:
 /// http://bl.ocks.org/mbostock/4183330
