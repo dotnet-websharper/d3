@@ -71,9 +71,16 @@ module Definition =
             "value" , String
         ]
 
-    let Transition = Type.New()
+    let Transition = Class "Transition"
 
     let selector = (String + Element + selectionCallback !|Element + selectionCallback NodeList)?selector
+
+    let ChainedG (members : ((Type.IParameters -> Type.Type) -> CodeModel.IClassMember list)) (c: CodeModel.Class) =
+        c |+> Instance (members <| fun args -> args ^-> c)
+
+    let Chained (members : ((Type.IParameters -> Type.Type) -> CodeModel.IClassMember list)) (c: CodeModel.Class) =
+        c |+> Instance (members <| fun args -> args ^-> c)
+        |>! addToClassList
 
     let ChainedClassG name (t: Type.Type) (members : ((Type.IParameters -> Type.Type) -> CodeModel.IClassMember list)) =
         Class name |=> t |+> Instance (members <| fun args -> args ^-> t)
@@ -83,13 +90,13 @@ module Definition =
         |>! addToClassList
 
     let ChainedClassNew name members =
-        ChainedClass name (Type.New()) members
+        Class name |> Chained members
 
     let ChainedClassNewInherits name inherits members =
-        ChainedClassNew name members |=> Inherits inherits
+        Class name |=> Inherits inherits |> Chained members
 
-    let ChainedClassInheritsG name t inherits members =
-        ChainedClassG name t members |=> Inherits inherits
+    let ChainedClassInheritsG name (t: Type.Type) inherits members =
+        Class name |=> Inherits inherits |=> t |> ChainedG members
 
 //    let Selection = Type.New()
 
@@ -179,7 +186,7 @@ module Definition =
     let easing = T<float -> float>
 
     let TransitionClass =
-        ChainedClass "Transition" Transition <| fun chained ->
+        Transition |> Chained (fun chained ->
         [
             "delay"      => chained Int?delay
             "delay"      => chained (Obj * Int ^-> Int)?delayFn
@@ -202,7 +209,7 @@ module Definition =
             "empty"      => O ^-> Bool
             "node"       => O ^-> Element
             "size"       => O ^-> Int
-        ]
+        ])
 
     let KeyValuePair =
         Record "KeyValuePair" [
@@ -1185,15 +1192,12 @@ module Definition =
                     [
                         name => String?url * (t ^-> O) ^-> O
                         name => String?url * (Obj?err * t ^-> O) ^-> O
-                        |> WithInline (sprintf "$global.d3.%s($0, function (x,y) { return $1(x,y); })" name)
                     ]
                 let remoteMime name t : list<CodeModel.IClassMember> =
                     [
                         name => String?url * !?String?mimeType * (t ^-> O) ^-> O
                         name => String?url * (Obj?err * t ^-> O) ^-> O
-                        |> WithInline (sprintf "$global.d3.%s($0, function (x,y) { return $1(x,y); })" name)
                         name => String?url * String?mimeType * (Obj?err * t ^-> O) ^-> O
-                        |> WithInline (sprintf "$global.d3.%s($0, $1, function (x,y) { return $2(x,y); })" name)
                     ]
                 let doc = T<Document>
                 List.concat [

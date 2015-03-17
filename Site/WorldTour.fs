@@ -2,6 +2,7 @@
 
 open System
 open WebSharper
+open WebSharper.JavaScript
 open WebSharper.D3
 
 /// This is a translation of an example by mbostock to WebSharper.D3:
@@ -31,7 +32,7 @@ module WorldTour =
         abstract mesh : topology: obj * geoObject: obj * filter: (obj * obj -> bool) -> obj
 
     let topojson : ITopoJson =
-        JavaScript.Global?topojson
+        JS.Global?topojson
 
     [<AbstractClass>]
     type Country =
@@ -51,7 +52,7 @@ module WorldTour =
                 .Append("canvas")
                 .Attr("width", width)
                 .Attr("height", height)
-        let c = (canvas.Node() |> As<Html5.CanvasElement>).GetContext("2d")
+        let c = (canvas.Node() |> As<CanvasElement>).GetContext("2d")
         let path = D3.Geo.Path().Projection(projection).Context(c)
         async {
             let globe = New ["type" => "sphere"]
@@ -71,7 +72,7 @@ module WorldTour =
                         else false))
                 |> Array.sortBy (fun c -> c?name)
                 |> As<Country[]>
-            let rec transition i =
+            let rec transition i : unit =
                 D3.Transition()
                     .Duration(1250)
                     .Each("start", fun (_, _) -> title.Text(countries.[i]?name : string) |> ignore)

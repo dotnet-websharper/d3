@@ -2,6 +2,7 @@
 
 open System
 open WebSharper
+open WebSharper.JavaScript
 open WebSharper.D3
 
 /// Let us get started with the famous D3!

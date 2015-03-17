@@ -1,7 +1,8 @@
 ﻿namespace Site.CompaniesGraph
 
 open WebSharper
-open WebSharper.Html
+open WebSharper.Html.Client
+open WebSharper.JavaScript
 open WebSharper.JQuery
 open WebSharper.D3
 open Site
@@ -48,13 +49,13 @@ module UI =
             |> Array.map (fun (Graphs.Link (s, t)) ->
                 Link(Source = forceNodes.[s], Target = forceNodes.[t]))
         let rec tick () =
-            link.AttrFn("x1", fun d -> d.Source.X)
-                .AttrFn("y1", fun d -> d.Source.Y)
-                .AttrFn("x2", fun d -> d.Target.X)
-                .AttrFn("y2", fun d -> d.Target.Y)
+            link.AttrFn("x1", fun (d: Link<ForceNode>) -> d.Source.X)
+                .AttrFn("y1", fun (d: Link<ForceNode>) -> d.Source.Y)
+                .AttrFn("x2", fun (d: Link<ForceNode>) -> d.Target.X)
+                .AttrFn("y2", fun (d: Link<ForceNode>) -> d.Target.Y)
             |> ignore
-            node.AttrFn("cx", fun d -> d.X)
-                .AttrFn("cy", fun d -> d.Y)
+            node.AttrFn("cx", fun (d: ForceNode) -> d.X)
+                .AttrFn("cy", fun (d: ForceNode) -> d.Y)
                 .AttrFn("r", fun d -> config.Radius d?Label)
             |> ignore
         and force =
@@ -122,7 +123,7 @@ module UI =
             |>! OnAfterRender (fun parent ->
                 Start parent.Dom label)
         ctx.AppendChild(main.Body) |> ignore
-        (main :> IPagelet).Render()
+        main.Render()
 
     let Sample =
         Samples.Build()

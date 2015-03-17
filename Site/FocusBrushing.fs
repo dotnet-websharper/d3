@@ -1,6 +1,7 @@
 ﻿namespace Site
 
 open WebSharper
+open WebSharper.JavaScript
 open WebSharper.D3
 
 /// This is a translation of an example by mbostock to WebSharper.D3:
@@ -21,7 +22,7 @@ module FocusBrushing =
 
     type DataRow =
         {
-            Date : EcmaScript.Date
+            Date : Date
             Price : float
         }
 
