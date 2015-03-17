@@ -224,6 +224,7 @@ module Definition =
             "entries" => O ^-> !|KeyValuePair
             "forEach" => WithThis self (String?key * Obj?value) O
         ]
+        |>! addToClassList
 
     let Set =
         let self = Type.New()
@@ -236,6 +237,7 @@ module Definition =
             "values"  => O ^-> !|String
             "forEach" => WithThis self String?value O
         ]
+        |>! addToClassList
 
     let Nest =
         ChainedClassNew "Nest" <| fun chained ->
@@ -282,11 +284,11 @@ module Definition =
             "on"           => String?``type`` * (Error?error * Obj?response ^-> O)?listener ^-> O
         ]
 
-    let Rgb = Type.New()
+    let Rgb = Class "rgb"
 
     let ColorType name convName convType =
         let chained args = args ^-> Rgb
-        Class name
+        (if name = "rgb" then Rgb else Class name)
         |+> Instance (
             name |> Seq.map (fun n ->
                 string n =@ Int :> CodeModel.IClassMember
@@ -304,7 +306,7 @@ module Definition =
     let Hsl = ColorType "hsl" "rgb" Rgb
     let Lab = ColorType "lab" "rgb" Rgb
     let Hcl = ColorType "hcl" "rgb" Rgb
-    let RgbClass = ColorType "rgb" "hsl" Hsl |=> Rgb
+    let RgbClass = ColorType "rgb" "hsl" Hsl
 
     let QualifiedNs =
         Record "QualifiedNs" [
@@ -315,7 +317,7 @@ module Definition =
     /// TODO: check that this does not flatten arguments, when argType ~ Float3T for example.
     let interpolate argType = argType?a * argType?b ^-> argType
 
-    let Scale = Class "Scale"
+    let Scale = Class "Scale" |>! addToClassList
 
     let getQuantScale name (domainType: Type.Type) =
         ChainedClassNewInherits name Scale <| fun chained ->
@@ -597,15 +599,13 @@ module Definition =
         ]
 
     let ClusterNode =
-        let self = Type.New()
         Record "ClusterNode" [
-            "parent"   , self
-            "children" , !|self
+            "parent"   , TSelf
+            "children" , !|TSelf
             "depth"    , Int
             "x"        , Int
             "y"        , Int
         ]
-        |=> self
 
     /// Pseudo-property getting and setting a 2-element double array [x,y].
     let propF2 self name : list<CodeModel.IClassMember> =
@@ -683,14 +683,12 @@ module Definition =
             @ propF2 self "size"
 
     let HierarchyNode =
-        let self = Type.New()
         Record "HierarchyNode" [
-            "parent"   , self
-            "children" , !|self
+            "parent"   , TSelf
+            "children" , !|TSelf
             "value"    , Obj
             "depth"    , Int
         ]
-        |=> self
 
     let Hierarchy =
         ChainedClassNew "Hierarchy" <| fun chained ->
@@ -715,21 +713,18 @@ module Definition =
         ]
 
     let PackNode =
-        let self = Type.New()
         Record "PackNode" [
-            "parent"   , self
-            "children" , !|self
+            "parent"   , TSelf
+            "children" , !|TSelf
             "value"    , Obj
             "depth"    , Int
             "x"        , Int
             "y"        , Int
             "r"        , Int
         ]
-        |=> self
 
     let Pack =
-        let self = Type.New()
-        ChainedClass "Pack" self <| fun chained ->
+        ChainedClassNew "Pack" <| fun chained ->
             [
                 "nodes"    => PackNode?root ^-> !|PackNode
                 "links"    => getSetVal chained !|Link.[PackNode]
@@ -739,13 +734,12 @@ module Definition =
                 "radius"   => getSetVal chained Int
                 "padding"  => getSetVal chained Int
             ]
-            @ propF2 self "size"
+            @ propF2 TSelf "size"
 
     let PartitionNode =
-        let self = Type.New()
         Record "PartitionNode" [
-            "parent"   , self
-            "children" , !|self
+            "parent"   , TSelf
+            "children" , !|TSelf
             "value"    , Obj
             "depth"    , Int
             "x"        , Int
@@ -753,11 +747,9 @@ module Definition =
             "dx"       , Int
             "dy"       , Int
         ]
-        |=> self
 
     let Partition =
-        let self = Type.New()
-        ChainedClass "Partition" self <| fun chained ->
+        ChainedClassNew "Partition" <| fun chained ->
             [
                 "nodes"    => PartitionNode?root ^-> !|PartitionNode
                 "links"    => getSetVal chained !|Link.[PartitionNode]
@@ -765,7 +757,7 @@ module Definition =
                 "sort"     => getSetVal chained Comparator
                 "value"    => getSetVal chained (Obj ^-> Float)
             ]
-            @ propF2 self "size"
+            @ propF2 TSelf "size"
 
     let Pie =
         ChainedClassNew "Pie" <| fun chained ->
@@ -805,19 +797,16 @@ module Definition =
         ]
 
     let TreeNode =
-        let self = Type.New()
         Record "TreeNode" [
-            "parent"   , self
-            "children" , !|self
+            "parent"   , TSelf
+            "children" , !|TSelf
             "depth"    , Int
             "x"        , Int
             "y"        , Int
         ]
-        |=> self
 
     let Tree =
-        let self = Type.New()
-        ChainedClass "Tree" self <| fun chained ->
+        ChainedClassNew "Tree" <| fun chained ->
             [
                 "nodes"      => TreeNode?root ^-> !|TreeNode
                 "links"      => (!|TreeNode)?nodes ^-> !|Link.[TreeNode]
@@ -825,8 +814,8 @@ module Definition =
                 "sort"       => getSetVal chained Comparator
                 "separation" => getSetVal chained (TreeNode * TreeNode ^-> Int)
             ]
-            @ propF2 self "nodeSize"
-            @ propF2 self "size"
+            @ propF2 TSelf "nodeSize"
+            @ propF2 TSelf "size"
 
     let TreemapMode =
         EnumStrings "TreemapMode" [
@@ -837,8 +826,7 @@ module Definition =
         ]
 
     let Treemap =
-        let self = Type.New ()
-        ChainedClass "Treemap" self <| fun chained ->
+        ChainedClassNew "Treemap" <| fun chained ->
             [
                 "nodes"     => PartitionNode?root ^-> !|PartitionNode
                 "links"     => (!|PartitionNode)?nodes ^-> !|Link.[PartitionNode]
@@ -850,7 +838,7 @@ module Definition =
                 "sticky"    => getSetVal chained Bool
                 "mode"      => getSetVal chained TreemapMode
             ]
-            @ propF2 self "size"
+            @ propF2 TSelf "size"
 
     let PathContext =
         Interface "PathContext"
@@ -952,11 +940,10 @@ module Definition =
             @ propF3 self "rotate"
 
     let AlbersProjection =
-        let self = Type.New()
         Class "AlbersProjection"
-        |=> Projection
-        |=> self
-        |+> Instance [ yield! propF2 self "parallels" ]
+        |=> Inherits Projection
+        |+> Instance [ yield! propF2 TSelf "parallels" ]
+        |>! addToClassList
 
     let StreamTransform =
         ChainedClassNew "StreamTransform" <| fun chained ->
@@ -991,6 +978,7 @@ module Definition =
             "x"     =? Float
             "y"     =? Float
         ]
+        |>! addToClassList
 
     let QuadtreeRoot =
         ChainedClassNewInherits "QuadtreeRoot" QuadtreeNode <| fun chained ->
@@ -1009,14 +997,13 @@ module Definition =
         ]
 
     let PolygonClass =
-        ChainedClassNew "Polygon" (fun chained ->
+        ChainedClass "Polygon" Polygon (fun chained ->
             [
                 "area"     => O ^-> Float
                 "centroid" => O ^-> Float2T
                 "clip"     => chained Polygon
             ]
         )
-        |=> Polygon
 
     let Hull =
         ChainedClassNew "Hull" <| fun chained ->
