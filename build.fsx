@@ -20,7 +20,7 @@ bt.Solution [
                 Title = Some "WebSharper.D3-d3v3"
                 LicenseUrl = Some "http://websharper.com/licensing"
                 ProjectUrl = Some "https://github.com/intellifactory/websharper.d3"
-                Description = "WebSharper Extensions for Google Maps d3v3"
+                Description = "WebSharper Extensions for D3 3.3.6"
                 RequiresLicenseAcceptance = true })
         .Add(main)
 
