@@ -5,6 +5,12 @@ open WebSharper.InterfaceGenerator
 open WebSharper.JavaScript.Dom
 
 module Definition =
+
+#if ZAFIR
+#else
+    let (--) (x: GenericHelper) (y: _ -> _ -> #CodeModel.Entity) = x - y 
+#endif
+
     let mutable classList = [] : CodeModel.NamespaceEntity list
 
     let addToClassList c =
@@ -132,8 +138,8 @@ module Definition =
                 let elFunc x y = WithThis Element (x?datum * T<int>?index) y
                 [
                     Generic - fun x -> "data" => (!|x)?data ^-> selfG.[x]
-                    Generic - fun x y -> "data" => (elFunc x !|y)?proj ^-> selfG.[x]
-                    Generic - fun x y -> "data" => (!|x)?data * (elFunc x y)?key ^-> selfG.[x]
+                    Generic -- fun x y -> "data" => (elFunc x !|y)?proj ^-> selfG.[x]
+                    Generic -- fun x y -> "data" => (!|x)?data * (elFunc x y)?key ^-> selfG.[x]
                     "data" => O ^-> !|t
                 ]
             Class "Selection"
@@ -1121,20 +1127,20 @@ module Definition =
             "ascending"   => Float?a * Float?b ^-> Int
             "descending"  => Float?a * Float?b ^-> Int
             Generic - fun t   -> "min" => (!|t)?array ^-> t
-            Generic - fun t u -> "min" => (!|t)?array * (t ^-> u)?accessor ^-> u
+            Generic -- fun t u -> "min" => (!|t)?array * (t ^-> u)?accessor ^-> u
             Generic - fun t   -> "max" => (!|t)?array ^-> t
-            Generic - fun t u -> "max" => (!|t)?array * (t ^-> u)?accessor ^-> u
+            Generic -- fun t u -> "max" => (!|t)?array * (t ^-> u)?accessor ^-> u
             Generic - fun t   -> "extent" => (!|t)?array ^-> t * t
-            Generic - fun t u -> "extent" => (!|t)?array * (t ^-> u)?accessor ^-> u * u
+            Generic -- fun t u -> "extent" => (!|t)?array * (t ^-> u)?accessor ^-> u * u
             Generic - fun t   -> "mean" => (!|t)?array ^-> t
-            Generic - fun t u -> "mean" => (!|t)?array * (t ^-> u)?accessor ^-> u
+            Generic -- fun t u -> "mean" => (!|t)?array * (t ^-> u)?accessor ^-> u
             Generic - fun t   -> "median" => (!|t)?array ^-> t
-            Generic - fun t u -> "median" => (!|t)?array * (t ^-> u)?accessor ^-> u
+            Generic -- fun t u -> "median" => (!|t)?array * (t ^-> u)?accessor ^-> u
             Generic - fun t   -> "quantile" => (!|t)?numbers * Float?p ^-> t
             Generic - fun t   -> "bisectLeft" => (!|t)?array * Int?x * !?Int?lo * !?Int?hi ^-> Int
             Generic - fun t   -> "bisect" => (!|t)?array * Int?x * !?Int?lo * !?Int?hi ^-> Int
             Generic - fun t   -> "bisectRight" => (!|t)?array * Int?x * !?Int?lo * !?Int?hi ^-> Int
-            Generic - fun t u -> "bisector" => (t ^-> u) ^-> Bisector
+            Generic -- fun t u -> "bisector" => (t ^-> u) ^-> Bisector
             Generic - fun t   -> "shuffle" => (!|t)?array ^-> !|t
             "keys"    => Obj?``object`` ^-> !|String
             "values"  => Obj?``object`` ^-> !|Obj
