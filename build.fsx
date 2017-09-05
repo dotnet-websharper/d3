@@ -3,7 +3,7 @@ open IntelliFactory.Build
 
 let bt =
     BuildTool().PackageId("WebSharper.D3")
-        .VersionFrom("WebSharper")
+        .VersionFrom("WebSharper", versionSpec = "(,4.0)")
         .References(fun r -> [r.Assembly "System.Web"])
         .WithFramework(fun fw -> fw.Net40)
 
