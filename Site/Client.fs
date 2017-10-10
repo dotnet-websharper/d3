@@ -2,7 +2,6 @@ namespace Site
 
 open WebSharper
 
-[<JavaScript>]
 module Client =
 
     let All =
@@ -14,4 +13,8 @@ module Client =
             !+ WorldTour.Sample
         ]
 
-    let Main = All.Show()
+    [<SPAEntryPoint>]
+    let Main() = All.Show()
+
+[<assembly:JavaScript>]
+do ()

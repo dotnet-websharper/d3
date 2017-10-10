@@ -1,9 +1,9 @@
 ﻿namespace Site.CompaniesGraph
 
 open Site
+open WebSharper
 
 /// Support types for CompaniesGraph sample.
-[<ReflectedDefinition>]
 module Data =
 
     type Label =

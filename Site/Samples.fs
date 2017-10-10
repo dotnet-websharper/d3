@@ -6,7 +6,6 @@ open WebSharper.JQuery
 open WebSharper.Html.Client
 
 /// Support code for the sample catalog.
-[<JavaScript>]
 module Samples =
 
     type Sample =

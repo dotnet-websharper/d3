@@ -12,14 +12,13 @@ open Site
 /// Visualizes consumer companies as a force graph where links are
 /// industry connections. Company size is proportional to revenue.
 /// Data taken from FreeBase.
-[<JavaScript>]
 module UI =
 
     module Data =
 
         let Load () =
             Async.FromContinuations (fun (ok, _, _) ->
-                JQuery.GetJSON(Data.FileName, fun (x, _) ->
+                JQuery.GetJSON(Data.FileName, fun x _ ->
                     ok (x :?> Data.DataSet))
                 |> ignore)
 
@@ -33,7 +32,6 @@ module UI =
             Radius : 'T -> double
         }
 
-    [<JavaScript>]
     let Render config =
         let height = config.CanvasHeight
         let width = config.CanvasWidth
@@ -63,7 +61,7 @@ module UI =
                 .Nodes(forceNodes)
                 .Links(forceLinks)
                 .Size(width, height)
-                .On(ForceEvent.Tick, tick)
+                .On(ForceEvent.Tick, fun () -> tick())
                 .Start()
         and svg =
             D3.Select(config.Parent).Append("svg")
@@ -89,7 +87,6 @@ module UI =
         |> ignore
         ()
 
-    [<JavaScript>]
     let Start (parent: Dom.Element) (out: Element) =
         async {
             let! data = Data.Load()

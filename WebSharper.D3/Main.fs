@@ -6,11 +6,6 @@ open WebSharper.JavaScript.Dom
 
 module Definition =
 
-#if ZAFIR
-#else
-    let (--) (x: GenericHelper) (y: _ -> _ -> #CodeModel.Entity) = x - y 
-#endif
-
     let mutable classList = [] : CodeModel.NamespaceEntity list
 
     let addToClassList c =
