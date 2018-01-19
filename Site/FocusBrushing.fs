@@ -82,12 +82,11 @@ module FocusBrushing =
             svg.Append("g")
                 .Attr("transform", SvgTransform.Translate(margin2.Left, margin2.Top))
 
-        let brushed() =
+        brush.On(BrushEvent.Brush, fun () ->
             x.Domain(if brush.Empty() then x2.Domain() else As <| brush.Extent()) |> ignore
             focus.Select("path").Attr("d", area) |> ignore
             focus.Select(".x.axis") |> xAxis.Apply
-
-        brush.On(BrushEvent.Brush, brushed) |> ignore
+        ) |> ignore
 
         D3.Csv("sp500.csv", fun data ->
 

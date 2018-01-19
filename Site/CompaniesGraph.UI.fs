@@ -19,7 +19,7 @@ module UI =
 
         let Load () =
             Async.FromContinuations (fun (ok, _, _) ->
-                JQuery.GetJSON(Data.FileName, fun (x, _) ->
+                JQuery.GetJSON(Data.FileName, fun (x: obj, _) ->
                     ok (x :?> Data.DataSet))
                 |> ignore)
 
@@ -33,7 +33,6 @@ module UI =
             Radius : 'T -> double
         }
 
-    [<JavaScript>]
     let Render config =
         let height = config.CanvasHeight
         let width = config.CanvasWidth
@@ -48,22 +47,21 @@ module UI =
             config.DataSet.Links
             |> Array.map (fun (Graphs.Link (s, t)) ->
                 Link(Source = forceNodes.[s], Target = forceNodes.[t]))
-        let rec tick () =
-            link.AttrFn("x1", fun (d: Link<ForceNode>) -> d.Source.X)
-                .AttrFn("y1", fun (d: Link<ForceNode>) -> d.Source.Y)
-                .AttrFn("x2", fun (d: Link<ForceNode>) -> d.Target.X)
-                .AttrFn("y2", fun (d: Link<ForceNode>) -> d.Target.Y)
-            |> ignore
-            node.AttrFn("cx", fun (d: ForceNode) -> d.X)
-                .AttrFn("cy", fun (d: ForceNode) -> d.Y)
-                .AttrFn("r", fun d -> config.Radius d?Label)
-            |> ignore
-        and force =
+        let rec force =
             D3.Layout.Force()
                 .Nodes(forceNodes)
                 .Links(forceLinks)
                 .Size(width, height)
-                .On(ForceEvent.Tick, tick)
+                .On(ForceEvent.Tick, fun () ->
+                    link.AttrFn("x1", fun (d: Link<ForceNode>) -> d.Source.X)
+                        .AttrFn("y1", fun (d: Link<ForceNode>) -> d.Source.Y)
+                        .AttrFn("x2", fun (d: Link<ForceNode>) -> d.Target.X)
+                        .AttrFn("y2", fun (d: Link<ForceNode>) -> d.Target.Y)
+                    |> ignore
+                    node.AttrFn("cx", fun (d: ForceNode) -> d.X)
+                        .AttrFn("cy", fun (d: ForceNode) -> d.Y)
+                        .AttrFn("r", fun d -> config.Radius d?Label)
+                    |> ignore)
                 .Start()
         and svg =
             D3.Select(config.Parent).Append("svg")
@@ -89,7 +87,6 @@ module UI =
         |> ignore
         ()
 
-    [<JavaScript>]
     let Start (parent: Dom.Element) (out: Element) =
         async {
             let! data = Data.Load()

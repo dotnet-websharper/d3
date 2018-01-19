@@ -27,6 +27,7 @@ module D3Extras =
 [<JavaScript>]
 module WorldTour =
 
+    [<Name "">]
     type ITopoJson =
         abstract feature : topology: obj * geoObject: obj -> obj
         abstract mesh : topology: obj * geoObject: obj * filter: (obj * obj -> bool) -> obj
@@ -79,14 +80,14 @@ module WorldTour =
                     .Tween("rotate", fun _ ->
                         let (p0, p1) = D3.Geo.Centroid(countries.[i])
                         let r = D3.Interpolate(projection.Rotate(), (-p0, -p1, 0.))
-                        fun t ->
-                            let (x, y, z) = r t
+                        Action<_>(fun t ->
+                            let (x, y, z) = r.Invoke(t)
                             projection.Rotate(x, y, z) |> ignore
                             c.ClearRect(0., 0., width, height)
                             c.FillStyle <- "#bbb"; c.BeginPath(); path.Call(landFeature) |> ignore; c.Fill();
                             c.FillStyle <- "#f00"; c.BeginPath(); path.Call(countries.[i]) |> ignore; c.Fill();
                             c.StrokeStyle <- "#fff"; c.LineWidth <- 0.5; c.BeginPath(); path.Call(borders) |> ignore; c.Stroke()
-                            c.StrokeStyle <- "#000"; c.LineWidth <- 2.0; c.BeginPath(); path.Call(globe) |> ignore; c.Stroke())
+                            c.StrokeStyle <- "#000"; c.LineWidth <- 2.0; c.BeginPath(); path.Call(globe) |> ignore; c.Stroke()))
                     .Transition()
                         .Each("end", fun _ -> transition (i + 1))
                 |> ignore

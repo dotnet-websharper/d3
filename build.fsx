@@ -1,29 +1,17 @@
-#load "tools/includes.fsx"
-open IntelliFactory.Build
+#load "paket-files/build/intellifactory/websharper/tools/WebSharper.Fake.fsx"
+open Fake
+open WebSharper.Fake
 
-let bt =
-    BuildTool().PackageId("WebSharper.D3")
-        .VersionFrom("WebSharper", versionSpec = "(,4.0)")
-        .References(fun r -> [r.Assembly "System.Web"])
-        .WithFramework(fun fw -> fw.Net40)
+let targets =
+    GetSemVerOf "WebSharper"
+    |> ComputeVersion
+    |> WSTargets.Default
+    |> MakeTargets
 
-let main =
-    bt.WebSharper.Extension("WebSharper.D3")
-        .Embed(["d3.v3.min.js"])
-        .SourcesFromProject()
+Target "Build" DoNothing
+targets.BuildDebug ==> "Build"
 
-bt.Solution [
-    main
+Target "CI-Release" DoNothing
+targets.CommitPublish ==> "CI-Release"
 
-    bt.NuGet.CreatePackage()
-        .Configure(fun c ->
-            { c with
-                Title = Some "WebSharper.D3-d3v3"
-                LicenseUrl = Some "http://websharper.com/licensing"
-                ProjectUrl = Some "https://github.com/intellifactory/websharper.d3"
-                Description = "WebSharper Extensions for D3 3.3.6"
-                RequiresLicenseAcceptance = true })
-        .Add(main)
-
-]
-|> bt.Dispatch
+RunTargetOrDefault "Build"
