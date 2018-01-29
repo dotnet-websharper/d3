@@ -4,9 +4,9 @@ source https://nuget.intellifactory.com/nuget username: "%IF_USER%" password: "%
 
 storage: none
 
-nuget WebSharper alpha
-nuget WebSharper.FSharp alpha
-nuget WebSharper.Html alpha
+nuget WebSharper prerelease
+nuget WebSharper.FSharp prerelease
+nuget WebSharper.Html prerelease
 nuget FSharp.Data
 
 group build
@@ -15,6 +15,8 @@ group build
 
     nuget FAKE
     nuget Paket.Core 5.122.3
+
+group wsbuild
     github intellifactory/websharper tools/WebSharper.Fake.fsx
     github intellifactory/websharper tools/WebSharper.Fake.cmd
     github intellifactory/websharper tools/WebSharper.Fake.sh
