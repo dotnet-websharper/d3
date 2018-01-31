@@ -11,6 +11,8 @@ description
 tags
     Web JavaScript F# C#
 files
+    ../WebSharper.D3/bin/Release/netstandard2.0/WebSharper.D3.dll ==> lib/net461
+    ../WebSharper.D3/bin/Release/netstandard2.0/WebSharper.D3.xml ==> lib/net461
     ../WebSharper.D3/bin/Release/netstandard2.0/WebSharper.D3.dll ==> lib/netstandard2.0
     ../WebSharper.D3/bin/Release/netstandard2.0/WebSharper.D3.xml ==> lib/netstandard2.0
 dependencies
