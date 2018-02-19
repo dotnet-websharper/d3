@@ -2,16 +2,16 @@ STORAGE: NONE
 NUGET
   remote: https://api.nuget.org/v3/index.json
     FSharp.Core (4.3.4) - restriction: && (< net40) (< portable-net45+win8+wp8+wpa81)
-    FSharp.Data (2.4.4)
+    FSharp.Data (2.4.5)
       FSharp.Core (>= 4.0.0.1) - restriction: && (< net40) (< portable-net45+win8+wp8+wpa81)
       Zlib.Portable (>= 1.11) - restriction: || (&& (< net40) (>= portable-net45+win8)) (&& (< net40) (< portable-net45+win8) (>= portable-net45+win8+wp8+wpa81))
     IntelliFactory.Xml (0.6.64.1)
     Zlib.Portable (1.11) - restriction: || (&& (< net40) (>= portable-net45+win8)) (&& (< net40) (< portable-net45+win8) (>= portable-net45+win8+wp8+wpa81))
   remote: https://nuget.intellifactory.com/nuget
-    WebSharper (4.2.2.226-beta)
-    WebSharper.FSharp (4.2.2.226-beta)
-      WebSharper (4.2.2.226-beta)
-    WebSharper.Html (4.2.0.122-beta)
+    WebSharper (4.2.2.231-beta)
+    WebSharper.FSharp (4.2.2.231-beta)
+      WebSharper (4.2.2.231-beta)
+    WebSharper.Html (4.2.0.126-beta)
       IntelliFactory.Xml (>= 0.6.64 < 0.7)
       WebSharper (>= 4.2.2-beta < 4.3.0-beta)
 
@@ -37,4 +37,4 @@ GROUP wsbuild
 
 GIT
   remote: https://github.com/dotnet-websharper/build-script
-     (b325ab20b6449f09d40bfe85b555cea362b228e9)
+     (3620ef58aabd2af5b1e7234cdb982d5381f10c57)
