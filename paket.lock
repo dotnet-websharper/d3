@@ -1,17 +1,17 @@
 STORAGE: NONE
 NUGET
   remote: https://api.nuget.org/v3/index.json
-    FSharp.Core (4.5) - restriction: && (< net40) (< portable-net45+win8+wp8+wpa81)
+    FSharp.Core (4.5.2) - restriction: && (< net40) (< portable-net45+win8+wp8+wpa81)
     FSharp.Data (2.4.6)
       FSharp.Core (>= 4.0.0.1) - restriction: && (< net40) (< portable-net45+win8+wp8+wpa81)
       Zlib.Portable (>= 1.11) - restriction: || (&& (< net40) (>= portable-net45+win8)) (&& (< net40) (< portable-net45+win8) (>= portable-net45+win8+wp8+wpa81))
     IntelliFactory.Xml (0.6.64.1)
-    Zlib.Portable (1.11) - restriction: || (&& (< net40) (>= portable-net45+win8)) (&& (< net40) (< portable-net45+win8) (>= portable-net45+win8+wp8+wpa81))
-  remote: https://nuget.intellifactory.com/nuget
     WebSharper (4.4.0.280)
     WebSharper.FSharp (4.4.0.280)
       WebSharper (4.4.0.280)
-    WebSharper.Html (4.4.0.139)
+    Zlib.Portable (1.11) - restriction: || (&& (< net40) (>= portable-net45+win8)) (&& (< net40) (< portable-net45+win8) (>= portable-net45+win8+wp8+wpa81))
+  remote: https://nuget.intellifactory.com/nuget
+    WebSharper.Html (4.4.0.140)
       IntelliFactory.Xml (>= 0.6.64 < 0.7)
       WebSharper (>= 4.4 < 4.5)
 
