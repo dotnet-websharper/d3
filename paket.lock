@@ -6,14 +6,13 @@ NUGET
       FSharp.Core (>= 4.0.0.1) - restriction: && (< net40) (< portable-net45+win8+wp8+wpa81)
       Zlib.Portable (>= 1.11) - restriction: || (&& (< net40) (>= portable-net45+win8)) (&& (< net40) (< portable-net45+win8) (>= portable-net45+win8+wp8+wpa81))
     IntelliFactory.Xml (0.6.64.1)
-    WebSharper (4.4.0.280)
-    WebSharper.FSharp (4.4.0.280)
-      WebSharper (4.4.0.280)
-    Zlib.Portable (1.11) - restriction: || (&& (< net40) (>= portable-net45+win8)) (&& (< net40) (< portable-net45+win8) (>= portable-net45+win8+wp8+wpa81))
-  remote: https://nuget.intellifactory.com/nuget
+    WebSharper (4.4.1.288)
+    WebSharper.FSharp (4.4.1.288)
+      WebSharper (4.4.1.288)
     WebSharper.Html (4.4.0.140)
       IntelliFactory.Xml (>= 0.6.64 < 0.7)
       WebSharper (>= 4.4 < 4.5)
+    Zlib.Portable (1.11) - restriction: || (&& (< net40) (>= portable-net45+win8)) (&& (< net40) (< portable-net45+win8) (>= portable-net45+win8+wp8+wpa81))
 
 GROUP build
 RESTRICTION: == net45
@@ -21,12 +20,12 @@ NUGET
   remote: https://api.nuget.org/v3/index.json
     Chessie (0.6)
       FSharp.Core
-    FAKE (4.64.4)
-    FSharp.Compiler.Tools (4.1.34)
-    FSharp.Core (4.3.4)
-    Mono.Cecil (0.10.0-beta7)
-    Newtonsoft.Json (10.0.3)
-    Paket.Core (5.122.3)
+    FAKE (5.3)
+    FSharp.Compiler.Tools (10.0.2)
+    FSharp.Core (4.5.2)
+    Mono.Cecil (0.10)
+    Newtonsoft.Json (11.0.2)
+    Paket.Core (5.141)
       Chessie (>= 0.6)
       FSharp.Compiler.Tools
       FSharp.Core
@@ -37,4 +36,4 @@ GROUP wsbuild
 
 GIT
   remote: https://github.com/dotnet-websharper/build-script
-     (d57d7d132dbd715f9d3c0d942e845d76039a0470)
+     (ba0f9d10f68ae96f0784f07548863a3c0bb1ee6f)
