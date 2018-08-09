@@ -6,13 +6,14 @@ NUGET
       FSharp.Core (>= 4.0.0.1) - restriction: && (< net40) (< portable-net45+win8+wp8+wpa81)
       Zlib.Portable (>= 1.11) - restriction: || (&& (< net40) (>= portable-net45+win8)) (&& (< net40) (< portable-net45+win8) (>= portable-net45+win8+wp8+wpa81))
     IntelliFactory.Xml (0.6.64.1)
-    WebSharper (4.4.1.288)
-    WebSharper.FSharp (4.4.1.288)
-      WebSharper (4.4.1.288)
-    WebSharper.Html (4.4.0.140)
-      IntelliFactory.Xml (>= 0.6.64 < 0.7)
-      WebSharper (>= 4.4 < 4.5)
     Zlib.Portable (1.11) - restriction: || (&& (< net40) (>= portable-net45+win8)) (&& (< net40) (< portable-net45+win8) (>= portable-net45+win8+wp8+wpa81))
+  remote: https://daily.websharper.com/nuget
+    WebSharper (4.5.0.290)
+    WebSharper.FSharp (4.5.0.290)
+      WebSharper (4.5.0.290)
+    WebSharper.Html (4.5.0.142)
+      IntelliFactory.Xml (>= 0.6.64 < 0.7)
+      WebSharper (>= 4.5 < 4.6)
 
 GROUP build
 RESTRICTION: == net45
