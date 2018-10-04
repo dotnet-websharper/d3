@@ -9,6 +9,7 @@ nuget WebSharper prerelease
 nuget WebSharper.FSharp prerelease
 nuget WebSharper.Html prerelease
 nuget FSharp.Data
+nuget FSharp.Core ~> 4.2.0
 
 group build
     framework: net45
