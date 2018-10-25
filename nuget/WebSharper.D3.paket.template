@@ -16,4 +16,4 @@ files
     ../WebSharper.D3/bin/Release/netstandard2.0/WebSharper.D3.dll ==> lib/netstandard2.0
     ../WebSharper.D3/bin/Release/netstandard2.0/WebSharper.D3.xml ==> lib/netstandard2.0
 dependencies
-        WebSharper ~> 4.5.2
+        WebSharper ~> 4.5.4
