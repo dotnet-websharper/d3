@@ -29,8 +29,8 @@ NUGET
     FSharp.Data (2.4.6)
       Zlib.Portable (>= 1.11) - restriction: || (&& (== net461) (< net40)) (== netstandard2.0)
     IntelliFactory.Xml (0.6.64.1)
-    Microsoft.NETCore.Platforms (2.1.1) - restriction: || (&& (== net461) (>= dnxcore50) (>= netstandard1.6)) (&& (== net461) (< net45) (>= netstandard1.6)) (== netstandard2.0)
-    Microsoft.NETCore.Targets (2.1) - restriction: || (&& (== net461) (< net45) (>= netstandard1.6)) (== netstandard2.0)
+    Microsoft.NETCore.Platforms (2.2) - restriction: || (&& (== net461) (>= dnxcore50) (>= netstandard1.6)) (&& (== net461) (< net45) (>= netstandard1.6)) (== netstandard2.0)
+    Microsoft.NETCore.Targets (2.1) - restriction: || (&& (== net461) (>= dnxcore50) (>= netstandard1.6)) (&& (== net461) (< net45) (>= netstandard1.6)) (== netstandard2.0)
     runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl (4.3.3) - restriction: || (&& (== net461) (>= dnxcore50) (>= netstandard1.6)) (&& (== net461) (< net45) (>= netstandard1.6)) (== netstandard2.0)
     runtime.debian.9-x64.runtime.native.System.Security.Cryptography.OpenSsl (4.3.3) - restriction: || (&& (== net461) (>= dnxcore50) (>= netstandard1.6)) (&& (== net461) (< net45) (>= netstandard1.6)) (== netstandard2.0)
     runtime.fedora.23-x64.runtime.native.System.Security.Cryptography.OpenSsl (4.3.3) - restriction: || (&& (== net461) (>= dnxcore50) (>= netstandard1.6)) (&& (== net461) (< net45) (>= netstandard1.6)) (== netstandard2.0)
@@ -265,13 +265,13 @@ NUGET
       System.Globalization (>= 4.3) - restriction: || (&& (== net461) (>= dnxcore50)) (&& (== net461) (< net45)) (== netstandard2.0)
       System.Reflection (>= 4.3) - restriction: || (&& (== net461) (>= dnxcore50)) (&& (== net461) (< net45)) (== netstandard2.0)
       System.Runtime (>= 4.3) - restriction: || (&& (== net461) (>= dnxcore50)) (&& (== net461) (< net45)) (== netstandard2.0)
-    System.Runtime (4.3) - restriction: || (&& (== net461) (>= dnxcore50) (>= netstandard1.6)) (&& (== net461) (< net45) (>= netstandard1.6)) (== netstandard2.0)
-      Microsoft.NETCore.Platforms (>= 1.1) - restriction: || (&& (== net461) (>= dnxcore50)) (&& (== net461) (< net45)) (== netstandard2.0)
-      Microsoft.NETCore.Targets (>= 1.1) - restriction: || (&& (== net461) (>= dnxcore50)) (&& (== net461) (< net45)) (== netstandard2.0)
-    System.Runtime.Extensions (4.3) - restriction: || (&& (== net461) (>= dnxcore50) (>= netstandard1.6)) (&& (== net461) (< net45) (>= netstandard1.6)) (== netstandard2.0)
-      Microsoft.NETCore.Platforms (>= 1.1) - restriction: || (&& (== net461) (>= dnxcore50)) (&& (== net461) (< net45)) (== netstandard2.0)
-      Microsoft.NETCore.Targets (>= 1.1) - restriction: || (&& (== net461) (>= dnxcore50)) (&& (== net461) (< net45)) (== netstandard2.0)
-      System.Runtime (>= 4.3) - restriction: || (&& (== net461) (>= dnxcore50)) (&& (== net461) (< net45)) (== netstandard2.0)
+    System.Runtime (4.3.1) - restriction: || (&& (== net461) (>= dnxcore50) (>= netstandard1.6)) (&& (== net461) (< net45) (>= netstandard1.6)) (== netstandard2.0)
+      Microsoft.NETCore.Platforms (>= 1.1.1) - restriction: || (&& (== net461) (>= dnxcore50)) (&& (== net461) (< net45)) (== netstandard2.0)
+      Microsoft.NETCore.Targets (>= 1.1.3) - restriction: || (&& (== net461) (>= dnxcore50)) (&& (== net461) (< net45)) (== netstandard2.0)
+    System.Runtime.Extensions (4.3.1) - restriction: || (&& (== net461) (>= dnxcore50) (>= netstandard1.6)) (&& (== net461) (< net45) (>= netstandard1.6)) (== netstandard2.0)
+      Microsoft.NETCore.Platforms (>= 1.1.1) - restriction: || (&& (== net461) (>= dnxcore50)) (&& (== net461) (< net45)) (== netstandard2.0)
+      Microsoft.NETCore.Targets (>= 1.1.3) - restriction: || (&& (== net461) (>= dnxcore50)) (&& (== net461) (< net45)) (== netstandard2.0)
+      System.Runtime (>= 4.3.1) - restriction: || (&& (== net461) (>= dnxcore50)) (&& (== net461) (< net45)) (== netstandard2.0)
     System.Runtime.Handles (4.3) - restriction: || (&& (== net461) (< net45) (>= netstandard1.6)) (== netstandard2.0)
       Microsoft.NETCore.Platforms (>= 1.1) - restriction: || (&& (== net461) (< net46)) (== netstandard2.0)
       Microsoft.NETCore.Targets (>= 1.1) - restriction: || (&& (== net461) (< net46)) (== netstandard2.0)
@@ -404,12 +404,13 @@ NUGET
       System.Runtime (>= 4.3) - restriction: || (&& (== net461) (>= dnxcore50)) (&& (== net461) (< net451)) (== netstandard2.0)
     Zlib.Portable (1.11) - restriction: || (&& (== net461) (< net40)) (== netstandard2.0)
   remote: https://daily.websharper.com/nuget
-    WebSharper (4.5.5.319)
-    WebSharper.FSharp (4.5.5.319)
-      WebSharper (4.5.5.319)
-    WebSharper.Html (4.5.1.150)
+    WebSharper (4.5.8.326)
+      FSharp.Core (>= 4.2.3)
+    WebSharper.FSharp (4.5.8.326)
+      WebSharper (4.5.8.326)
+    WebSharper.Html (4.5.1.153)
       IntelliFactory.Xml (>= 0.6.64 < 0.7)
-      WebSharper (>= 4.5.5 < 4.6)
+      WebSharper (>= 4.5.8 < 4.6)
 
 GROUP build
 RESTRICTION: == net45
@@ -433,4 +434,4 @@ GROUP wsbuild
 
 GIT
   remote: https://github.com/dotnet-websharper/build-script
-     (b55fa7868cffa5dd74ac8bc13b053567f7991add)
+     (8f1de8b8171b563fd9647c7b58e03a3ddafb8014)
