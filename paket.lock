@@ -29,7 +29,7 @@ NUGET
     FSharp.Data (2.4.6)
       Zlib.Portable (>= 1.11) - restriction: || (&& (== net461) (< net40)) (== netstandard2.0)
     IntelliFactory.Xml (0.6.64.1)
-    Microsoft.NETCore.Platforms (2.2.1) - restriction: || (&& (== net461) (>= dnxcore50) (>= netstandard1.6)) (&& (== net461) (< net45) (>= netstandard1.6)) (&& (== net461) (>= netcoreapp1.1)) (== netstandard2.0)
+    Microsoft.NETCore.Platforms (2.2.2) - restriction: || (&& (== net461) (>= dnxcore50) (>= netstandard1.6)) (&& (== net461) (< net45) (>= netstandard1.6)) (&& (== net461) (>= netcoreapp1.1)) (== netstandard2.0)
     Microsoft.NETCore.Targets (2.1) - restriction: || (&& (== net461) (>= dnxcore50) (>= netstandard1.6)) (&& (== net461) (< net45) (>= netstandard1.6)) (&& (== net461) (>= netcoreapp1.1)) (== netstandard2.0)
     runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl (4.3.3) - restriction: || (&& (== net461) (>= dnxcore50) (>= netstandard1.6)) (&& (== net461) (< net45) (>= netstandard1.6)) (== netstandard2.0)
     runtime.debian.9-x64.runtime.native.System.Security.Cryptography.OpenSsl (4.3.3) - restriction: || (&& (== net461) (>= dnxcore50) (>= netstandard1.6)) (&& (== net461) (< net45) (>= netstandard1.6)) (== netstandard2.0)
@@ -404,13 +404,13 @@ NUGET
       System.Runtime (>= 4.3) - restriction: || (&& (== net461) (>= dnxcore50)) (&& (== net461) (< net451)) (== netstandard2.0)
     Zlib.Portable (1.11) - restriction: || (&& (== net461) (< net40)) (== netstandard2.0)
   remote: https://daily.websharper.com/nuget
-    WebSharper (4.5.12.336)
+    WebSharper (4.5.15.342)
       FSharp.Core (>= 4.2.3)
-    WebSharper.FSharp (4.5.12.336)
-      WebSharper (4.5.12.336)
-    WebSharper.Html (4.5.1.155)
+    WebSharper.FSharp (4.5.15.342)
+      WebSharper (4.5.15.342)
+    WebSharper.Html (4.5.1.156)
       IntelliFactory.Xml (>= 0.6.64 < 0.7)
-      WebSharper (>= 4.5.12 < 4.6)
+      WebSharper (>= 4.5.15 < 4.6)
 
 GROUP build
 RESTRICTION: == net45
@@ -434,4 +434,4 @@ GROUP wsbuild
 
 GIT
   remote: https://github.com/dotnet-websharper/build-script
-     (5c3a96b8a50f712c0d0301b5178860c1fe1543af)
+     (951f1db60fdbe057a5b96f0012dab0633922bb32)
