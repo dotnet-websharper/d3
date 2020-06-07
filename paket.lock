@@ -402,13 +402,13 @@ NUGET
       System.Runtime (>= 4.3) - restriction: || (&& (== net461) (>= dnxcore50)) (&& (== net461) (< net451)) (== netstandard2.0)
     Zlib.Portable (1.11) - restriction: || (&& (== net461) (< net40)) (== netstandard2.0)
   remote: https://daily.websharper.com/nuget
-    WebSharper (4.6.2.386)
+    WebSharper (4.6.4.404)
       FSharp.Core (>= 4.2.3)
-    WebSharper.FSharp (4.6.2.386)
-      WebSharper (4.6.2.386)
-    WebSharper.Html (4.6.1.172)
+    WebSharper.FSharp (4.6.4.404)
+      WebSharper (4.6.4.404)
+    WebSharper.Html (4.6.2.178)
       IntelliFactory.Xml (>= 0.6.64 < 0.7)
-      WebSharper (>= 4.6.2 < 4.7)
+      WebSharper (>= 4.6.4 < 4.7)
 
 GROUP build
 RESTRICTION: == net45
@@ -418,7 +418,7 @@ NUGET
       FSharp.Core
     FAKE (5.16)
     FSharp.Compiler.Tools (10.2.3)
-    FSharp.Core (4.7.1)
+    FSharp.Core (4.7.2)
     Mono.Cecil (0.11.2)
     Newtonsoft.Json (12.0.3)
     Paket.Core (5.141)
