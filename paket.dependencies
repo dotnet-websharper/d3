@@ -1,22 +1,14 @@
-version 5.142.0
 source https://api.nuget.org/v3/index.json
 source https://daily.websharper.com/nuget
 
 framework: net461, netstandard2.0
 storage: none
 
-nuget WebSharper prerelease
-nuget WebSharper.FSharp prerelease
-nuget WebSharper.Html prerelease
+nuget WebSharper ~> 4.7
+nuget WebSharper.FSharp ~> 4.7
+nuget WebSharper.Html ~> 4.7
 nuget FSharp.Data
 nuget FSharp.Core ~> 4.2.0
 
-group build
-    framework: net45
-    source https://api.nuget.org/v3/index.json
-
-    nuget FAKE
-    nuget Paket.Core 5.141.0
-
 group wsbuild
-    git https://github.com/dotnet-websharper/build-script
+    git https://github.com/dotnet-websharper/build-script dotnettool
