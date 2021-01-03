@@ -1,5 +1,6 @@
 WebSharper
 WebSharper.FSharp
 FSharp.Data
-WebSharper.Html
+WebSharper.UI
+WebSharper.AspNetCore
 FSharp.Core
