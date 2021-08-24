@@ -186,7 +186,7 @@ module Definition =
                     "enter" => O ^-> self
                     "exit" => O ^-> self
                     "on"         => String?``type`` * !?(selectionCallback O)?listener ^-> self
-                    "transition" => O ^-> Transition
+                    "transition" => O + String ^-> Transition.[t]
                     "interrupt"  => chained O
                     "call"       => (self ^-> O) ^-> self
                     "call"       => T<JavaScript.Function> ^-> self
@@ -206,30 +206,40 @@ module Definition =
     let easing = T<float -> float>
 
     let TransitionClass =
-        Transition |> Chained (fun chained ->
-        [
-            "delay"      => chained Int?delay
-            "delay"      => chained (Obj * Int ^-> Int)?delayFn
-            "duration"   => chained Int?duration
-            "ease"       => chained (!+Float * String?value) + chained easing?value
-            "attr"       => chained (nameArg * (Obj + selectionCallback Obj)?value)
-            "attrTween"  => chained (nameArg * tweenCallback?value)
-            "style"      => chained (nameArg * (Obj + selectionCallback Obj)?value * !? String?priority)
-            "styleTween" => chained (nameArg * tweenCallback?value * !? String?priority)
-            "text"       => chained (setValF String)
-            "tween"      => chained (nameArg * factoryCallback?factory)
-            "tween"      => chained (nameArg * (O ^-> (Float?t ^-> O)))
-            "remove"     => chained O
-            "select"     => chained selector
-            "selectAll"  => chained selector
-            "filter"     => chained (String + selectionCallback Bool)?selector
-            "transition" => chained O
-            "each"       => chained (!?String?``type`` * selectionCallback O)
-            "call"       => chained (!+Obj * (Selection.[Obj] ^-> O)?callback)
-            "empty"      => O ^-> Bool
-            "node"       => O ^-> Element
-            "size"       => O ^-> Int
-        ])
+        Generic - fun (t: CodeModel.TypeParameter) ->
+            Transition |> Chained (fun _ ->
+                let chained x = x ^-> TSelf.[t]
+                [
+                    "delay"      => chained Int?delay
+                    "duration"   => chained Int?duration
+                    "ease"       => chained (!+Float * String?value) + chained easing?value
+                    "easeVarying" => chained (nameArg * factoryCallback?factory)
+                    "attr"       => chained (nameArg * (Obj + selectionCallback Obj)?value)
+                    "attrTween"  => chained (nameArg * tweenCallback?value)
+                    "style"      => chained (nameArg * (Obj + selectionCallback Obj)?value * !? String?priority)
+                    "styleTween" => chained (nameArg * tweenCallback?value * !? String?priority)
+                    "text"       => chained (setValF String)
+                    "textTween"      => chained (nameArg * factoryCallback?factory)
+                    "tween"      => chained (nameArg * (O ^-> (Float?t ^-> O)))
+                    "remove"     => chained O
+                    "select"     => chained selector
+                    "selectAll"  => chained selector
+                    "selectChild" => chained selector
+                    "selectChildren" => chained selector
+                    "filter"     => chained (String + selectionCallback Bool)?selector
+                    "merge" => chained selector
+                    "transition" => chained O
+                    "selection" => O ^-> Selection.[t]
+                    "active" => chained selector
+                    "end" => chained O
+                    "on" => (Transition.[t]?``type`` ^-> (O ^-> O)) + chained (Transition.[t]?``type`` * (O ^-> O)?listener)
+                    "each"       => chained (!?String?``type`` * selectionCallback O)
+                    "call"       => chained (!+Obj * (Selection.[Obj] ^-> O)?callback)
+                    "empty"      => O ^-> Bool
+                    "nodes" => O ^-> !| Element
+                    "node"       => O ^-> Element
+                    "size"       => O ^-> Int
+                ])
 
     let KeyValuePair =
         Record "KeyValuePair" [
@@ -294,6 +304,16 @@ module Definition =
             "skew"      =@ Float
             "scale"     =@ Type.Tuple [Float; Float]
             "toString"  => O ^-> String
+            "scale" => Int ^-> TSelf
+            "translate" => Int * Int ^-> TSelf
+            "apply" => !| Int ^-> TSelf
+            "applyX" => Int ^-> TSelf
+            "applyY" => Int ^-> TSelf
+            "invert" => !| Int ^-> TSelf
+            "invertX" => Int ^-> TSelf
+            "invertY" => Int ^-> TSelf
+            "rescaleX" => !| Int ^-> !| Int
+            "rescaleY" => !| Int ^-> !| Int
         ]
         |>! addToClassList
 
@@ -443,6 +463,10 @@ module Definition =
             "interpolate" => getSetVal chained Interpolation
             "tension" => getSetVal chained String
             "defined" => getSetVal chained (tData ^-> Bool)
+            "x" => getSetVal chained Int
+            "y" => getSetVal chained Int
+            "curve" => getSetVal chained (!| (Int * Int) * !| (Int * Int))
+            "context" => getSetVal chained Obj
         ]
 
     let RadialLine =
@@ -451,6 +475,10 @@ module Definition =
             coord "radius"
             coord "angle"
             "defined" => getSetVal chained (tData ^-> Bool)
+            "angle" => getSetVal chained Int
+            "radius" => getSetVal chained Int
+            "curve" => getSetVal chained (!| (Int * Int) * !| (Int * Int))
+            "context" => getSetVal chained Obj
         ]
 
     let Area =
@@ -465,6 +493,13 @@ module Definition =
             "interpolate" => getSetVal chained Interpolation
             "tension" => getSetVal chained String
             "defined" => getSetVal chained (tData ^-> Bool)
+            "curve" => getSetVal chained (!| (Int * Int) * !| (Int * Int))
+            "context" => getSetVal chained Obj
+
+            "lineX0" => Line
+            "lineY0" => Line
+            "lineX1" => Line
+            "lineY1" => Line
         ]
 
     let RadialArea =
@@ -477,7 +512,13 @@ module Definition =
             coord "startAngle"
             coord "endAngle"
             "defined" => getSetVal chained (tData ^-> Bool)
-        ]
+            "curve" => getSetVal chained (!| (Int * Int) * !| (Int * Int))
+            "context" => getSetVal chained Obj
+
+            "lineX0" => Line
+            "lineY0" => Line
+            "lineX1" => Line
+            "lineY1" => Line        ]
 
     let Arc =
         ChainedClassCoord "Arc" <| fun chained coord tData ->
@@ -487,7 +528,25 @@ module Definition =
             coord "startAngle"
             coord "endAngle"
             "centroid" => Obj?datum * !?Int?index ^-> Float2T
+            "innerRadius" => getSetVal chained Int
+            "outerRadius" => getSetVal chained Int
+            "cornerRadius" => getSetVal chained Int
+            "startAngle" => getSetVal chained Int
+            "endAngle" => getSetVal chained Int
+            "padAngle" => getSetVal chained Int
+            "padRadius" => getSetVal chained Int
+            "context" => getSetVal chained Obj
         ]
+
+    let Curve =
+        ChainedClassNew "Curve" <| fun chained ->
+            [
+                "areaStart" => getSetVal chained O
+                "areaEnd" => getSetVal chained O
+                "lineStart" => getSetVal chained O
+                "lineEnd" => getSetVal chained O
+                "point" => Int * Int ^-> O
+            ]
 
     let SymbolType =
         EnumStrings "SymbolType" [
@@ -504,6 +563,7 @@ module Definition =
         [
             "type" => getSetVal chained SymbolType.Type
             "size" => getSetVal chained Int
+            "context" => getSetVal chained Obj
         ]
 
     let Chord =
@@ -537,7 +597,7 @@ module Definition =
     let Axis =
         ChainedClassNew "Axis" <| fun chained ->
         [
-            "apply"  => (Selection.[Obj] + Transition)?selection ^-> O |> WithInline "$this($selection)"
+            "apply"  => (Selection.[Obj] + Transition.[Obj])?selection ^-> O |> WithInline "$this($selection)"
             "scale"  => getSetVal chained Scale.Type
             "orient" => getSetVal chained Orientation.Type
             "ticks"  => chained !+Obj
@@ -559,7 +619,7 @@ module Definition =
     let Brush =
         ChainedClassNew "Brush" <| fun chained ->
         [
-            "apply" => (Selection.[Obj] + Transition)?selection ^-> O |> WithInline "$this($selection)"
+            "apply" => (Selection.[Obj] + Transition.[Obj])?selection ^-> O |> WithInline "$this($selection)"
             "x" => getSetVal chained Scale.Type
             "y" => getSetVal chained Scale.Type
             "extent" => getSetVal chained (Int2T + Int2x2T)
@@ -567,12 +627,60 @@ module Definition =
             "clear" => chained O
             "empty" => O ^-> Bool
             "on"    => (BrushEvent?``type`` ^-> (O ^-> O)) + chained (BrushEvent?``type`` * (O ^-> O)?listener)
-            "event" => (Selection.[Obj] + Transition)?selection ^-> O
+            "event" => (Selection.[Obj] + Transition.[Obj])?selection ^-> O
+        ]
+
+    let Timer =
+        ChainedClassNew "Timer" <| fun chained ->
+        [
+            "restart" => (Int ^-> O) * Int ^-> O
+            "stop" => chained O
         ]
 
     let TimeInterval =
         ChainedClassNew "TimeInterval" <| fun chained ->
         [
+            "floor" => chained Date
+            "round" => chained Date
+            "ceil" => chained Date
+            "offset" => Date * !? Int ^-> Date
+            "range" => Date * Date * !? Int ^-> !| Date
+            
+            "timeMilliseconds" => Date * Date * !? Int ^-> !| Date
+            "utcMilliseconds" => Date * Date * !? Int ^-> !| Date
+            "timeSeconds" => Date * Date * !? Int ^-> !| Date
+            "utcSeconds" => Date * Date * !? Int ^-> !| Date
+            "timeMinutes" => Date * Date * !? Int ^-> !| Date
+            "utcMinutes" => Date * Date * !? Int ^-> !| Date
+            "timeHours" => Date * Date * !? Int ^-> !| Date
+            "utcHours" => Date * Date * !? Int ^-> !| Date
+            "timeDays" => Date * Date * !? Int ^-> !| Date
+            "utcDays" => Date * Date * !? Int ^-> !| Date
+            "timeWeeks" => Date * Date * !? Int ^-> !| Date
+            "utcWeeks" => Date * Date * !? Int ^-> !| Date
+            "timeMonths" => Date * Date * !? Int ^-> !| Date
+            "utcMonths" => Date * Date * !? Int ^-> !| Date
+            "timeYears" => Date * Date * !? Int ^-> !| Date
+            "utcYears" => Date * Date * !? Int ^-> !| Date
+            
+            "timeMondays" => Date * Date * !? Int ^-> !| Date
+            "utcMondays" => Date * Date * !? Int ^-> !| Date
+            "timeTuesdays" => Date * Date * !? Int ^-> !| Date
+            "utcTuesdays" => Date * Date * !? Int ^-> !| Date
+            "timeWednesdays" => Date * Date * !? Int ^-> !| Date
+            "utcWednesdays" => Date * Date * !? Int ^-> !| Date
+            "timeThursdays" => Date * Date * !? Int ^-> !| Date
+            "utcThursdays" => Date * Date * !? Int ^-> !| Date
+            "timeFridays" => Date * Date * !? Int ^-> !| Date
+            "utcFridays" => Date * Date * !? Int ^-> !| Date
+            "timeSaturdays" => Date * Date * !? Int ^-> !| Date
+            "utcSaturdays" => Date * Date * !? Int ^-> !| Date
+            "timeSundays" => Date * Date * !? Int ^-> !| Date
+            "utcSundays" => Date * Date * !? Int ^-> !| Date
+
+            "filter" => (Date ^-> Bool) ^-> TSelf
+            "every" => Int ^-> TSelf
+            "count" => Date * Date ^-> Int
         ]
 
     let WithDefaultConstructor (x: CodeModel.Class) =
@@ -588,9 +696,14 @@ module Definition =
             |+> Instance [
                 "source" =@ t
                 "target" =@ t
+                "x" =@ t
+                "y" =@ t
+                "context" =@ t
             ]
 
     addToClassList Link
+
+
 
     let BundleNode =
         let self = Type.New()
@@ -792,8 +905,11 @@ module Definition =
             "apply"      => (!|Obj)?values * !?Int?index ^-> !|Obj |> WithInline "$this($values, $index)"
             "value"    => getSetVal chained (Obj ^-> Float)
             "sort"     => getSetVal chained Comparator
+            "sortValues" => getSetVal chained Comparator
             "startAngle" => getVal Float + chained (Float + Obj * Int ^-> Float)
             "endAngle" => getVal Float + chained (Float + Obj * Int ^-> Float)
+            "padAngle" => getSetVal chained (O ^-> Int)
+
         ]
 
     let StackOffset =
@@ -821,6 +937,7 @@ module Definition =
             "x"      => getSetVal chained (Obj ^-> Float)
             "y"      => getSetVal chained (Obj ^-> Float)
             "out"    => getSetVal chained (Obj?d * Float?y0 * Float?y ^-> O)
+            "keys" => getSetVal chained (!| Obj ^-> !| Obj)
         ]
 
     let TreeNode =
@@ -1069,7 +1186,23 @@ module Definition =
                 "x"           => getSetVal chained Scale
                 "y"           => getSetVal chained Scale
                 "on"          => (ZoomEvent?``type`` ^-> (O ^-> O)) + chained (ZoomEvent?``type`` * (O ^-> O)?listener)
-                "event"       => (Selection.[Obj] + Transition)?selection ^-> O
+                "event"       => (Selection.[Obj] + Transition.[Obj])?selection ^-> O
+                "transform" => Selection.[Obj] * self ^-> O
+                "translateBy" => Selection.[Obj] * Int * Int ^-> O
+                "translateTo" => Selection.[Obj] * Int * Int ^-> O
+                "scaleBy" => Selection.[Obj] * Int ^-> O
+                "scaleTo" => Selection.[Obj] * Int ^-> O
+                "constrain" => chained T<JavaScript.Function>
+                "filter" => chained T<JavaScript.Function>
+                "touchable" => chained T<JavaScript.Function>
+                "wheelDelta" => chained T<JavaScript.Function>
+                "extent" => chained T<JavaScript.Function>
+                "scaleExtent" => chained T<JavaScript.Function>
+                "translateExtent" => chained T<JavaScript.Function>
+                "clickDistane" => chained !?Int
+                "tapDistane" => chained !?Int
+                "duration" => chained !?Int
+                "interpolate" => chained !? T<JavaScript.Function>
             ]
             @ propF2 self "center"
             @ propF2 self "size"
@@ -1133,7 +1266,7 @@ module Definition =
             "touches"     => Element?container * !?Obj?touches ^-> !|Int2x2T
 
             // Transitions
-            "transition"  => !?Selection.[Obj]?selection ^-> Transition
+            "transition"  => !?Selection.[Obj]?selection ^-> Transition.[Obj]
             "ease"        => (String?``type`` *+ Float) ^-> easing
             "timer"       => O ^-> Bool?``function`` * !?Int?delay * !?T<System.DateTime>?time ^-> O
 
@@ -1180,6 +1313,72 @@ module Definition =
             Generic - fun t -> "functor" => t ^-> O ^-> t
             "rebind" => Obj?target * Obj?source *+ String ^-> O
             "dispatch" => !+ String ^-> Dispatcher
+
+            //time
+
+            "timeFormat" => String ^-> (Date ^-> String)
+            "timeParse" => String ^-> (String ^-> Date)
+            "utcFormat" => String ^-> (Date ^-> String)
+            "utcParse" => String ^-> (String ^-> Date)
+            "isoFormat" =? (Date ^-> String)
+            "isoParse" =? (String ^-> Date)
+
+            "interval" => (Date ^-> Date) * (Date * Int ^-> Date) * !? (Date * Date ^-> Int) * !? (Date ^-> Int) ^-> TimeInterval
+
+            "timeMillisecond" =? TimeInterval
+            "utcMillisecond" =? TimeInterval
+            "timeSecond" =? TimeInterval
+            "utcSecond" =? TimeInterval
+            "timeMinute" =? TimeInterval
+            "utcMinute" =? TimeInterval
+            "timeHour" =? TimeInterval
+            "utcHour" =? TimeInterval
+            "timeDay" =? TimeInterval
+            "utcDay" =? TimeInterval
+            "timeWeek" =? TimeInterval
+            "utcWeek" =? TimeInterval
+            "timeMonth" =? TimeInterval
+            "utcMonth" =? TimeInterval
+            "timeYear" =? TimeInterval
+            "utcYear" =? TimeInterval
+            
+            "timeMonday" =? TimeInterval
+            "utcMonday" =? TimeInterval
+            "timeTuesday" =? TimeInterval
+            "utcTuesday" =? TimeInterval
+            "timeWednesday" =? TimeInterval
+            "utcWednesday" =? TimeInterval
+            "timeThursday" =? TimeInterval
+            "utcThursday" =? TimeInterval
+            "timeFriday" =? TimeInterval
+            "utcFriday" =? TimeInterval
+            "timeSaturday" =? TimeInterval
+            "utcSaturday" =? TimeInterval
+            "timeSunday" =? TimeInterval
+            "utcSunday" =? TimeInterval
+
+            "timeTicks" => Date * Date * Int ^-> !| Date
+            "utcTicks" => Date * Date * Int ^-> !| Date
+            "timeTickInterval" => Date * Date * Int ^-> !| TimeInterval
+            "utcTickInterval" => Date * Date * Int ^-> !| TimeInterval
+
+            //timer
+
+            "timer" => (Int ^-> O) * !? Int ^-> Timer
+            "timerFlush" => O ^-> O
+            "timeout" => (Int ^-> O) * !? Int ^-> Timer
+            "interval" => (Int ^-> O) * !? Int ^-> Timer
+
+            //curve TODO
+
+            "curve" => Curve
+
+            //link
+            
+            Generic - fun t -> "link" => Obj ^-> Link.[t]
+            Generic - fun t -> "linkVertical" => O ^-> Link.[t]
+            Generic - fun t -> "linkHorizontal" => O ^-> Link.[t]
+            Generic - fun t -> "linkRadial" => O ^-> Link.[t]
         ]
         |+> Static (
                 // interpolation section
@@ -1199,8 +1398,6 @@ module Definition =
                     Generic - fun t -> "interpolateObject" => ipF t.Type
                     "interpolateTransform" => ipF Transform.Type
                     "interpolateZoom" => ipF Float3T
-                    // TODO: incomplete
-                    // geo.Interpolate
                     "interpolators" =? !|(ipF Obj)
                 ]
             )
@@ -1232,6 +1429,7 @@ module Definition =
                 ]
             )
         |=> Nested [
+
             Class "d3.timer"
             |+> Static [
                 "flush" => O ^-> O
@@ -1310,6 +1508,15 @@ module Definition =
                 Generic - fun tData -> "area.radial" => O ^-> RadialArea.[tData]
                 Generic - fun tData -> "arc"         => O ^-> Arc.[tData]
                 "symbol"          => O ^-> Symbol
+
+                "symbolCircle" =? Symbol
+                "symbolCross" =? Symbol
+                "symbolDiamond" =? Symbol
+                "symbolSquare" =? Symbol
+                "symbolStar" =? Symbol
+                "symbolTriangle" =? Symbol
+                "symbolWye" =? Symbol
+
                 "symbolTypes"     =? !|SymbolType
                 Generic - fun tData -> "chord"       => O ^-> Chord.[tData]
                 "diagonal"        => O ^-> Diagonal
