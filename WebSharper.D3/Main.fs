@@ -54,9 +54,6 @@ module Definition =
     let ( !| ) x = Type.ArrayOf x
 
     let Point = !| Int //[x, y]
-    let Iterable = !| Int + !| Float + !| String + !| Obj
-    let Value = Int + Float + String + Obj
-
 
     let Int2T = Type.Tuple [Int; Int]
     let Int2x2T = Type.Tuple [Int2T; Int2T]
@@ -164,7 +161,6 @@ module Definition =
             selfG
             |+> Instance
                 [
-                    // TODO: NameValuePair
                     "attr" => String ^-> Obj
                     "attr" => String * Obj ^-> self
                     "attr" => String * (WithThis Element t attrValue) ^-> self
@@ -180,7 +176,6 @@ module Definition =
                     "insert"     => chained (nameArg * !?(String + selectionCallback Element)?before)
                     "remove"     => chained O
 
-                    // TODO: datum, filter, sort, order, each - can make use of `t` parameter
                     "datum"      => chained (Obj + selectionCallback Obj)?value
                     "filter"     => chained (String + selectionCallback Bool)?selector
                     "sort"       => chained !?Comparator?comparator
@@ -275,6 +270,9 @@ module Definition =
             "forEach" => WithThis TSelf String?value O
         ]
         |>! addToClassList
+
+    let Iterable = !| Int + !| Float + !| String + !| Obj + Map + Set
+    let Value = Int + Float + String + Obj
 
     let Nest =
         ChainedClassNew "Nest" <| fun chained ->
@@ -435,7 +433,6 @@ module Definition =
         ]
         |>! addToClassList
 
-    /// TODO: check that this does not flatten arguments, when argType ~ Float3T for example.
     let interpolate argType = argType?a * argType?b ^-> argType
 
     let Scale = Class "Scale" |>! addToClassList
@@ -701,7 +698,7 @@ module Definition =
             "apply"  => Obj?datum * !?Int?index ^-> String
             "source" => getSetVal chained (Obj?d * Int?i ^-> Obj) + chained Obj
             "target" => getSetVal chained (Obj?d * Int?i ^-> Obj) + chained Obj
-            "projection" => getSetVal chained (Float2T ^-> Float2T) // TODO: seems to use .x/.y obj now in domain; range OK
+            "projection" => getSetVal chained (Float2T ^-> Float2T)
         ]
 
     let Orientation =
@@ -1246,7 +1243,7 @@ module Definition =
     let ClipTransform =
         ChainedClassNewInherits "ClipTransform" StreamTransform <| fun chained ->
         [
-            "extent" => getSetVal chained Float2x2T // TODO: check
+            "extent" => getSetVal chained Float2x2T
         ]
 
     let Voronoi =
@@ -1605,6 +1602,14 @@ module Definition =
             "valueOf" => O ^-> Int + Float
         ]
 
+    let Bin =
+        ChainedClassNew "Bin" <| fun chained ->
+        [
+            "value" => getSetVal chained (O ^-> Value)
+            "domain" => getSetVal chained Obj
+            "tresholds" => getSetVal chained !| Value
+        ]
+
     let D3 =
         Class "d3"
         |+> Static [
@@ -1726,7 +1731,29 @@ module Definition =
             "timeout" => (Int ^-> O) * !? Int ^-> Timer
             "interval" => (Int ^-> O) * !? Int ^-> Timer
 
-            //curve TODO
+            //curve
+
+            Generic - fun t -> "curveBasis" => t ^-> !| Point
+            Generic - fun t -> "curveBasisClosed" => t ^-> !| Point
+            Generic - fun t -> "curveBasisOpen" => t ^-> !| Point
+            Generic - fun t -> "curveBumpX" => t ^-> !| Point
+            Generic - fun t -> "curveBumpY" => t ^-> !| Point
+            Generic - fun t -> "curveBundle" => t ^-> !| Point
+            "curveBundle" => Int ^-> !| Point
+            Generic - fun t -> "curveCardinal" => t ^-> !| Point
+            Generic - fun t -> "curveCardinalClosed" => t ^-> !| Point
+            Generic - fun t -> "curveCardinalOpen" => t ^-> !| Point
+            Generic - fun t -> "curveCatMulRom" => t ^-> !| Point
+            Generic - fun t -> "curveCatMulRomClosed" => t ^-> !| Point
+            Generic - fun t -> "curveCatMulRomOpen" => t ^-> !| Point
+            Generic - fun t -> "curveLinear" => t ^-> !| Point
+            Generic - fun t -> "curveLinearClosed" => t ^-> !| Point
+            Generic - fun t -> "curveMonotoneX" => t ^-> !| Point
+            Generic - fun t -> "curveMonotonY" => t ^-> !| Point
+            Generic - fun t -> "curveNatural" => t ^-> !| Point
+            Generic - fun t -> "curveStep" => t ^-> !| Point
+            Generic - fun t -> "curveStepAfter" => t ^-> !| Point
+            Generic - fun t -> "curveStepBefore" => t ^-> !| Point
 
             "curve" => Curve
 
@@ -1988,12 +2015,12 @@ module Definition =
 
             //transformations
 
-            "group" => Iterable * (Obj ^-> Value) (* TODO ^-> Map *)
+            "group" => Iterable * (Obj ^-> Value) ^-> Map
             "groups" => Iterable * (Obj ^-> Value) ^-> !| Iterable
             "flatGroup" => Iterable * (Obj ^-> Value) ^-> !| Iterable
-            "index" => Iterable * (Obj ^-> Value) (* ^-> Map *)
+            "index" => Iterable * (Obj ^-> Value) ^-> Map
             "indexes" => Iterable * (Obj ^-> Value) ^-> Iterable
-            "rollup" => Iterable * (Obj ^-> Value) (* ^-> Map *)
+            "rollup" => Iterable * (Obj ^-> Value) ^-> Map
             "rollups" => Iterable * (Obj ^-> Value) ^-> Iterable
             "flatRollup" => Iterable * (Obj ^-> Value) ^-> Iterable
 
@@ -2026,7 +2053,25 @@ module Definition =
 
             //sets
 
-            
+            "difference" => Iterable * !| Iterable ^-> Set
+            "union" => !| Iterable ^-> Set
+            "intersection" => !| Iterable ^-> Set
+            "superset" => Iterable * Iterable ^-> Bool
+            "subset" => Iterable * Iterable ^-> Bool
+            "disjoint" => Iterable * Iterable ^-> Bool
+
+            //bins
+
+            "bin" => O ^-> Bin
+
+            "tresholdFreedmanDiaconis" => !| Value * Value * Value ^-> Int
+            "tresholdScott" => !| Value * Value * Value ^-> Int
+            "tresholdSturges" => !| Value ^-> Int
+
+            //interning
+
+            "internMap" => !? Iterable * !? Value ^-> Map 
+            "internSet" => !? Iterable * !? Value ^-> Set 
         ]
         |+> Static (
                 // interpolation section
@@ -2050,7 +2095,7 @@ module Definition =
                 ]
             )
         |+> Static (   // xhr section
-                // approximate: need xhr-returning API (TODO)
+                // approximate: need xhr-returning API
                 // note: turns out d3 detects callback arity dynamically, and calls it differently!
                 // therefore need extra care with tupled functions.
                 let remote name t : list<CodeModel.IClassMember> =
@@ -2235,7 +2280,7 @@ module Definition =
             |+> Static [
                 "drag" => O ^-> Drag
                 "dragDisable" => (* TODO Window ^->*)O
-                "dragEnable" => (* TODO Window ^->*)O
+                "dragEnable" => (* Window ^->*)O
                 "zoom" => O ^-> Zoom
             ]
         ]
