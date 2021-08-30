@@ -97,18 +97,18 @@ module Definition =
 
     let selector = (String + Element + selectionCallback !|Element + selectionCallback NodeList)?selector
 
-    let ChainedG (members : ((Type.IParameters -> Type.Type) -> CodeModel.IClassMember list)) (c: CodeModel.Class) =
-        c |+> Instance (members <| fun args -> args ^-> c)
+    let ChainedG (t: CodeModel.TypeParameter) (members : ((Type.IParameters -> Type.Type) -> CodeModel.IClassMember list)) (c: CodeModel.Class) =
+        c |+> Instance (members <| fun args -> args ^-> c.[t])
 
     let Chained (members : ((Type.IParameters -> Type.Type) -> CodeModel.IClassMember list)) (c: CodeModel.Class) =
         c |+> Instance (members <| fun args -> args ^-> c)
         |>! addToClassList
 
-    let ChainedClassG name (t: Type.Type) (members : ((Type.IParameters -> Type.Type) -> CodeModel.IClassMember list)) =
-        Class name |=> t |+> Instance (members <| fun args -> args ^-> t)
+    let ChainedClassG name (t: CodeModel.TypeParameter) (members : ((Type.IParameters -> Type.Type) -> CodeModel.IClassMember list)) =
+        Class name |+> Instance (members <| fun args -> args ^-> TSelf.[t])
 
-    let ChainedClass name (t: Type.Type) (members : ((Type.IParameters -> Type.Type) -> CodeModel.IClassMember list)) =
-        Class name |=> t |+> Instance (members <| fun args -> args ^-> t)
+    let ChainedClass name (members : ((Type.IParameters -> Type.Type) -> CodeModel.IClassMember list)) =
+        Class name |+> Instance (members <| fun args -> args ^-> TSelf)
         |>! addToClassList
 
     let ChainedClassNew name members =
@@ -117,8 +117,8 @@ module Definition =
     let ChainedClassNewInherits name inherits members =
         Class name |=> Inherits inherits |> Chained members
 
-    let ChainedClassInheritsG name (t: Type.Type) inherits members =
-        Class name |=> Inherits inherits |=> t |> ChainedG members
+    let ChainedClassInheritsG name (t: CodeModel.TypeParameter) inherits members =
+        Class name |=> Inherits inherits |> ChainedG t members
 
 //    let Selection = Type.New()
 
@@ -483,10 +483,9 @@ module Definition =
         ]
 
     let OrdinalScale =
-        let self = Type.New()
         let gen =
             Generic - fun tData ->
-            ChainedClassInheritsG "OrdinalScale" self.[tData] Scale <| fun chained ->
+            ChainedClassInheritsG "OrdinalScale" tData Scale <| fun chained ->
             [
                 "apply"           => tData?x ^-> Float |> WithInline "$this($x)"
                 "domain"          => getSetVal chained !|tData
@@ -500,6 +499,7 @@ module Definition =
             ]
         addToClassList gen
         gen
+
 
     let TimeScale = getQuantScale "TimeScale" Date
 
@@ -559,10 +559,9 @@ module Definition =
         ] 
 
     let ChainedClassCoord name members =
-        let self = Type.New()
         let gen =
             Generic - fun tData ->
-            ChainedClassG name self.[tData] <| fun chained ->
+            ChainedClassG name tData <| fun chained ->
             let coord name = name => getSetVal chained (tData ^-> Float) + chained Float
             members chained coord tData
         addToClassList gen
@@ -1138,44 +1137,11 @@ module Definition =
     let Feature =
         ChainedClassNew "Feature" <| fun chained -> []
 
-    let ProjectionType = Type.New()
-
-    let Path =
-        ChainedClassNew "Path" <| fun chained ->
-        [
-            "call" => Obj?feature ^-> String
-            |> WithInline "$0($1)"
-            "call" => Obj?feature * Int?ix ^-> String
-            |> WithInline "$0($1,$2)"
-            "projection"  => getSetVal chained ((Float2T ^-> Float2T) + ProjectionType)
-            "context"     => getSetVal chained (PathContext.Type + Obj)
-            "pointRadius" => getSetVal chained Float
-            "area"        => Feature ^-> Int
-            "centroid"    => Feature ^-> Int2T
-            "bounds"      => Feature ^-> Int2x2T
-        ]
-
     let MultiLineString =
         ChainedClassNew "MultiLineString" <| fun chained -> []
 
     let LineString =
         ChainedClassNew "LineString" <| fun chained -> []
-
-    let Polygon = Type.New()
-
-    let Graticule =
-        ChainedClassNew "Graticule" <| fun chained ->
-            [
-                "lines" => O ^-> !|LineString
-                "outline" => O ^-> Polygon
-                "precision" => getSetVal chained Float
-            ]
-            @ propF4 TSelf "extent"
-            @ propF4 TSelf "minorExtent"
-            @ propF4 TSelf "majorExtent"
-            @ propF2 TSelf "step"
-            @ propF2 TSelf "majorStep"
-            @ propF2 TSelf "minorStep"
 
     let Circle =
         ChainedClassNew "Circle" <| fun chained ->
@@ -1206,8 +1172,7 @@ module Definition =
         |>! addToClassList
 
     let Projection =
-        let self = ProjectionType
-        ChainedClass "Projection" self <| fun chained ->
+        ChainedClassNew "Projection" <| fun chained ->
             [
                 "apply"      => Float2T?location ^-> Float2T |> WithInline "$this($location)"
                 "invert"     => Float2T?location ^-> Float2T
@@ -1223,10 +1188,26 @@ module Definition =
                 "fitHeight" => Int * Obj ^-> TSelf
                 "fitWidth" => Int * Obj ^-> TSelf
             ]
-            @ propF2 self "center"
-            @ propF2 self "translate"
-            @ propF3 self "rotate"
-            @ propF3 self "angle"
+            @ propF2 TSelf "center"
+            @ propF2 TSelf "translate"
+            @ propF3 TSelf "rotate"
+            @ propF3 TSelf "angle"
+
+    let Path =
+        ChainedClassNew "Path" <| fun chained ->
+        [
+            "call" => Obj?feature ^-> String
+            |> WithInline "$0($1)"
+            "call" => Obj?feature * Int?ix ^-> String
+            |> WithInline "$0($1,$2)"
+            "projection"  => getSetVal chained ((Float2T ^-> Float2T) + Projection)
+            "context"     => getSetVal chained (PathContext.Type + Obj)
+            "pointRadius" => getSetVal chained Float
+            "area"        => Feature ^-> Int
+            "centroid"    => Feature ^-> Int2T
+            "bounds"      => Feature ^-> Int2x2T
+        ]
+
 
     let AlbersProjection =
         Class "AlbersProjection"
@@ -1257,11 +1238,9 @@ module Definition =
         ]
 
     let QuadtreeNode =
-        let self = Type.New()
         Class "QuadtreeNode"
-        |=> self
         |+> Instance [
-            "nodes" =? self * self * self * self
+            "nodes" =? TSelf * TSelf * TSelf * TSelf
             "leaf"  =? Bool
             "point" =? Float2T
             "x"     =? Float
@@ -1298,15 +1277,29 @@ module Definition =
         ]
 
     let PolygonClass =
-        ChainedClass "Polygon" Polygon (fun chained ->
+        ChainedClassNew "Polygon" (fun chained ->
             [
                 "area"     => O ^-> Float
                 "centroid" => O ^-> Float2T
-                "hull"     => chained Polygon
+                "hull"     => chained TSelf
                 "contains" => Int * Int ^-> Bool
                 "length" => O ^-> Int
             ]
         )
+
+    let Graticule =
+        ChainedClassNew "Graticule" <| fun chained ->
+            [
+                "lines" => O ^-> !|LineString
+                "outline" => O ^-> PolygonClass
+                "precision" => getSetVal chained Float
+            ]
+            @ propF4 TSelf "extent"
+            @ propF4 TSelf "minorExtent"
+            @ propF4 TSelf "majorExtent"
+            @ propF2 TSelf "step"
+            @ propF2 TSelf "majorStep"
+            @ propF2 TSelf "minorStep"
 
     let Hull =
         ChainedClassNew "Hull" <| fun chained ->
@@ -2031,7 +2024,6 @@ module Definition =
             "pair" => Value * Value ^-> Iterable
             "permute" => Iterable * !| Int ^-> Iterable
             "shuffle" => Iterable * !? Int * !? Int ^-> Iterable
-            "shuffler" => (* TODO *) O
 
             "ticks" => Int * Int * Int ^-> !| Int
             "tickIncrement" => Int * Int * Int ^-> !| Int
@@ -2273,14 +2265,14 @@ module Definition =
             |+> Static [
                 "voronoi"  => O ^-> Voronoi
                 "quadtree" => O ^-> Quadtree
-                "polygon"  => (!|Float2T)?vertices ^-> Polygon
+                "polygon"  => (!|Float2T)?vertices ^-> PolygonClass
                 "hull"     => O ^-> Hull
             ]
             Class "d3.behavior"
             |+> Static [
                 "drag" => O ^-> Drag
-                "dragDisable" => (* TODO Window ^->*)O
-                "dragEnable" => (* Window ^->*)O
+                "dragDisable" => T<JavaScript.Window> ^-> O
+                "dragEnable" => T<JavaScript.Window> ^-> O
                 "zoom" => O ^-> Zoom
             ]
         ]
