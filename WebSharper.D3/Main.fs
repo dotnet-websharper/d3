@@ -53,6 +53,11 @@ module Definition =
     let Error = T<exn>
     let ( !| ) x = Type.ArrayOf x
 
+    let Point = !| Int //[x, y]
+    let Iterable = !| Int + !| Float + !| String + !| Obj
+    let Value = Int + Float + String + Obj
+
+
     let Int2T = Type.Tuple [Int; Int]
     let Int2x2T = Type.Tuple [Int2T; Int2T]
     let Float2T = Type.Tuple [Float; Float]
@@ -143,7 +148,7 @@ module Definition =
 //    addToClassList <| Generic - UpdateSelectionT
 
     let Selection =
-        let selfG = Type.New()
+        let selfG = Class "Selection"
         let attrValue = String + Float + Int + Obj
         Generic - fun (t: CodeModel.TypeParameter) ->
             let self = selfG.[t]
@@ -156,8 +161,7 @@ module Definition =
                     Generic -- fun x y -> "data" => (!|x)?data * (elFunc x y)?key ^-> selfG.[x]
                     "data" => O ^-> !|t
                 ]
-            Class "Selection"
-            |=> selfG
+            selfG
             |+> Instance
                 [
                     // TODO: NameValuePair
@@ -248,9 +252,7 @@ module Definition =
         ]
 
     let Map =
-        let self = Type.New()
         Class "Map"
-        |=> self
         |+> Instance [
             "has"     => String?key ^-> Bool
             "get"     => String?key ^-> Float
@@ -259,20 +261,18 @@ module Definition =
             "keys"    => O ^-> !|String
             "values"  => O ^-> !|Obj
             "entries" => O ^-> !|KeyValuePair
-            "forEach" => WithThis self (String?key * Obj?value) O
+            "forEach" => WithThis TSelf (String?key * Obj?value) O
         ]
         |>! addToClassList
 
     let Set =
-        let self = Type.New()
         Class "Set"
-        |=> self
         |+> Instance [
             "has"     => String?value ^-> Bool
             "add"     => String?value ^-> String
             "remove"  => String?value ^-> Bool
             "values"  => O ^-> !|String
-            "forEach" => WithThis self String?value O
+            "forEach" => WithThis TSelf String?value O
         ]
         |>! addToClassList
 
@@ -361,6 +361,80 @@ module Definition =
             "local" , String
         ]
 
+    let ContinuousScale =
+        ChainedClassNew "ContinuousScale" <| fun chained ->
+            [
+                "invert" => Int ^-> Int
+                "domain" => chained !| Int
+                "range" => chained !| Int
+                "rangeRound" => chained !| Int
+                "clamp" => chained Int
+                "unknown" => chained !| Int
+                "interpolate" => chained !| Int
+                "count" => chained Int
+                "tickFormat" => (!? Int ^-> !? String) ^-> String
+                "nice" => chained Int
+                "copy" => chained O
+            ]
+
+    let PowScale =
+        ChainedClassNew "PowScale" <| fun chained ->
+            [
+                "invert" => Int ^-> Int
+                "domain" => chained !| Int
+                "range" => chained !| Int
+                "rangeRound" => chained !| Int
+                "clamp" => chained Int
+                "unknown" => chained !| Int
+                "interpolate" => chained !| Int
+                "count" => chained Int
+                "tickFormat" => (!? Int ^-> !? String) ^-> String
+                "nice" => chained Int
+                "copy" => chained O
+            ]
+
+    let LogScale =
+        ChainedClassNew "LogScale" <| fun chained ->
+            [
+                "invert" => Int ^-> Int
+                "domain" => chained !| Int
+                "range" => chained !| Int
+                "rangeRound" => chained !| Int
+                "clamp" => chained Int
+                "unknown" => chained !| Int
+                "interpolate" => chained !| Int
+                "count" => chained Int
+                "tickFormat" => (!? Int ^-> !? String) ^-> String
+                "nice" => chained Int
+                "copy" => chained O
+            ]
+
+    let ContTimeScale =
+        ChainedClassNew "ContTimeScale" <| fun chained ->
+            [
+                "invert" => Int ^-> Int
+                "domain" => chained !| Int
+                "range" => chained !| Int
+                "rangeRound" => chained !| Int
+                "clamp" => chained Int
+                "unknown" => chained !| Int
+                "interpolate" => chained !| Int
+                "count" => chained Int
+                "tickFormat" => (!? Int ^-> !? String) ^-> String
+                "nice" => chained Int
+                "copy" => chained O
+            ]
+
+    let ContScale =
+        Class "ContScale"
+        |+> Instance [
+            "continuous" =? ContinuousScale
+            "pow" =? PowScale
+            "log" =? LogScale
+            "time" =? ContTimeScale
+        ]
+        |>! addToClassList
+
     /// TODO: check that this does not flatten arguments, when argType ~ Float3T for example.
     let interpolate argType = argType?a * argType?b ^-> argType
 
@@ -444,6 +518,48 @@ module Definition =
             "cardinal-open"
             "monotone"
         ]
+
+    let Node =
+        ChainedClassNew "Node" <| fun chained ->
+        [
+            "data" =? Obj
+            "depth" =? Int
+            "height" =? Int
+            "parent" =? TSelf
+            "children" =? !| TSelf
+            "value" =? Int + Float
+
+            "ancestors" => O ^-> !| TSelf
+            "descendants" => O ^-> !| TSelf
+            "leafes" => O ^-> !| TSelf
+            "filter" => (TSelf ^-> Bool) ^-> !| TSelf
+            "path" => TSelf ^-> !| TSelf
+            "links" => O ^-> !| Obj
+            "sum" => (TSelf ^-> Int + Float) ^-> TSelf
+            "count" => O ^-> Int
+            "sort" => (TSelf * TSelf ^-> Int + Float) ^-> TSelf
+            "each" => (TSelf * Int * TSelf) ^-> !| TSelf
+            "eachBefore" => (TSelf * Int * TSelf) ^-> !| TSelf
+            "eachAfter" => (TSelf * Int * TSelf) ^-> !| TSelf
+            "copy" => O ^-> TSelf
+
+        ]
+
+    let StratifyCluster =
+        ChainedClassNew "StratifyCluster" <| fun chained ->
+        [
+            "size" => getSetVal chained Int
+            "nodeSize" => getSetVal chained Int
+            "separation" => getSetVal chained (Obj * Obj ^-> Int)
+        ]
+
+    let Stratify =
+        ChainedClassNew "Stratify" <| fun chained ->
+        [
+            "id" => getSetVal chained Obj
+            "parentID" => getSetVal chained Obj
+            "cluster" => StratifyCluster
+        ] 
 
     let ChainedClassCoord name members =
         let self = Type.New()
@@ -575,6 +691,8 @@ module Definition =
             coord "angle"
             "source" => getSetVal chained (tData?d * Int?i ^-> Obj) + chained Obj
             "target" => getSetVal chained (tData?d * Int?i ^-> Obj) + chained Obj
+
+            
         ]
 
     let Diagonal =
@@ -603,17 +721,19 @@ module Definition =
             "ticks"  => chained !+Obj
             "tickValues" => getSetVal chained !|Obj
             "tickSize"  => getSetVal chained Int
-            "innerTickSize" => getSetVal chained Int
-            "outerTickSize" => getSetVal chained Int
+            "tickSizeInner"  => getSetVal chained Int
+            "tickSizeOuter"  => getSetVal chained Int
             "tickPadding" => getSetVal chained Int
             "tickFormat" => getSetVal chained (Obj ^-> String)
+            "tickArguments" => getSetVal chained !| Obj
+            "offset" => getSetVal chained (Float + Int)
         ]
 
     let BrushEvent =
         EnumStrings "BrushEvent" [
-            "brushstart"
+            "start"
             "brush"
-            "brushend"
+            "end"
         ]
 
     let Brush =
@@ -623,11 +743,14 @@ module Definition =
             "x" => getSetVal chained Scale.Type
             "y" => getSetVal chained Scale.Type
             "extent" => getSetVal chained (Int2T + Int2x2T)
-            "clamp" => getSetVal chained (Bool + Bool * Bool)
             "clear" => chained O
             "empty" => O ^-> Bool
             "on"    => (BrushEvent?``type`` ^-> (O ^-> O)) + chained (BrushEvent?``type`` * (O ^-> O)?listener)
             "event" => (Selection.[Obj] + Transition.[Obj])?selection ^-> O
+            "filter" => getSetVal chained (BrushEvent ^-> Bool)
+            "touchable" => getSetVal chained (O ^-> Bool)
+            "keyModifiers" => getSetVal chained Bool
+            "handleSize" => getSetVal chained Int
         ]
 
     let Timer =
@@ -706,9 +829,8 @@ module Definition =
 
 
     let BundleNode =
-        let self = Type.New()
         Record "BundleNode" [
-            "parent" , self
+            "parent" , TSelf
         ]
 
     let Bundle =
@@ -730,12 +852,30 @@ module Definition =
         ChainedClassNew "ChordLayout" <| fun chained ->
         [
             "matrix"  => getSetVal chained (!| !|Float)
-            "padding" => getSetVal chained Float
             "sortGroups"    => getSetVal chained Comparator
-            "sortSubGroups" => getSetVal chained Comparator
+            "sortSubgroups" => getSetVal chained Comparator
             "sortChords"    => getSetVal chained Comparator
-            "chords" => O ^-> !|Link.[ChordNode]
-            "groups" => O ^-> !|Link.[ChordNode]
+            "padAngle" => getSetVal chained Float
+        ]
+
+    let Ribbon =
+        ChainedClassNew "Ribbon" <| fun chained ->
+        [
+            "source" => getSetVal chained Obj
+            "target" => getSetVal chained Obj
+            "radius" => getSetVal chained Int
+            "sourceRadius" => getSetVal chained Int
+            "targetRadius" => getSetVal chained Int
+            "startAngle" => getSetVal chained Float
+            "endAngle" => getSetVal chained Float
+            "padAngle" => getSetVal chained Float
+            "context" => getSetVal chained Obj
+        ]
+
+    let RibbonArrow =
+        ChainedClassNew "RibbonArrow" <| fun chained ->
+        [
+            "headRadius" => getSetVal chained Int
         ]
 
     let ClusterNode =
@@ -755,7 +895,7 @@ module Definition =
         let setter = name => O ^-> Float * Float
         [getter; setter]
 
-    /// Pseudo-property getting and setting a 2-element double array [x,y,z].
+    /// Pseudo-property getting and setting a 3-element triple array [x,y,z].
     let propF3 self name : list<CodeModel.IClassMember> =
         let getter =
             (name => Float * Float * Float ^-> self)
@@ -772,8 +912,7 @@ module Definition =
         [getter; setter]
 
     let Cluster =
-        let self = Type.New()
-        ChainedClass "Cluster" self <| fun chained ->
+        ChainedClassNew "Cluster" <| fun chained ->
             [
                 "nodes"      => ClusterNode?root ^-> !|ClusterNode
                 "links"      => (!|ClusterNode)?nodes ^-> !|Link.[ClusterNode]
@@ -782,8 +921,8 @@ module Definition =
                 "separation" => getSetVal chained (ClusterNode * ClusterNode ^-> Int)
                 "value"      => getSetVal chained (Obj ^-> Float)
             ]
-            @ propF2 self "nodeSize"
-            @ propF2 self "size"
+            @ propF2 TSelf "nodeSize"
+            @ propF2 TSelf "size"
 
     let ForceNode =
         DefineRecord "ForceNode" [
@@ -806,8 +945,7 @@ module Definition =
         ]
 
     let Force =
-        let self = Type.New()
-        ChainedClass "Force" self <| fun chained ->
+        ChainedClassNew "Force" <| fun chained ->
             [
                 "on" => (ForceEvent?``type`` ^-> (O ^-> O)) + chained (ForceEvent?``type`` * (O ^-> O)?listener)
                 "nodes" => getSetVal chained !|ForceNode
@@ -820,7 +958,7 @@ module Definition =
                 "linkDistance" => chained !?(Int + (Obj?d * Int?i ^-> Int))?distance
                 "charge" => chained !?(Int + (Obj?d * Int?i ^-> Int))?charge
             ]
-            @ propF2 self "size"
+            @ propF2 TSelf "size"
 
     let HierarchyNode =
         Record "HierarchyNode" [
@@ -990,8 +1128,13 @@ module Definition =
             "beginPath" => O ^-> O
             "moveTo"    => Float?x * Float?y ^-> O
             "lineTo"    => Float?x * Float?y ^-> O
+            "quadraticCurveTo" => Float?cpx * Float?cpy * Float?x * Float?y ^-> O
+            "arcTo" => Float?x1 * Float?x2 * Float?y1 * Float?y2 * Int?radius ^-> O
+            "bezierCurveTo" => Float?cpx1 * Float?cpy1 * Float?cpx2 * Float?cpy2 * Float?x * Float?y ^-> O
             "arc"       => Float?x * Float?y * Float?radius * Float?startAngle * Float?endAngle ^-> O
             "closePath" => O ^-> O
+            "rect" => Int * Int * Int *Int ^-> TSelf
+            "toString" => O ^-> String
         ]
         |>! addToClassList
 
@@ -1024,29 +1167,27 @@ module Definition =
     let Polygon = Type.New()
 
     let Graticule =
-        let self = Type.New()
-        ChainedClass "Graticule" self <| fun chained ->
+        ChainedClassNew "Graticule" <| fun chained ->
             [
                 "lines" => O ^-> !|LineString
                 "outline" => O ^-> Polygon
                 "precision" => getSetVal chained Float
             ]
-            @ propF4 self "extent"
-            @ propF4 self "minorExtent"
-            @ propF4 self "majorExtent"
-            @ propF2 self "step"
-            @ propF2 self "majorStep"
-            @ propF2 self "minorStep"
+            @ propF4 TSelf "extent"
+            @ propF4 TSelf "minorExtent"
+            @ propF4 TSelf "majorExtent"
+            @ propF2 TSelf "step"
+            @ propF2 TSelf "majorStep"
+            @ propF2 TSelf "minorStep"
 
     let Circle =
-        let self = Type.New()
-        ChainedClass "Circle" self <| fun chained ->
+        ChainedClassNew "Circle" <| fun chained ->
             [
-                "origin"    => (Float2T + Obj ^-> Float2T) ^-> self
+                "origin"    => (Float2T + Obj ^-> Float2T) ^-> TSelf
                 "angle"     => getSetVal chained Float
                 "precision" => getSetVal chained Float
             ]
-            @ propF2 self "origin"
+            @ propF2 TSelf "origin"
 
     let Rotation =
         ChainedClassNew "Rotation" <| fun chained ->
@@ -1078,10 +1219,17 @@ module Definition =
                 "clipExtent" => getSetVal chained Float2x2T
                 "precision"  => getSetVal chained Int
                 "stream"     => Listener?listener ^-> Listener
+                "reflectX" => getSetVal chained Bool
+                "reflectY" => getSetVal chained Bool
+                "fitExtend" => !| (Int * Int) * Obj ^-> TSelf
+                "fitSize" => Int * Obj ^-> TSelf
+                "fitHeight" => Int * Obj ^-> TSelf
+                "fitWidth" => Int * Obj ^-> TSelf
             ]
             @ propF2 self "center"
             @ propF2 self "translate"
             @ propF3 self "rotate"
+            @ propF3 self "angle"
 
     let AlbersProjection =
         Class "AlbersProjection"
@@ -1138,6 +1286,18 @@ module Definition =
             "x"     => getSetVal chained (Obj ^-> Float)
             "y"     => getSetVal chained (Obj ^-> Float)
             "extent" => getSetVal chained Float2x2T
+            "cover" => Float * Float ^-> TSelf
+            "add" => Date ^-> TSelf
+            "addAll" => Date ^-> TSelf
+            "remove" => Date ^-> TSelf
+            "removeAll" => Date ^-> TSelf
+            "copy" => O ^-> TSelf
+            "root" => O ^-> TreeNode
+            "data" => O ^-> !| Obj
+            "size" => O ^-> Int
+            "find" => Int * Int * !? Int ^-> Date
+            "visit" => (TreeNode * Int * Int * Int * Int ^-> Bool) ^-> TSelf
+            "visitAfter" => (TreeNode * Int * Int * Int * Int ^-> Bool) ^-> TSelf
         ]
 
     let PolygonClass =
@@ -1145,7 +1305,9 @@ module Definition =
             [
                 "area"     => O ^-> Float
                 "centroid" => O ^-> Float2T
-                "clip"     => chained Polygon
+                "hull"     => chained Polygon
+                "contains" => Int * Int ^-> Bool
+                "length" => O ^-> Int
             ]
         )
 
@@ -1162,6 +1324,17 @@ module Definition =
             "dragstart"
             "drag"
             "dragend"
+
+            "target"
+            "type"
+            "subject"
+            "x"
+            "y"
+            "dx"
+            "dy"
+            "identifier"
+            "active"
+            "sourceEvent"
         ]
 
     let Drag =
@@ -1169,6 +1342,11 @@ module Definition =
         [
             "origin" => getSetVal chained (selectionCallback Float2T)
             "on"     => (DragEvent?``type`` ^-> (O ^-> O)) + chained (DragEvent?``type`` * (O ^-> O)?listener)
+            "container" => getSetVal chained TSelf
+            "filter" => getSetVal chained TSelf
+            "touchable" => getSetVal chained TSelf
+            "subject" => getSetVal chained TSelf
+            "clickDistance" => getSetVal chained TSelf
         ]
 
     let ZoomEvent =
@@ -1179,15 +1357,14 @@ module Definition =
         ]
 
     let Zoom =
-        let self = Type.New()
-        ChainedClass "Zoom" self <| fun chained ->
+        ChainedClassNew "Zoom" <| fun chained ->
             [
                 "scale"       => getSetVal chained Float
                 "x"           => getSetVal chained Scale
                 "y"           => getSetVal chained Scale
                 "on"          => (ZoomEvent?``type`` ^-> (O ^-> O)) + chained (ZoomEvent?``type`` * (O ^-> O)?listener)
                 "event"       => (Selection.[Obj] + Transition.[Obj])?selection ^-> O
-                "transform" => Selection.[Obj] * self ^-> O
+                "transform" => Selection.[Obj] * TSelf ^-> O
                 "translateBy" => Selection.[Obj] * Int * Int ^-> O
                 "translateTo" => Selection.[Obj] * Int * Int ^-> O
                 "scaleBy" => Selection.[Obj] * Int ^-> O
@@ -1204,17 +1381,22 @@ module Definition =
                 "duration" => chained !?Int
                 "interpolate" => chained !? T<JavaScript.Function>
             ]
-            @ propF2 self "center"
-            @ propF2 self "size"
-            @ propF2 self "scaleExtent"
-            @ propF2 self "translate"
+            @ propF2 TSelf "center"
+            @ propF2 TSelf "size"
+            @ propF2 TSelf "scaleExtent"
+            @ propF2 TSelf "translate"
 
     let Bisector =
         ChainedClassNew "Bisector" <| fun chained ->
         [
-            Generic - fun t -> "bisectLeft" => (!|t)?array * Int?x * !?Int?lo * !?Int?hi ^-> Int
             Generic - fun t -> "apply" => (!|t)?array * Int?x * !?Int?lo * !?Int?hi ^-> Int |> WithInline "$this($arguments)"
-            Generic - fun t -> "bisectRight" => (!|t)?array * Int?x * !?Int?lo * !?Int?hi ^-> Int
+            
+            "left" => Iterable * Value * !? Int * !? Int ^-> Point
+            "right" => Iterable * Value * !? Int * !? Int ^-> Point
+            "center" => Iterable * Value * !? Int * !? Int ^-> Point
+            "quickselect" => Iterable * Int * Int * (Value * Value ^-> Int)?compare ^-> Iterable
+            "ascending" => Value * Value ^-> Int
+            "descending" => Value * Value ^-> Int
         ]
 
     let Prefix =
@@ -1227,7 +1409,9 @@ module Definition =
         ChainedClassNew "Dispatcher" <| fun chained ->
         [
             "on" => String
-            "type" => String?``type`` *+ Obj ^-> O |> WithInline "$0.$type($arguments)"
+            "copy" => O ^-> TSelf
+            "call" => String + TSelf + !| Obj ^-> O
+            "apply" => String + TSelf + !| Obj ^-> O
         ]
 
     let SvgTransform =
@@ -1253,6 +1437,173 @@ module Definition =
                 |> WithInline "'skewY(' + skewAngle + ')'"
         ]
         |>! addToClassList
+
+    let Simulation =
+        ChainedClassNew "Simulation" <| fun chained ->
+        [
+            "restart" => O ^-> TSelf
+            "stop" => O ^-> TSelf
+            "tick" => Int ^-> TSelf
+            "nodes" => getSetVal chained !| Obj
+            "alpha" => getSetVal chained Int
+            "alphaMin" => getSetVal chained Int
+            "alphaDecay" => getSetVal chained Int
+            "alphaTarget" => getSetVal chained Int
+            "velocityDecay" => getSetVal chained Int
+            "force" => String ^-> getSetVal chained TSelf
+            "find" => Int * Int * !? Int ^-> Node
+            "randomSource" => getSetVal chained (O ^-> Float)
+            "on" => getSetVal chained Listener
+        ]
+
+    let Center =
+        ChainedClassNew "Center" <| fun chained ->
+        [
+            "x" => getSetVal chained Int
+            "y" => getSetVal chained Int
+            "strength" => getSetVal chained Float
+        ]
+
+    let Collide =
+        ChainedClassNew "Collide" <| fun chained ->
+        [
+            "radius" => getSetVal chained Float
+            "strength" => getSetVal chained Float
+            "iterations" => getSetVal chained Int
+        ]
+    
+    let ManyBody =
+        ChainedClassNew "ManyBody" <| fun chained ->
+        [
+            "strength" => getSetVal chained Float
+            "theta" => getSetVal chained Float
+            "distance" => getSetVal chained Int
+            "distanceMin" => getSetVal chained Int
+            "distanceMax" => getSetVal chained Int
+        ]   
+
+    let ForceX =
+        ChainedClassNew "X" <| fun chained ->
+        [
+            "strength" => getSetVal chained Float
+            "x" => getSetVal chained Int
+        ]
+
+    let ForceY =
+        ChainedClassNew "Y" <| fun chained ->
+        [
+            "strength" => getSetVal chained Float
+            "y" => getSetVal chained Int
+        ]
+
+    let Radial =
+        ChainedClassNew "Radial" <| fun chained ->
+        [
+            "strength" => getSetVal chained Float
+            "radius" => getSetVal chained Int
+            "x" => getSetVal chained Int 
+            "y" => getSetVal chained Int 
+        ]
+
+    let Dsv =
+        ChainedClassNew "Dsv" <| fun chained ->
+        [
+            "parse" => String * !? String ^-> !| Obj
+            "parseRows" => String * !? String ^-> !| Obj
+            "format" => !| Obj * !| String ^-> !| String
+            "formatRows" => !| !| String ^-> String
+            "formatRow" => !| String ^-> String
+            "formatValue" => Obj ^-> String
+        ]
+
+    let Voronoy =
+        Class "Voronoy"
+        |+> Instance [
+            "circumcenters" =? !| Float
+            "vectors" =? !| Float
+            "xmin" =? Int
+            "ymin" =? Int
+            "xmax" =? Int
+            "ymax" =? Int
+
+            "contains" => Int * Int * Int ^-> Bool
+            "neighbors" => Int ^-> !| Int
+            "render" => Obj ^-> O
+            "renderBounds" => Obj ^-> O
+            "renderCell" => Obj ^-> O
+            "cellPolygons" => O ^-> !| !| Point
+            "cellPolygon" => !| Point
+            "update" => O ^-> O
+        ]
+
+    let Delaunay =
+        Class "Delaunay"
+        |+> Static [
+            Constructor(!| Point)
+        ]
+        |+> Instance [
+            "from" => !| Point * !? (Point ^-> Int) * !? (Point ^-> Int) ^-> TSelf
+            "find" => Int * Int * !? Int ^-> Int
+            "neighbors" => Point ^-> !| Point
+            "renderer" => !? Obj ^-> O
+            "renderHull" => !? Obj ^-> O
+            "renderTriangle" => !| Int * !? Obj ^-> O
+            "renderPoints" => !? Obj * !? Int ^-> O
+            "hullPolygon" => O ^-> !| Point
+            "trianglePolygon" => !| Int ^-> !| Point
+            "update" => O ^-> O
+            "voronoi" => !| Int ^-> Voronoi
+            
+            "points" =? !| Int
+            "halfedges" =? !| Int
+            "hull" =? !| Int
+            "triangles" =? !| Int
+            "inedges" =? !| Int
+        ]
+
+    let Contours =
+        ChainedClassNew "Contours" <| fun chained ->
+        [
+            "contour" => !| Int + !| Float * Int + Float ^-> Obj
+            "size" => getSetVal chained Int
+            "smoothing" => getSetVal chained Bool
+            "tresholds" => getSetVal chained (!| Int + !| Float)
+        ]
+
+    let ContourDensity =
+        ChainedClassNew "ContourDensity" <| fun chained ->
+        [
+            "data" => !| Int + !| Float ^-> !| Obj
+            "x" => getSetVal chained Int
+            "y" => getSetVal chained Int
+            "weight" => getSetVal chained Float
+            "size" => getSetVal chained !| Int
+            "cellSize" => getSetVal chained Int
+            "treshold" => getSetVal chained (!| Int + !| Float)
+            "bandWidth" => getSetVal chained Float
+        ]
+
+    let Color =
+        ChainedClassNew "Color" <| fun chained ->
+        [
+            "opacity" =? Float
+            "rgb" => O ^-> TSelf
+            "copy" => !| Obj ^-> TSelf
+            "brighter" => Float + Int ^-> TSelf
+            "darker" => Float + Int ^-> TSelf
+            "displayable" => O ^-> Bool
+            "formatHex" => O ^-> String
+            "formatHsl" => O ^-> String
+            "formatRgb" => O ^-> String
+            "toString" => O ^-> String
+        ]
+
+    let Adder =
+        ChainedClassNew "Adder" <| fun chained ->
+        [
+            "add" => Int + Float ^-> TSelf
+            "valueOf" => O ^-> Int + Float
+        ]
 
     let D3 =
         Class "d3"
@@ -1306,7 +1657,13 @@ module Definition =
             "transform" => String?string ^-> Transform
 
             "format" => String?specifier ^-> Float?number ^-> String
-            "fomatPefix" => Float?value * !?Float?precision ^-> Prefix
+            "formatPefix" => Float?value * !?Float?precision ^-> Prefix
+            "formatSpecifier" => String ^-> Obj
+            "precisionFixed" => Float ^-> Float
+            "precisionPrefix" => Float * Float ^-> Float
+            "precisionRound" => Float * Float ^-> Float
+            "formatLocale" => Obj ^-> Obj
+            "formatDefaultLocale" => Obj ^-> Obj
             "requote" => String ^-> String
             "round" => Float?x * Int?n ^-> Float
 
@@ -1379,6 +1736,286 @@ module Definition =
             Generic - fun t -> "linkVertical" => O ^-> Link.[t]
             Generic - fun t -> "linkHorizontal" => O ^-> Link.[t]
             Generic - fun t -> "linkRadial" => O ^-> Link.[t]
+
+            //hierarchy
+
+            "node" => O ^-> Node
+            "stratify" => O ^-> Stratify
+
+            //projection
+
+            "projection" => O ^-> Projection
+
+            "geoAzimuthalEqualArea" => O ^-> Projection
+            "geoAzimuthalEqualAreaRaw" =? Projection
+            
+            "geoAzimuthalEquidistant" => O ^-> Projection
+            "geoAzimuthalEquidistantRaw" =? Projection
+            
+            "geoGnomonic" => O ^-> Projection
+            "geoGnomonicRaw" =? Projection
+            
+            "geoOrthographic" => O ^-> Projection
+            "geoOrthographicRaw" =? Projection
+            
+            "geoStereographic" => O ^-> Projection
+            "geoStereographicRaw" =? Projection
+            
+            "geoEqualEarth" => O ^-> Projection
+            "geoEqualEarthRaw" =? Projection
+            
+            "geoAlbersUsa" => O ^-> Projection
+            
+            "geoAlbers" => O ^-> Projection
+
+            "geoConicConformal" => O ^-> Projection
+            "geoConicConformalRaw" => Int * Int ^-> Projection
+
+            "geoConicEqualArea" => O ^-> Projection
+            "geoConicEqualAreaRaw" => Int * Int ^-> Projection
+
+            "geoConicEquidistant" => O ^-> Projection
+            "geoConicEquidistantRaw" => Int * Int ^-> Projection
+
+            "geoEquirectangular" => O ^-> Projection
+            "geoEquirectangularRaw" =? Projection
+            
+            "geoMercator" => O ^-> Projection
+            "geoMercatorRaw" =? Projection
+            
+            "geoTransfersMercator" => O ^-> Projection
+            "geoTransfersMercatorRaw" =? Projection
+            
+            "geoNaturalEarth1" => O ^-> Projection
+            "geoNaturalEarth1Raw" =? Projection
+            
+            //forces
+
+            "forceSimulation" => !? !| Node ^-> Simulation
+            "forceCenter" => !? (Int * Int) ^-> Center
+            "forceCollide" => !? Float ^-> Collide
+            "forceManyBody" => O ^-> ManyBody
+            "forceX" => !? Int ^-> ForceX
+            "forceY" => !? Int ^-> ForceY
+            "forceRadial" => Int * !? Int * !? Int ^-> Radial
+
+            //fetches TODO
+
+            //ease
+
+            "easeLinear" => Float ^-> Float
+
+            "easePolyIn" => Float ^-> Float
+            "easePolyOut" => Float ^-> Float
+            "easePoly" => Float ^-> Float
+            "easePolyInOut" => Float ^-> Float
+
+            "easeQuadIn" => Float ^-> Float
+            "easeQuadOut" => Float ^-> Float
+            "easeQuad" => Float ^-> Float
+            "easeQuadInOut" => Float ^-> Float
+            
+            "easeCubicIn" => Float ^-> Float
+            "easeCubicOut" => Float ^-> Float
+            "easeCubic" => Float ^-> Float
+            "easeCubicInOut" => Float ^-> Float
+                        
+            "easeSinIn" => Float ^-> Float
+            "easeSinOut" => Float ^-> Float
+            "easeSin" => Float ^-> Float
+            "easeSinInOut" => Float ^-> Float
+                                    
+            "easeExpIn" => Float ^-> Float
+            "easeExpOut" => Float ^-> Float
+            "easeExp" => Float ^-> Float
+            "easeExpInOut" => Float ^-> Float
+                                                
+            "easeCircleIn" => Float ^-> Float
+            "easeCircleOut" => Float ^-> Float
+            "easeCircle" => Float ^-> Float
+            "easeCircleInOut" => Float ^-> Float
+                                                         
+            "easeElasticIn" => Float ^-> Float
+            "easeElasticOut" => Float ^-> Float
+            "easeElastic" => Float ^-> Float
+            "easeElasticInOut" => Float ^-> Float
+                                                                    
+            "easeBackIn" => Float ^-> Float
+            "easeBackOut" => Float ^-> Float
+            "easeBack" => Float ^-> Float
+            "easeBackInOut" => Float ^-> Float
+                                                                                
+            "easeBounceIn" => Float ^-> Float
+            "easeBounceOut" => Float ^-> Float
+            "easeBounce" => Float ^-> Float
+            "easeBounceInOut" => Float ^-> Float
+            
+            //dsv
+
+            "dsvFormat" => T<char> ^-> Dsv
+            "autoType" => Obj ^-> Obj
+
+            //contours
+
+            "contours" => O ^-> !| Int + !| Float ^-> !| Contours
+            "contourDensity" => O ^-> ContourDensity
+
+            //colors
+
+            "schemeCategory10" =? !| String
+            "schemeAccent" =? !| String
+            "schemeDark2" =? !| String
+            "schemePaired" =? !| String
+            "schemePastel1" =? !| String
+            "schemePastel2" =? !| String
+            "schemeSet1" =? !| String
+            "schemeSet2" =? !| String
+            "schemeSet3" =? !| String
+            "schemeTableau10" =? !| String
+            "interpolateBrBG" => Float ^-> String
+            "interpolatePRGn" => Float ^-> String
+            "interpolatePiYG" => Float ^-> String
+            "interpolatePuOr" => Float ^-> String
+            "interpolateRdBu" => Float ^-> String
+            "interpolateRdGy" => Float ^-> String
+            "interpolateRdYlBu" => Float ^-> String
+            "interpolateRdYlGn" => Float ^-> String
+            "interpolateSpectral" => Float ^-> String
+            "interpolateBlues" => Float ^-> String
+            "interpolateGreens" => Float ^-> String
+            "interpolateGreys" => Float ^-> String
+            "interpolateOranges" => Float ^-> String
+            "interpolatePurples" => Float ^-> String
+            "interpolateReds" => Float ^-> String
+            "interpolateTurbo" => Float ^-> String
+            "interpolateViridis" => Float ^-> String
+            "interpolateInferno" => Float ^-> String
+            "interpolateMagma" => Float ^-> String
+            "interpolatePlasma" => Float ^-> String
+            "interpolateCividis" => Float ^-> String
+            "interpolateWarm" => Float ^-> String
+            "interpolateCool" => Float ^-> String
+            "interpolateCubeHelixDefault" => Float ^-> String
+            "interpolateBuGn" => Float ^-> String
+            "interpolateBuPu" => Float ^-> String
+            "interpolateGnBu" => Float ^-> String
+            "interpolateOrRd" => Float ^-> String
+            "interpolatePuBuGn" => Float ^-> String
+            "interpolatePuBu" => Float ^-> String
+            "interpolatePuRd" => Float ^-> String
+            "interpolateRdPu" => Float ^-> String
+            "interpolateYlGnBu" => Float ^-> String
+            "interpolateYlGn" => Float ^-> String
+            "interpolateYlOrBr" => Float ^-> String
+            "interpolateYlOrRd" => Float ^-> String
+            "interpolateRainbow" => Float ^-> String
+            "interpolateSinebow" => Float ^-> String
+
+            "color" => String ^-> Color
+
+            "rgb" => Int * Int * Int * !? Int ^-> Color
+            "rgb" => String ^-> Color
+            "rgb" => Color ^-> Color
+            
+            "hsl" => Int * Int * Int * !? Int ^-> Color
+            "hsl" => String ^-> Color
+            "hsl" => Color ^-> Color
+            
+            "lab" => Int * Int * Int * !? Int ^-> Color
+            "lab" => String ^-> Color
+            "lab" => Color ^-> Color
+            
+            "hcl" => Int * Int * Int * !? Int ^-> Color
+            "hcl" => String ^-> Color
+            "hcl" => Color ^-> Color
+            
+            "lch" => Int * Int * Int * !? Int ^-> Color
+            "lch" => String ^-> Color
+            "lch" => Color ^-> Color
+            
+            "cubehelix" => Int * Int * Int * !? Int ^-> Color
+            "cubehelix" => String ^-> Color
+            "cubehelix" => Color ^-> Color
+            
+            "gray" => Int  * !? Int ^-> Color
+
+            //chords
+
+            "ribbon" => Ribbon
+            "ribbonArrow" => RibbonArrow
+
+            //axis
+
+            "axisTop" => !| !| Int ^-> Axis
+            "axisRight" => !| !| Int ^-> Axis
+            "axisBottom" => !| !| Int ^-> Axis
+            "axisLeft" => !| !| Int ^-> Axis
+
+            //statistics
+
+            "min" => Iterable ^-> Value
+            "minIndex" => Iterable ^-> Int
+            "max" => Iterable ^-> Value
+            "maxIndex" => Iterable ^-> Int
+            "extent" => Iterable ^-> !| Value
+            "mode" => Iterable ^-> Value
+            "mean" => Iterable ^-> Value
+            "median" => Iterable ^-> Value
+            "sum" => Iterable ^-> Int + Float
+            "cumsum" => Iterable ^-> Int + Float
+            "quantile" => Iterable * Int + Float ^-> Int
+            "quantileSorted" => Iterable * Int + Float ^-> Int
+            "variance" => Iterable ^-> Int + Float
+            "deviation" => Iterable ^-> Int + Float
+            "fsum" => !| Int + !| Float ^-> Int + Float
+            "fcumsum" => !| Int + !| Float ^-> Int + Float
+
+            "adder" => O ^-> Adder
+
+            //search
+
+            "least" => Iterable ^-> !| Value
+            "leastIndex" => Iterable ^-> !| Int
+            "greatest" => Iterable ^-> !| Value
+            "greatestIndex" => Iterable ^-> !| Int
+            "bisectLeft" => Iterable * Value * !? Int * !? Int ^-> Point
+            "bisect" => Iterable * Value * !? Int * !? Int ^-> Point
+            "bisectRight" => Iterable * Value * !? Int * !? Int ^-> Point
+            "bisectCenter" => Iterable * Value * !? Int * !? Int ^-> Point
+
+            "bisector" => (Obj ^-> Value) ^-> Bisector
+            "bisector" => (Obj  * Value ^-> Value) ^-> Bisector
+
+            //transformations
+
+            "group" => Iterable * (Obj ^-> Value) (* TODO ^-> Map *)
+            "groups" => Iterable * (Obj ^-> Value) ^-> !| Iterable
+            "flatGroup" => Iterable * (Obj ^-> Value) ^-> !| Iterable
+            "index" => Iterable * (Obj ^-> Value) (* ^-> Map *)
+            "indexes" => Iterable * (Obj ^-> Value) ^-> Iterable
+            "rollup" => Iterable * (Obj ^-> Value) (* ^-> Map *)
+            "rollups" => Iterable * (Obj ^-> Value) ^-> Iterable
+            "flatRollup" => Iterable * (Obj ^-> Value) ^-> Iterable
+
+            "groupSort" => Iterable * (Value * Value ^-> Int) * (Obj ^-> Value) ^-> !| Value
+            "count" => Iterable ^-> Int
+            "cross" => !| Iterable ^-> !| !| Value
+            "merge" => !| Iterable ^-> Iterable
+            "pair" => Value * Value ^-> Iterable
+            "permute" => Iterable * !| Int ^-> Iterable
+            "shuffle" => Iterable * !? Int * !? Int ^-> Iterable
+            "shuffler" => (* TODO *) O
+
+            "ticks" => Int * Int * Int ^-> !| Int
+            "tickIncrement" => Int * Int * Int ^-> !| Int
+            "tickStep" => Int * Int * Int ^-> Int
+            "nice" => Int * Int * Int ^-> !| Int
+            "range" => !? Int * Int * !? Int + Float ^-> !| Int + Float
+            "transpose" => !| !| Value ^-> !| Value
+            "zip" => !| Value * !| Value ^-> !| !| Value
+
+            //iterables
+
         ]
         |+> Static (
                 // interpolation section
@@ -1439,6 +2076,21 @@ module Definition =
                 "normal"    => !?Float?mean * !?Float?deviation ^-> Float
                 "logNormal" => !?Float?mean * !?Float?deviation ^-> Float
                 "irwinHall" => Int?count ^-> Float
+                "bates" => Int?count ^-> Float
+                "exponential" => Int?count ^-> Float
+                "pareto" => Int?count ^-> Float
+                "bernouli" => Int?count ^-> Float
+                "geometric" => Int?count ^-> Float
+                "binomial" => Int * Float ^-> Float
+                "gamma" => Float * !? Float ^-> Float
+                "beta" => Float * !? Float ^-> Float
+                "weibull" => Float * !? Float * !? Float ^-> Float
+                "cauchy" => Float ^-> Float
+                "logistic" => !? Float * !? Float ^-> Float
+                "poisson" => Float ^-> Float
+                "uniform" => Float * !? Float ^-> (O ^-> Float)
+                "int" => Int * !? Int ^-> (O ^-> Int)
+                "logNormal" => Int * !? Int ^-> (O ^-> Int)
             ]
             Class "d3.ns"
             |+> Static [
@@ -1571,6 +2223,8 @@ module Definition =
             Class "d3.behavior"
             |+> Static [
                 "drag" => O ^-> Drag
+                "dragDisable" => (* TODO Window ^->*)O
+                "dragEnable" => (* TODO Window ^->*)O
                 "zoom" => O ^-> Zoom
             ]
         ]
