@@ -2016,6 +2016,17 @@ module Definition =
 
             //iterables
 
+            "every" => Iterable * (Value ^-> Bool) ^-> Bool
+            "some" => Iterable * (Value ^-> Bool) ^-> Bool
+            "filter" => Iterable * (Value ^-> Bool) ^-> Iterable
+            "map" => Iterable * (Value ^-> Value) ^-> Iterable
+            "reduce" => Iterable * (Value * Value ^-> Value) ^-> Value
+            "reverse" => Iterable ^-> Iterable
+            "sort" => Iterable * (Value * Value ^-> Int) ^-> Iterable
+
+            //sets
+
+            
         ]
         |+> Static (
                 // interpolation section
