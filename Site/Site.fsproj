@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFrameworks>net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <WebSharperProject>Bundle</WebSharperProject>
     <WebSharperBundleOutputDir>Content</WebSharperBundleOutputDir>
     <WebSharperSourceMap>false</WebSharperSourceMap>
@@ -19,9 +18,7 @@
     <Compile Include="WorldTour.fs" />
     <Compile Include="Client.fs" />
     <Content Include="index.html" />
-    <Content Include="Web.config" />
     <None Include="Style.css" />
-    <None Include="packages.config" />
     <None Include="sp500.csv" />
   </ItemGroup>
   <Target Name="DeploySite" AfterTargets="Build">
