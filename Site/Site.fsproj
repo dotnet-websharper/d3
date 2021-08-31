@@ -11,11 +11,11 @@
     <Compile Include="Samples.fs" />
     <Compile Include="Circles.fs" />
     <Compile Include="Graphs.fs" />
-    <Compile Include="CompaniesGraph.Data.fs" />
+    <!-- <Compile Include="CompaniesGraph.Data.fs" />
     <Compile Include="CompaniesGraph.UI.fs" />
     <None Include="CompaniesGraph.fsx" />
-    <None Include="CompaniesGraph.json" />
-    <Compile Include="WorldTour.fs" />
+    <None Include="CompaniesGraph.json" /> -->
+    <!-- <Compile Include="WorldTour.fs" /> -->
     <Compile Include="Client.fs" />
     <Content Include="index.html" />
     <None Include="Style.css" />

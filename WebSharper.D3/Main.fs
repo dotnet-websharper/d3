@@ -1766,6 +1766,8 @@ module Definition =
 
             //projection
 
+            "path" => O ^-> Path
+
             "projection" => O ^-> Projection
 
             "geoAzimuthalEqualArea" => O ^-> Projection
@@ -2228,7 +2230,7 @@ module Definition =
                 "projection" => (Float2T ^-> Float2T)?raw ^-> Projection
                 "projectionMutator" => (Float2T ^-> Float2T ^-> Float2T)?rawFactory ^-> Projection
 
-                "albersUsa"            => O ^-> Projection
+                (* "albersUsa"            => O ^-> Projection
                 "azimuthalEqualArea"   => O ^-> Projection
                 "azimuthalEquidistant" => O ^-> Projection
                 "conicConformal"       => O ^-> Projection
@@ -2238,7 +2240,7 @@ module Definition =
                 "gnomonic"             => O ^-> Projection
                 "mercator"             => O ^-> Projection
                 "orthographic"         => O ^-> Projection
-                "stereographic"        => O ^-> Projection
+                "stereographic"        => O ^-> Projection *)
 
 //                "albersUsa.raw"            => Float2 ^-> Projection
 //                "azimuthalEqualArea.raw"   => O ^-> Projection
