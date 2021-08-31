@@ -69,6 +69,8 @@ module Definition =
     let NodeList = T<NodeList>
     let Event = T<Event>
 
+    let FetchRequest = (T<string> * T<JavaScript.RequestOptions>) + T<JavaScript.Request>
+
     let nameArg = String?name
 
     let WithThis t ps r = (t -* ps ^-> r) + (ps ^-> r)
@@ -1819,8 +1821,21 @@ module Definition =
             "forceY" => !? Int ^-> ForceY
             "forceRadial" => Int * !? Int * !? Int ^-> Radial
 
-            //fetches TODO
+            //fetches
+            
+            "blob" => FetchRequest ^-> T<JavaScript.Promise<JavaScript.Blob>>
+            "buffer" => FetchRequest ^-> T<JavaScript.Promise<JavaScript.ArrayBuffer>>
+            "html" => FetchRequest ^-> T<JavaScript.Promise<JavaScript.Dom.Document>>
+            "image" => FetchRequest ^-> T<JavaScript.Promise<JavaScript.ImageData>> //?
+            "json" => FetchRequest ^-> T<JavaScript.Promise<obj>>
+            "text" => FetchRequest ^-> T<JavaScript.Promise<string>>
+            "xml" => FetchRequest ^-> T<JavaScript.Promise<JavaScript.Dom.Document>>
 
+            "csv" => FetchRequest * !? Int ^-> T<JavaScript.Promise<string>>
+            "dsv" => FetchRequest * !? Int ^-> T<JavaScript.Promise<string>>
+            "svg" => FetchRequest ^-> T<JavaScript.Promise<string>>
+            "tsv" => FetchRequest * !? Int ^-> T<JavaScript.Promise<string>>
+            
             //ease
 
             "easeLinear" => Float ^-> Float
@@ -2200,30 +2215,6 @@ module Definition =
                 "identity"  => O ^-> IdentityScale
                 Generic - fun tData -> "ordinal"   => O ^-> OrdinalScale.[tData]
             ]
-            Class "d3.svg"
-            |+> Static [
-                Generic - fun tData -> "line"        => O ^-> Line.[tData]
-                Generic - fun tData -> "line.radial" => O ^-> RadialLine.[tData]
-                Generic - fun tData -> "area"        => O ^-> Area.[tData]
-                Generic - fun tData -> "area.radial" => O ^-> RadialArea.[tData]
-                Generic - fun tData -> "arc"         => O ^-> Arc.[tData]
-                "symbol"          => O ^-> Symbol
-
-                "symbolCircle" =? Symbol
-                "symbolCross" =? Symbol
-                "symbolDiamond" =? Symbol
-                "symbolSquare" =? Symbol
-                "symbolStar" =? Symbol
-                "symbolTriangle" =? Symbol
-                "symbolWye" =? Symbol
-
-                "symbolTypes"     =? !|SymbolType
-                Generic - fun tData -> "chord"       => O ^-> Chord.[tData]
-                "diagonal"        => O ^-> Diagonal
-                "diagonal.radial" => O ^-> Diagonal
-                "axis"            => O ^-> Axis
-                "brush"           => O ^-> Brush
-            ]
             Class "d3.geo"
             |+> Static [
                 "path"      => O ^-> Path
@@ -2282,7 +2273,7 @@ module Definition =
         Assembly [
             Namespace "WebSharper.D3" classList
             Namespace "WebSharper.D3.Resources" [
-                (Resource "D3" "d3.v3.min.js").AssemblyWide()
+                (Resource "D3" "https://cdnjs.cloudflare.com/ajax/libs/d3/7.0.1/d3.min.js").AssemblyWide()
             ]
         ]
 
@@ -2292,5 +2283,5 @@ type D3Extension() =
         member ext.Assembly = Definition.D3Assembly
 
 [<assembly: Extension(typeof<D3Extension>)>]
-[<assembly: System.Reflection.AssemblyVersion("3.0.0.0")>]
+[<assembly: System.Reflection.AssemblyVersion("7.0.0.0")>]
 do ()

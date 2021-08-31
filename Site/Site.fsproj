@@ -11,7 +11,6 @@
   <ItemGroup>
     <Compile Include="Samples.fs" />
     <Compile Include="Circles.fs" />
-    <Compile Include="FocusBrushing.fs" />
     <Compile Include="Graphs.fs" />
     <Compile Include="CompaniesGraph.Data.fs" />
     <Compile Include="CompaniesGraph.UI.fs" />
@@ -41,7 +40,7 @@
     <Copy SourceFiles="@(WorldTourFiles)" DestinationFolder="..\build\html\WorldTour" SkipUnchangedFiles="true" />
   </Target>
   <ItemGroup>
-    <ProjectReference Include="../WebSharper.D3\WebSharper.D3.fsproj" />
+    <ProjectReference Include="../WebSharper.D3/WebSharper.D3.fsproj" />
   </ItemGroup>
-  <Import Project="..\.paket\Paket.Restore.targets" />
+  <Import Project="../.paket/Paket.Restore.targets" />
 </Project>
