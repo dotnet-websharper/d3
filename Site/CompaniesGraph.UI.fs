@@ -20,9 +20,10 @@
 namespace Site.CompaniesGraph
 
 open WebSharper
-open WebSharper.Html.Client
 open WebSharper.JavaScript
-open WebSharper.JQuery
+open WebSharper.UI
+open WebSharper.UI.Client
+open WebSharper.UI.Html
 open WebSharper.D3
 open Site
 
@@ -36,10 +37,20 @@ module UI =
 
     module Data =
 
+        let sendXHR typE url (data:string) callback =
+            let newXHR = JavaScript.XMLHttpRequest()
+            newXHR.Open(typE, url, true)
+            newXHR.Send(data)
+            newXHR.Onreadystatechange =
+                if newXHR.Status = 200 && newXHR.ReadyState = 4 then
+                    callback(newXHR.ResponseText) else null
+
         let Load () =
             Async.FromContinuations (fun (ok, _, _) ->
-                JQuery.GetJSON(Data.FileName, fun (x: obj, _) ->
-                    ok (x :?> Data.DataSet))
+                let xhrFun response =
+                    JSON.Parse(response) |> ignore
+                    null
+                sendXHR "GET" Data.FileName null xhrFun
                 |> ignore)
 
     type Config<'T> =
@@ -106,7 +117,7 @@ module UI =
         |> ignore
         ()
 
-    let Start (parent: Dom.Element) (out: Element) =
+    let Start (parent: Dom.Element) (out: Dom.Element) =
         async {
             let! data = Data.Load()
             return Render {
@@ -124,22 +135,22 @@ module UI =
                         match label with
                         | Data.Company (n, r) -> n + " (revenue: " + string r + ")"
                         | Data.Industry i -> i
-                    out.Text <- t
+                    out.TextContent <- t
             }
         }
         |> Async.Start
 
     let Show (ctx: Dom.Element) =
-        let label = Div []
+        let label = div [] [] :?> Elt
         let main =
-            Div [
-                Span [Text "In Focus: "]
+            div [
+                on.afterRender (fun parent ->
+                    Start parent label.Dom)
+            ] [
+                span [] [text "In Focus: "]
                 label
-            ]
-            |>! OnAfterRender (fun parent ->
-                Start parent.Dom label)
-        ctx.AppendChild(main.Body) |> ignore
-        main.Render()
+            ] :?> Elt
+        ctx.AppendChild(main.Dom) |> ignore
 
     let Sample =
         Samples.Build()

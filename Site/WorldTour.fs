@@ -62,7 +62,7 @@ module WorldTour =
         let width = 960.
         let height = 500.
         let projection =
-            D3.Geo.Orthographic()
+            D3.GeoOrthographic()
                 .Scale(248.)
                 .ClipAngle(90.)
         let title =
@@ -73,7 +73,7 @@ module WorldTour =
                 .Attr("width", width)
                 .Attr("height", height)
         let c = (canvas.Node() |> As<CanvasElement>).GetContext("2d")
-        let path = D3.Geo.Path().Projection(projection).Context(c)
+        let path = D3.Path().Projection(projection).Context(c)
         async {
             let globe = New ["type" => "sphere"]
             let! world = D3.Json("WorldTour/world-110m.json")

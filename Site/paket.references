@@ -1,6 +1,6 @@
-WebSharper
-WebSharper.FSharp
-FSharp.Data
-WebSharper.UI
-WebSharper.AspNetCore
-FSharp.Core
+group testing
+    WebSharper
+    WebSharper.FSharp
+    FSharp.Data
+    WebSharper.UI
+    FSharp.Core

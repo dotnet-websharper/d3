@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <WebSharperProject>Bundle</WebSharperProject>
     <WebSharperBundleOutputDir>Content</WebSharperBundleOutputDir>
     <WebSharperSourceMap>false</WebSharperSourceMap>
@@ -11,18 +10,15 @@
   <ItemGroup>
     <Compile Include="Samples.fs" />
     <Compile Include="Circles.fs" />
-    <Compile Include="FocusBrushing.fs" />
     <Compile Include="Graphs.fs" />
-    <Compile Include="CompaniesGraph.Data.fs" />
+    <!-- <Compile Include="CompaniesGraph.Data.fs" />
     <Compile Include="CompaniesGraph.UI.fs" />
     <None Include="CompaniesGraph.fsx" />
-    <None Include="CompaniesGraph.json" />
-    <Compile Include="WorldTour.fs" />
+    <None Include="CompaniesGraph.json" /> -->
+    <!-- <Compile Include="WorldTour.fs" /> -->
     <Compile Include="Client.fs" />
     <Content Include="index.html" />
-    <Content Include="Web.config" />
     <None Include="Style.css" />
-    <None Include="packages.config" />
     <None Include="sp500.csv" />
   </ItemGroup>
   <Target Name="DeploySite" AfterTargets="Build">
@@ -41,7 +37,7 @@
     <Copy SourceFiles="@(WorldTourFiles)" DestinationFolder="..\build\html\WorldTour" SkipUnchangedFiles="true" />
   </Target>
   <ItemGroup>
-    <ProjectReference Include="../WebSharper.D3\WebSharper.D3.fsproj" />
+    <ProjectReference Include="../WebSharper.D3/WebSharper.D3.fsproj" />
   </ItemGroup>
-  <Import Project="..\.paket\Paket.Restore.targets" />
+  <Import Project="../.paket/Paket.Restore.targets" />
 </Project>
