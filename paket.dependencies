@@ -12,7 +12,6 @@ nuget FSharp.Core 5.0.0
 nuget WebSharper prerelease
 nuget WebSharper.FSharp prerelease
 
-
 group wsbuild
     git https://github.com/dotnet-websharper/build-script websharper50
 
