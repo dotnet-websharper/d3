@@ -1,13 +1,15 @@
 type file
 id WebSharper.D3
-authors
-    IntelliFactory
-owners
-    IntelliFactory
-licenseUrl http://websharper.com/licensing
-projectUrl https://github.com/intellifactory/websharper.d3
+authors IntelliFactory
+owners IntelliFactory
+projectUrl https://websharper.com/
+repositoryType git
+repositoryUrl https://github.com/dotnet-websharper/d3
+licenseUrl http://github.com/dotnet-websharper/websharper.d3/blob/master/LICENSE.md
+licenseExpression Apache-2.0
+iconUrl https://github.com/dotnet-websharper/core/raw/websharper50/tools/WebSharper.png
 description
-    WebSharper Extensions for D3 3.3.6
+    WebSharper Extensions for D3 7.0.1
 tags
     Web JavaScript F# C#
 files
