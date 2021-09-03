@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
@@ -39,5 +40,5 @@
   <ItemGroup>
     <ProjectReference Include="../WebSharper.D3/WebSharper.D3.fsproj" />
   </ItemGroup>
-  <Import Project="../.paket/Paket.Restore.targets" />
+  <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>
