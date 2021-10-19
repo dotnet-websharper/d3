@@ -103,7 +103,7 @@ module Samples =
                             match JS.Document.GetElementById(s.Id) with
                             | null -> ()
                             | el ->
-                                let copy = el.CloneNode(true)
+                                let copy = el.CloneNode(true) :?> Dom.Element
                                 copy.Attributes.RemoveNamedItem("id") |> ignore
                                 self.AppendChild(copy) |> ignore) //?
                     ] []
