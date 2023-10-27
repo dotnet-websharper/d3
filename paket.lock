@@ -8,11 +8,11 @@ NUGET
     System.Reflection.Emit.Lightweight (4.7)
       System.Reflection.Emit.ILGeneration (>= 4.7) - restriction: || (&& (== net5.0) (< netcoreapp2.0) (< netstandard2.1)) (&& (== net5.0) (< netstandard2.0)) (&& (== net5.0) (< portable-net45+wp8)) (&& (== net5.0) (>= uap10.1)) (&& (== netcoreapp2.1) (< netcoreapp2.0)) (&& (== netcoreapp2.1) (< netstandard2.0)) (&& (== netcoreapp2.1) (< portable-net45+wp8)) (&& (== netcoreapp2.1) (>= uap10.1)) (&& (== netcoreapp3.1) (< netcoreapp2.0) (< netstandard2.1)) (&& (== netcoreapp3.1) (< netstandard2.0)) (&& (== netcoreapp3.1) (< portable-net45+wp8)) (&& (== netcoreapp3.1) (>= uap10.1)) (== netstandard2.0)
   remote: https://nuget.pkg.github.com/dotnet-websharper/index.json
-    WebSharper (7.0.2.347-beta2)
+    WebSharper (7.0.3.355-beta2)
       FSharp.Core (>= 6.0)
       System.Reflection.Emit.Lightweight (>= 4.7)
-    WebSharper.FSharp (7.0.2.347-beta2)
-      WebSharper (7.0.2.347-beta2)
+    WebSharper.FSharp (7.0.3.355-beta2)
+      WebSharper (7.0.3.355-beta2)
 
 GROUP testing
 STORAGE: NONE
@@ -20,7 +20,7 @@ STRATEGY: MIN
 RESTRICTION: || (== net5.0) (== netcoreapp2.1) (== netcoreapp3.1) (== netstandard2.0)
 NUGET
   remote: https://api.nuget.org/v3/index.json
-    FSharp.Core (7.0.400)
+    FSharp.Core (7.0.401)
     FSharp.Data (6.3)
       FSharp.Core (>= 5.0.1)
       FSharp.Data.Csv.Core (>= 6.3)
@@ -413,17 +413,17 @@ NUGET
       System.Xml.XmlDocument (>= 4.3)
       System.Xml.XPath (>= 4.3)
   remote: https://nuget.pkg.github.com/dotnet-websharper/index.json
-    WebSharper (7.0.2.347-beta2)
+    WebSharper (7.0.3.355-beta2)
       FSharp.Core (>= 6.0)
       System.Reflection.Emit.Lightweight (>= 4.7)
-    WebSharper.FSharp (7.0.2.347-beta2)
-      WebSharper (7.0.2.347-beta2)
-    WebSharper.MathJS (7.0.2.347-beta2)
-      WebSharper (7.0.2.347-beta2)
-    WebSharper.UI (7.0.1.347-beta2)
+    WebSharper.FSharp (7.0.3.355-beta2)
+      WebSharper (7.0.3.355-beta2)
+    WebSharper.MathJS (7.0.3.355-beta2)
+      WebSharper (7.0.3.355-beta2)
+    WebSharper.UI (7.0.1.355-beta2)
       HtmlAgilityPack (>= 1.11)
-      WebSharper (>= 7.0.2 < 7.1)
-      WebSharper.MathJS (>= 7.0.2 < 7.1)
+      WebSharper (>= 7.0.3 < 7.1)
+      WebSharper.MathJS (>= 7.0.3 < 7.1)
 
 GROUP wsbuild
 
