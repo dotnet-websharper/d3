@@ -8,8 +8,8 @@ framework: netstandard2.0, netcoreapp2.1, netcoreapp3.1, net5.0
 storage: none
 strategy: min
 
-nuget WebSharper prerelease
-nuget WebSharper.FSharp prerelease
+nuget WebSharper ~> 8.0
+nuget WebSharper.FSharp ~> 8.0
 
 group wsbuild
     git https://github.com/dotnet-websharper/build-script websharper50
@@ -24,8 +24,8 @@ group testing
     storage: none
     strategy: min
 
-    nuget WebSharper prerelease
-    nuget WebSharper.FSharp prerelease
+    nuget WebSharper ~> 8.0
+    nuget WebSharper.FSharp ~> 8.0
     nuget FSharp.Data
-    nuget WebSharper.UI prerelease
+    nuget WebSharper.UI ~> 8.0
     nuget FSharp.Core
