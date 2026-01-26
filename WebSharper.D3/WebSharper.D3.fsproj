@@ -7,8 +7,38 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Base.fs" />
+    <Compile Include="Axis.fs" />
+    <Compile Include="Chord.fs" />
+    <Compile Include="Color.fs" />
+    <Compile Include="Interpolate.fs" />
+    <Compile Include="Contour.fs" />
+    <Compile Include="Delaunay.fs" />
+    <Compile Include="Force.fs" />
+    <Compile Include="Geo.fs" />
+    <Compile Include="Hierarchy.fs" />
+    <Compile Include="Path.fs" />
+    <Compile Include="Polygon.fs" />
+    <Compile Include="Quadtree.fs" />
+    <Compile Include="Scale.fs" />
+    <Compile Include="ScaleChromatic.fs" />
+    <Compile Include="Selection.fs" />
+    <Compile Include="Shape.fs" />
+    <Compile Include="Ease.fs" />
+    <Compile Include="Timer.fs" />
+    <Compile Include="Transition.fs" />
+    <Compile Include="Brush.fs" />
+    <Compile Include="Dispatch.fs" />
+    <Compile Include="Drag.fs" />
+    <Compile Include="Zoom.fs" />
+    <Compile Include="Array.fs" />
+    <Compile Include="DSV.fs" />
+    <Compile Include="Fetch.fs" />
+    <Compile Include="Format.fs" />
+    <Compile Include="Random.fs" />
+    <Compile Include="Time.fs" />
+    <Compile Include="TimeFormat.fs" />
     <Compile Include="Main.fs" />
-    <EmbeddedResource Include="d3.v3.min.js" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>
