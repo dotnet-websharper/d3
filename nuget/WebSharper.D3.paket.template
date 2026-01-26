@@ -8,7 +8,7 @@ repositoryUrl https://github.com/dotnet-websharper/d3
 licenseUrl http://github.com/dotnet-websharper/websharper.d3/blob/master/LICENSE.md
 iconUrl https://github.com/dotnet-websharper/core/raw/websharper50/tools/WebSharper.png
 description
-    WebSharper Extensions for D3 7.0.1
+    WebSharper Extensions for D3 7.9.0+
 tags
     Web JavaScript F# C#
 files
