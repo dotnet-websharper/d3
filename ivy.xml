@@ -1,7 +1,0 @@
-<ivy-module version="2.0">
-  <info organisation="IntelliFactory" module="ws5.d3" revision="3.0" />
-  <dependencies>
-    <dependency name="ws5" rev="latest.integration" />
-    <dependency name="ws5.ui" rev="latest.integration" />
-  </dependencies>
-</ivy-module>
