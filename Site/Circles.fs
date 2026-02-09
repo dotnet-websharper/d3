@@ -54,10 +54,10 @@ module Circles =
         /// since you gave a `double[]` - to help you with types later on.
         let joined = ctx.SelectAll("circle").Data(data)
 
-        /// Now, "enter" selection describes what happens to elements that
-        /// enter the theater stage so to speak, that is, how do we create
-        /// elements for data points that do not have an element yet.
-        /// Here we create circles and set some attributes, dependent on data.
+        // Now, "enter" selection describes what happens to elements that
+        // enter the theater stage so to speak, that is, how do we create
+        // elements for data points that do not have an element yet.
+        // Here we create circles and set some attributes, dependent on data.
         joined.Enter()
             .Append("circle")
             .AttrFn("cx", fun x -> x * 5.) // center x coord

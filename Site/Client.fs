@@ -21,8 +21,6 @@ namespace Site
 
 open WebSharper
 open WebSharper.D3
-open WebSharper.D3.Scales
-
 
 [<JavaScript>]
 module Client =
@@ -43,11 +41,9 @@ module Client =
 
         let aapl : Data array =
             let startDate = System.DateTime(2021,04,12)
-            let minVal = 100.
-            let maxVal = 600.
             let daysToGenerate = 640
             let getValForD (d: int) =
-                minVal + (maxVal-minVal)/(float daysToGenerate) * float d + float (System.Random().Next(-20, 20))
+                350. + float (System.Random().Next(-50, 50))
             [|
                 for d in [0..daysToGenerate-1] do
                     {
@@ -58,7 +54,7 @@ module Client =
 
         let x = D3.ScaleUtc(D3.Extent(aapl, fun d -> d.date), [|marginLeft; width - marginRight|])
 
-        let y = D3.ScaleLinear([|0; D3.Max(aapl, fun d -> d.close)|], [|height - marginBottom; marginTop|]);
+        let y = D3.ScaleLinear([|0; 700|], [|height - marginBottom; marginTop|])
 
         let line =
             D3.Line()

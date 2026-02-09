@@ -12,6 +12,7 @@ module Shape =
         |+> Instance [
             "x" => (t ^-> T<float>) ^-> TSelf[t]
             "y" => (t ^-> T<float>) ^-> TSelf[t]
-            "generate" => (!| t)?data ^-> T<obj>
+            "generate" => (!| t)?data ^-> T<string>
             |> WithInline "$this($data)"
+            |> WithComment "Generate the SVG Path for the given line"
         ]
