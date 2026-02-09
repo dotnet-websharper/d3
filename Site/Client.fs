@@ -20,17 +20,92 @@
 namespace Site
 
 open WebSharper
+open WebSharper.D3
+open WebSharper.D3.Scales
+
 
 [<JavaScript>]
 module Client =
 
-    let All =
-        let ( !+ ) x = Samples.Set.Singleton(x)
-        Samples.Set.Create [
-            !+ Circles.Sample
-            //!+ CompaniesGraph.UI.Sample
-            //!+ WorldTour.Sample
-        ]
+    type Data =
+        {
+            date: System.DateTime
+            close: float
+        }
+
+    let LineChartSample =
+        let width = 928.
+        let height = 500.
+        let marginTop = 20.
+        let marginRight = 30.
+        let marginBottom = 30.
+        let marginLeft = 40.
+
+        let aapl : Data array =
+            let startDate = System.DateTime(2021,04,12)
+            let minVal = 100.
+            let maxVal = 600.
+            let daysToGenerate = 640
+            let getValForD (d: int) =
+                minVal + (maxVal-minVal)/(float daysToGenerate) * float d + float (System.Random().Next(-20, 20))
+            [|
+                for d in [0..daysToGenerate-1] do
+                    {
+                        date = startDate.AddDays (2. * float d)
+                        close = getValForD d
+                    }
+            |]
+
+        let x = D3.ScaleUtc(D3.Extent(aapl, fun d -> d.date), [|marginLeft; width - marginRight|])
+
+        let y = D3.ScaleLinear([|0; D3.Max(aapl, fun d -> d.close)|], [|height - marginBottom; marginTop|]);
+
+        let line =
+            D3.Line()
+                .X(fun d -> x.Get(d.date))
+                .Y(fun d -> y.Get(d.close))
+
+        let svg =
+            D3.Create("svg")
+                .Attr("width", width)
+                .Attr("height", height)
+                .Attr("viewBox", [0, 0, width, height])
+                .Attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+
+        svg.Append("g")
+            .Attr("transform", $"translate(0,{height - marginBottom})")
+            .Call(D3.AxisBottom(x).Ticks(int width / 80).TickSizeOuter(0))
+            |> ignore
+
+        svg.Append("g")
+            .Attr("transform", $"translate({marginLeft},0)")
+            .Call(D3.AxisLeft(y).Ticks(int height / 40))
+            .Call(fun g -> g.Select(".domain").Remove())
+            .Call(fun g ->
+                g.SelectAll(".tick line")
+                    .Clone()
+                    .Attr("x2", width - marginLeft - marginRight)
+                    .Attr("stroke-opacity", 0.1))
+            .Call(fun g -> 
+                g.Append("text")
+                    .Attr("x", -marginLeft)
+                    .Attr("y", 10)
+                    .Attr("fill", "currentColor")
+                    .Attr("text-anchor", "start")
+                    .Text("↑ Daily close ($)"))
+            |> ignore
+
+        svg.Append("path")
+            .Attr("fill", "none")
+            .Attr("stroke", "steelblue")
+            .Attr("stroke-width", 1.5)
+            .Attr("d", line.Generate(aapl))
+            |> ignore
+
+        svg.Node()
 
     [<SPAEntryPoint>]
-    let Main() = All.Show()
+    let Main() =
+        WebSharper.JavaScript.JS.Document.GetElementById "main"
+        |> fun m ->
+            m.AppendChild(LineChartSample)

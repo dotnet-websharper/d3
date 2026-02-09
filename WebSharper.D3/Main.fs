@@ -19,6 +19,7 @@
 // $end{copyright}
 namespace WebSharper.D3
 
+open System
 open WebSharper
 open WebSharper.InterfaceGenerator
 open WebSharper.JavaScript.Dom
@@ -122,30 +123,6 @@ module Definition =
     let ChainedClassInheritsG name (t: CodeModel.TypeParameter) inherits members =
         Class name |=> Inherits inherits |> ChainedG t members
 
-//    let Selection = Type.New()
-
-//    let UpdateSelectionT =
-//        Generic / fun t ->
-//            Class "UpdateSelection"
-//            |=> Inherits Selection
-////            |+> Instance
-////                [
-////                    "data" =>
-////                        (
-////                            let data = !|Obj + !|Float + !|Int + selectionCallback !|Obj
-////                            let keyFunc = selectionCallback String
-////                            data?values * !?keyFunc?key ^-> UpdateSelection
-////                        )
-////                    "data"       => O ^-> !|Obj
-////                    "datum"      => chained (Obj + selectionCallback Obj)?value
-////                    "filter"     => chained (String + selectionCallback Bool)?selector
-////                    "sort"       => chained O
-////                    "order"      => chained O
-////                    "each"       => chained (selectionCallback O)
-////                ]
-//
-//    addToClassList <| Generic - UpdateSelectionT
-
     let Selection =
         let selfG = Class "Selection"
         let attrValue = String + Float + Int + Obj
@@ -191,11 +168,13 @@ module Definition =
                     "interrupt"  => chained O
                     "call"       => (self ^-> O) ^-> self
                     "call"       => T<JavaScript.Function> ^-> self
+                    "call"       => Obj ^-> self
                     "empty"      => O ^-> Bool
                     "node"       => O ^-> Element
                     "size"       => O ^-> Int
                     "select"     => chained selector
                     "selectAll"  => chained selector
+                    "clone"      => O ^-> self
                 ]
             |+> Instance data
 
@@ -715,7 +694,6 @@ module Definition =
         [
             "apply"  => (Selection.[Obj] + Transition.[Obj])?selection ^-> O |> WithInline "$this($selection)"
             "scale"  => getSetVal chained Scale.Type
-            "orient" => getSetVal chained Orientation.Type
             "ticks"  => chained !+Obj
             "tickValues" => getSetVal chained !|Obj
             "tickSize"  => getSetVal chained Int
@@ -1605,12 +1583,31 @@ module Definition =
             "tresholds" => getSetVal chained !| Value
         ]
 
+    let (=!>) n s =
+        n => s
+        |> Import n "d3"
+
     let D3 =
         Class "d3"
         |+> Static [
+
+            Generic - fun t ->
+                "scaleIdentity" =!> !| T<float> ^-> WebSharper.D3.Impl.Scale.Linear[t] 
+            Generic - fun t -> 
+                "scaleRadial" =!> !| T<float> * !| t ^-> WebSharper.D3.Impl.Scale.Linear[t]
+            Generic - fun t -> 
+                "scaleLinear" =!> !| T<float> * !| t ^-> WebSharper.D3.Impl.Scale.Linear[t]
+
+            "scaleTime" =!> !| T<DateTime> * !| T<float> ^-> WebSharper.D3.Impl.Scale.Time
+            "scaleUtc" =!> !| T<DateTime> * !| T<float> ^-> WebSharper.D3.Impl.Scale.Time
+
+            Generic - fun t -> "line" =!> T<unit> ^-> Impl.Shape.Line[t]
+
+            "create" =!> selector ^-> Selection.[Obj]
+
             // Selections
-            "select"      => selector ^-> Selection.[Obj]
-            "selectAll"   => selector ^-> Selection.[Obj]
+            "select"      =!> selector ^-> Selection.[Obj]
+            "selectAll"   =!> selector ^-> Selection.[Obj]
             "selection"   => O ^-> Selection.[Obj]
             "event"       =? Event
             "mouse"       => Element?container ^-> Int2T
@@ -1624,12 +1621,12 @@ module Definition =
             // Working with Arrays
             "ascending"   => Float?a * Float?b ^-> Int
             "descending"  => Float?a * Float?b ^-> Int
-            Generic - fun t   -> "min" => (!|t)?array ^-> t
-            Generic -- fun t u -> "min" => (!|t)?array * (t ^-> u)?accessor ^-> u
-            Generic - fun t   -> "max" => (!|t)?array ^-> t
-            Generic -- fun t u -> "max" => (!|t)?array * (t ^-> u)?accessor ^-> u
-            Generic - fun t   -> "extent" => (!|t)?array ^-> t * t
-            Generic -- fun t u -> "extent" => (!|t)?array * (t ^-> u)?accessor ^-> u * u
+            Generic - fun t   -> "min" =!> (!|t)?array ^-> t
+            Generic -- fun t u -> "min" =!> (!|t)?array * (t ^-> u)?accessor ^-> u
+            Generic - fun t   -> "max" =!> (!|t)?array ^-> t
+            Generic -- fun t u -> "max" =!> (!|t)?array * (t ^-> u)?accessor ^-> u
+            Generic - fun t   -> "extent" =!> (!|t)?array ^-> !|t
+            Generic -- fun t u -> "extent" =!> (!|t)?array * (t ^-> u)?accessor ^-> !|u
             Generic - fun t   -> "mean" => (!|t)?array ^-> t
             Generic -- fun t u -> "mean" => (!|t)?array * (t ^-> u)?accessor ^-> u
             Generic - fun t   -> "median" => (!|t)?array ^-> t
@@ -1988,6 +1985,11 @@ module Definition =
             "axisBottom" => !| !| Int ^-> Axis
             "axisLeft" => !| !| Int ^-> Axis
 
+            "axisTop" =!> Impl.Base.Scale ^-> Axis
+            "axisRight" =!> Impl.Base.Scale ^-> Axis
+            "axisBottom" =!> Impl.Base.Scale ^-> Axis
+            "axisLeft" =!> Impl.Base.Scale ^-> Axis
+
             //statistics
 
             "min" => Iterable ^-> Value
@@ -2274,8 +2276,17 @@ module Definition =
     let D3Assembly =
         Assembly [
             Namespace "WebSharper.D3" classList
-            Namespace "WebSharper.D3.Resources" [
-                (Resource "D3" "https://cdnjs.cloudflare.com/ajax/libs/d3/7.0.1/d3.min.js").AssemblyWide()
+            Namespace "WebSharper.D3.Base" [
+                Impl.Base.Shape
+                Impl.Base.Interpolate
+                Impl.Base.Scale
+            ]
+            Namespace "WebSharper.D3.Scales" [
+                WebSharper.D3.Impl.Scale.Linear
+                WebSharper.D3.Impl.Scale.Time
+            ]
+            Namespace "WebSharper.D3.Shape" [
+                WebSharper.D3.Impl.Shape.Line
             ]
         ]
 
