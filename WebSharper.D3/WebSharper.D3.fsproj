@@ -5,10 +5,12 @@
     <WebSharperProject>Extension</WebSharperProject>
     <WebSharperSourceMap>false</WebSharperSourceMap>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NpmDependencies>
+      <NpmPackage Name="d3" Version="gt= 7.9.2 lt 8.0.0" ResolutionStrategy="Max" />
+    </NpmDependencies>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Main.fs" />
-    <EmbeddedResource Include="d3.v3.min.js" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

@@ -69,7 +69,7 @@ module Definition =
     let NodeList = T<NodeList>
     let Event = T<Event>
 
-    let FetchRequest = (T<string> * T<JavaScript.RequestOptions>) + T<JavaScript.Request>
+    let FetchRequest = T<string> + (T<string> * T<JavaScript.RequestOptions>) + T<JavaScript.Request>
 
     let nameArg = String?name
 
@@ -233,8 +233,10 @@ module Definition =
                     "selection" => O ^-> Selection.[t]
                     "active" => chained selector
                     "end" => chained O
-                    "on" => (Transition.[t]?``type`` ^-> (O ^-> O)) + chained (Transition.[t]?``type`` * (O ^-> O)?listener)
-                    "each"       => chained (!?String?``type`` * selectionCallback O)
+                    // D3 v7: transition.on(typenames[, listener])
+                    "on" => (String?``type`` ^-> (O ^-> O)) + chained (String?``type`` * (O ^-> O)?listener)
+                    // D3 v7: transition.each(fn) -- v3's each(type, listener) is gone
+                    "each"       => chained (selectionCallback O)
                     "call"       => chained (!+Obj * (Selection.[Obj] ^-> O)?callback)
                     "empty"      => O ^-> Bool
                     "nodes" => O ^-> !| Element
@@ -1559,7 +1561,7 @@ module Definition =
             "contour" => !| Int + !| Float * Int + Float ^-> Obj
             "size" => getSetVal chained Int
             "smoothing" => getSetVal chained Bool
-            "tresholds" => getSetVal chained (!| Int + !| Float)
+            "thresholds" => getSetVal chained (!| Int + !| Float)
         ]
 
     let ContourDensity =
@@ -1571,7 +1573,7 @@ module Definition =
             "weight" => getSetVal chained Float
             "size" => getSetVal chained !| Int
             "cellSize" => getSetVal chained Int
-            "treshold" => getSetVal chained (!| Int + !| Float)
+            "thresholds" => getSetVal chained (!| Int + !| Float)
             "bandWidth" => getSetVal chained Float
         ]
 
@@ -1602,11 +1604,12 @@ module Definition =
         [
             "value" => getSetVal chained (O ^-> Value)
             "domain" => getSetVal chained Obj
-            "tresholds" => getSetVal chained !| Value
+            "thresholds" => getSetVal chained !| Value
         ]
 
     let D3 =
         Class "d3"
+        |> Import "*" "d3"
         |+> Static [
             // Selections
             "select"      => selector ^-> Selection.[Obj]
@@ -1657,7 +1660,7 @@ module Definition =
             "transform" => String?string ^-> Transform
 
             "format" => String?specifier ^-> Float?number ^-> String
-            "formatPefix" => Float?value * !?Float?precision ^-> Prefix
+            "formatPrefix" => Float?value * !?Float?precision ^-> Prefix
             "formatSpecifier" => String ^-> Obj
             "precisionFixed" => Float ^-> Float
             "precisionPrefix" => Float * Float ^-> Float
@@ -1738,13 +1741,13 @@ module Definition =
             Generic - fun t -> "curveCardinal" => t ^-> !| Point
             Generic - fun t -> "curveCardinalClosed" => t ^-> !| Point
             Generic - fun t -> "curveCardinalOpen" => t ^-> !| Point
-            Generic - fun t -> "curveCatMulRom" => t ^-> !| Point
-            Generic - fun t -> "curveCatMulRomClosed" => t ^-> !| Point
-            Generic - fun t -> "curveCatMulRomOpen" => t ^-> !| Point
+            Generic - fun t -> "curveCatmullRom" => t ^-> !| Point
+            Generic - fun t -> "curveCatmullRomClosed" => t ^-> !| Point
+            Generic - fun t -> "curveCatmullRomOpen" => t ^-> !| Point
             Generic - fun t -> "curveLinear" => t ^-> !| Point
             Generic - fun t -> "curveLinearClosed" => t ^-> !| Point
             Generic - fun t -> "curveMonotoneX" => t ^-> !| Point
-            Generic - fun t -> "curveMonotonY" => t ^-> !| Point
+            Generic - fun t -> "curveMonotoneY" => t ^-> !| Point
             Generic - fun t -> "curveNatural" => t ^-> !| Point
             Generic - fun t -> "curveStep" => t ^-> !| Point
             Generic - fun t -> "curveStepAfter" => t ^-> !| Point
@@ -1764,11 +1767,32 @@ module Definition =
             "node" => O ^-> Node
             "stratify" => O ^-> Stratify
 
-            //projection
+            //geo (d3-geo): D3 v4+ moved the geo helpers to the top level
+            //(d3.geoPath, d3.geoCentroid, ...); the old d3.geo namespace is gone.
 
-            "path" => O ^-> Path
+            // The binding's Path type models a geo path (projection/context/
+            // area/centroid/...), so GeoPath() and the legacy Path() both emit
+            // d3.geoPath() (previously Path() wrongly emitted d3.path()).
+            "geoPath" => !?Projection?projection ^-> Path
+            "path" => !?Projection?projection ^-> Path |> WithSourceName "geoPath"
 
-            "projection" => O ^-> Projection
+            "geoArea" => Feature ^-> Float
+            "geoBounds" => Feature ^-> Float2x2T
+            "geoCentroid" => Feature ^-> Float2T
+            "geoCircle" => O ^-> Circle
+            "geoContains" => Feature * Float2T ^-> Bool
+            "geoDistance" => Float2T?a * Float2T?b ^-> Float
+            "geoGraticule" => O ^-> Graticule
+            "geoGraticule10" => O ^-> Feature
+            "geoInterpolate" => Float2T?a * Float2T?b ^-> (Float ^-> Float2T)
+            "geoLength" => Feature ^-> Float
+            "geoRotation" => (!|Float)?angles ^-> Rotation
+            "geoProjection" => (Float2T ^-> Float2T)?project ^-> Projection
+            "geoProjectionMutator" => (Float2T ^-> Float2T ^-> Float2T)?rawFactory ^-> Projection
+            "geoStream" => Obj?``object`` * Listener?listener ^-> O
+            "geoIdentity" => O ^-> Projection
+
+            //projections
 
             "geoAzimuthalEqualArea" => O ^-> Projection
             "geoAzimuthalEqualAreaRaw" =? Projection
@@ -1807,8 +1831,8 @@ module Definition =
             "geoMercator" => O ^-> Projection
             "geoMercatorRaw" =? Projection
             
-            "geoTransfersMercator" => O ^-> Projection
-            "geoTransfersMercatorRaw" =? Projection
+            "geoTransverseMercator" => O ^-> Projection
+            "geoTransverseMercatorRaw" =? Projection
             
             "geoNaturalEarth1" => O ^-> Projection
             "geoNaturalEarth1Raw" =? Projection
@@ -1823,8 +1847,8 @@ module Definition =
             "forceY" => !? Int ^-> ForceY
             "forceRadial" => Int * !? Int * !? Int ^-> Radial
 
-            //fetches
-            
+            //fetches (d3-fetch, Promise-based)
+
             "blob" => FetchRequest ^-> T<JavaScript.Promise<JavaScript.Blob>>
             "buffer" => FetchRequest ^-> T<JavaScript.Promise<JavaScript.ArrayBuffer>>
             "html" => FetchRequest ^-> T<JavaScript.Promise<JavaScript.Dom.Document>>
@@ -1833,10 +1857,10 @@ module Definition =
             "text" => FetchRequest ^-> T<JavaScript.Promise<string>>
             "xml" => FetchRequest ^-> T<JavaScript.Promise<JavaScript.Dom.Document>>
 
-            "csv" => FetchRequest * !? Int ^-> T<JavaScript.Promise<string>>
-            "dsv" => FetchRequest * !? Int ^-> T<JavaScript.Promise<string>>
+            "csv" => FetchRequest ^-> T<JavaScript.Promise<obj>>
+            "dsv" => FetchRequest ^-> T<JavaScript.Promise<obj>>
             "svg" => FetchRequest ^-> T<JavaScript.Promise<string>>
-            "tsv" => FetchRequest * !? Int ^-> T<JavaScript.Promise<string>>
+            "tsv" => FetchRequest ^-> T<JavaScript.Promise<obj>>
             
             //ease
 
@@ -2073,9 +2097,9 @@ module Definition =
 
             "bin" => O ^-> Bin
 
-            "tresholdFreedmanDiaconis" => !| Value * Value * Value ^-> Int
-            "tresholdScott" => !| Value * Value * Value ^-> Int
-            "tresholdSturges" => !| Value ^-> Int
+            "thresholdFreedmanDiaconis" => !| Value * Value * Value ^-> Int
+            "thresholdScott" => !| Value * Value * Value ^-> Int
+            "thresholdSturges" => !| Value ^-> Int
 
             //interning
 
@@ -2103,180 +2127,108 @@ module Definition =
                     "interpolators" =? !|(ipF Obj)
                 ]
             )
-        |+> Static (   // xhr section
-                // approximate: need xhr-returning API
-                // note: turns out d3 detects callback arity dynamically, and calls it differently!
-                // therefore need extra care with tupled functions.
-                let remote name t : list<CodeModel.IClassMember> =
-                    [
-                        name => String?url * (t ^-> O) ^-> O
-                        name => String?url * (Obj?err * t ^-> O) ^-> O
-                    ]
-                let remoteMime name t : list<CodeModel.IClassMember> =
-                    [
-                        name => String?url * !?String?mimeType * (t ^-> O) ^-> O
-                        name => String?url * (Obj?err * t ^-> O) ^-> O
-                        name => String?url * String?mimeType * (Obj?err * t ^-> O) ^-> O
-                    ]
-                let doc = T<Document>
-                List.concat [
-                    remoteMime "text" String
-                    remote "json" Obj
-                    remoteMime "xml" doc
-                    remote "html" doc
-                    remote "csv" !|Obj
-                    remote "tsv" !|Obj
-                    ["xhr" => String?url * !?String?mimeType ^-> Xhr]
-                    remoteMime "xhr" Xhr.Type
-                ]
-            )
-        |=> Nested [
+        // D3 v7 removed the callback-based d3.json/d3.csv/... and d3.xhr
+        // helpers (they are Promise-based fetch now, above), so the v5-era xhr
+        // section is not emitted.
+        // D3 v7 moved these helpers to the top level; the old d3.geo/d3.geom/
+        // d3.layout/d3.scale/d3.behavior/d3.time/d3.ns/d3.random/d3.timer
+        // namespaces no longer exist. Their contents are re-exposed here with
+        // their v7 names.
+        |+> Static [
 
-            Class "d3.timer"
-            |+> Static [
-                "flush" => O ^-> O
-            ]
-            Class "d3.random"
-            |+> Static [
-                "normal"    => !?Float?mean * !?Float?deviation ^-> Float
-                "logNormal" => !?Float?mean * !?Float?deviation ^-> Float
-                "irwinHall" => Int?count ^-> Float
-                "bates" => Int?count ^-> Float
-                "exponential" => Int?count ^-> Float
-                "pareto" => Int?count ^-> Float
-                "bernouli" => Int?count ^-> Float
-                "geometric" => Int?count ^-> Float
-                "binomial" => Int * Float ^-> Float
-                "gamma" => Float * !? Float ^-> Float
-                "beta" => Float * !? Float ^-> Float
-                "weibull" => Float * !? Float * !? Float ^-> Float
-                "cauchy" => Float ^-> Float
-                "logistic" => !? Float * !? Float ^-> Float
-                "poisson" => Float ^-> Float
-                "uniform" => Float * !? Float ^-> (O ^-> Float)
-                "int" => Int * !? Int ^-> (O ^-> Int)
-                "logNormal" => Int * !? Int ^-> (O ^-> Int)
-            ]
-            Class "d3.ns"
-            |+> Static [
-                "prefix"  =? Map
-                "qualify" => nameArg ^-> QualifiedNs
-            ]
-            Class "d3.time"
-            |+> Static [
-                "format"    => String?specifier ^-> TimeFormat
+            // scales (d3-scale)
+            "scaleLinear" => O ^-> QuantitativeScale
+            "scaleSqrt" => O ^-> QuantitativeScale
+            "scalePow" => O ^-> QuantitativeScale
+            "scaleLog" => O ^-> QuantitativeScale
+            "scaleSymlog" => O ^-> QuantitativeScale
+            "scaleRadial" => O ^-> QuantitativeScale
+            "scaleIdentity" => O ^-> IdentityScale
+            "scaleTime" => O ^-> TimeScale
+            "scaleUtc" => O ^-> TimeScale
+            "scaleQuantize" => O ^-> DiscreteScale
+            "scaleThreshold" => O ^-> DiscreteScale
+            "scaleQuantile" => O ^-> QuantileScale
+            Generic - fun tData -> "scaleOrdinal" => O ^-> OrdinalScale.[tData]
+            Generic - fun tData -> "scaleBand" => O ^-> OrdinalScale.[tData]
+            Generic - fun tData -> "scalePoint" => O ^-> OrdinalScale.[tData]
 
-                "scale"     => O ^-> TimeScale
+            // drag / zoom / brush (d3-drag, d3-zoom, d3-brush)
+            "drag" => O ^-> Drag
+            "dragDisable" => T<JavaScript.Window> ^-> O
+            "dragEnable" => T<JavaScript.Window> ^-> O
+            "zoom" => O ^-> Zoom
+            "brush" => O ^-> Brush
+            "brushX" => O ^-> Brush
+            "brushY" => O ^-> Brush
 
-                "second"    =? TimeInterval
-                "minute"    =? TimeInterval
-                "hour"      =? TimeInterval
-                "day"       =? TimeInterval
-                "week"      =? TimeInterval
-                "sunday"    =? TimeInterval
-                "monday"    =? TimeInterval
-                "tuesday"   =? TimeInterval
-                "wednesday" =? TimeInterval
-                "thursday"  =? TimeInterval
-                "friday"    =? TimeInterval
-                "saturday"  =? TimeInterval
-                "month"     =? TimeInterval
-                "year"      =? TimeInterval
-            ]
-            |=> Nested [
-                Class "d3.time.format"
-                |+> Static [
-                    "utc" => String?specifier ^-> TimeFormat
-                    "iso" =? TimeFormat
-                ]
-            ]
-            Class "d3.layout"
-            |+> Static [
-                "bundle"    => O ^-> Bundle
-                "chord"     => O ^-> ChordLayout
-                "cluster"   => O ^-> Cluster
-                "force"     => O ^-> Force
-                "hierarchy" => O ^-> Hierarchy
-                "histogram" => O ^-> Histogram
-                "pack"      => O ^-> Pack
-                "partition" => O ^-> Partition
-                "pie"       => O ^-> Pie
-                "stack"     => O ^-> Stack
-                "tree"      => O ^-> Tree
-                "treemap"   => O ^-> Treemap
-            ]
-            Class "d3.scale"
-            |+> Static [
-                "linear"    => O ^-> QuantitativeScale
-                "sqrt"      => O ^-> QuantitativeScale
-                "pow"       => O ^-> QuantitativeScale
-                "log"       => O ^-> QuantitativeScale
-                "quantize"  => O ^-> DiscreteScale
-                "threshold" => O ^-> DiscreteScale
-                "quantile"  => O ^-> QuantileScale
-                "identity"  => O ^-> IdentityScale
-                Generic - fun tData -> "ordinal"   => O ^-> OrdinalScale.[tData]
-            ]
-            Class "d3.geo"
-            |+> Static [
-                "path"      => O ^-> Path
-                "graticule" => O ^-> Graticule
-                "circle"    => O ^-> Circle
-                "area"      => Feature ^-> Float
-                "centroid"  => Feature ^-> Float2T
-                "bounds"    => Feature ^-> Float2x2T
-                "distance"  => Float2T?a * Float2T?b ^-> Float
-                "rotation"  => (!|Float)?rotate ^-> Rotation
-                "projection" => (Float2T ^-> Float2T)?raw ^-> Projection
-                "projectionMutator" => (Float2T ^-> Float2T ^-> Float2T)?rawFactory ^-> Projection
+            // random (d3-random)
+            "randomUniform" => !?Float?min * !?Float?max ^-> (O ^-> Float)
+            "randomInt" => !?Int?min * !?Int?max ^-> (O ^-> Int)
+            "randomNormal" => !?Float?mu * !?Float?sigma ^-> (O ^-> Float)
+            "randomLogNormal" => !?Float?mu * !?Float?sigma ^-> (O ^-> Float)
+            "randomBates" => Float?n ^-> (O ^-> Float)
+            "randomIrwinHall" => Float?n ^-> (O ^-> Float)
+            "randomExponential" => Float?lambda ^-> (O ^-> Float)
+            "randomPareto" => Float?alpha ^-> (O ^-> Float)
+            "randomBernoulli" => Float?p ^-> (O ^-> Int)
+            "randomGeometric" => Float?p ^-> (O ^-> Int)
+            "randomBinomial" => Float?n * !?Float?p ^-> (O ^-> Int)
+            "randomGamma" => Float?k * !?Float?theta ^-> (O ^-> Float)
+            "randomBeta" => Float?alpha * !?Float?beta ^-> (O ^-> Float)
+            "randomWeibull" => Float?k * !?Float?a * !?Float?b ^-> (O ^-> Float)
+            "randomCauchy" => !?Float?a * !?Float?b ^-> (O ^-> Float)
+            "randomLogistic" => !?Float?a * !?Float?b ^-> (O ^-> Float)
+            "randomPoisson" => Float?lambda ^-> (O ^-> Int)
+            "randomLcg" => !?Float?seed ^-> (O ^-> Float)
 
-                (* "albersUsa"            => O ^-> Projection
-                "azimuthalEqualArea"   => O ^-> Projection
-                "azimuthalEquidistant" => O ^-> Projection
-                "conicConformal"       => O ^-> Projection
-                "conicEquidistant"     => O ^-> Projection
-                "conicEqualArea"       => O ^-> Projection
-                "equirectangular"      => O ^-> Projection
-                "gnomonic"             => O ^-> Projection
-                "mercator"             => O ^-> Projection
-                "orthographic"         => O ^-> Projection
-                "stereographic"        => O ^-> Projection *)
+            // dsv (d3-dsv)
+            "csvParse" => String ^-> !|Obj
+            "csvParseRows" => String ^-> !| !|Obj
+            "csvFormat" => !|Obj ^-> String
+            "csvFormatRows" => !| !|Obj ^-> String
+            "tsvParse" => String ^-> !|Obj
+            "tsvParseRows" => String ^-> !| !|Obj
+            "tsvFormat" => !|Obj ^-> String
+            "tsvFormatRows" => !| !|Obj ^-> String
 
-//                "albersUsa.raw"            => Float2 ^-> Projection
-//                "azimuthalEqualArea.raw"   => O ^-> Projection
-//                "azimuthalEquidistant.raw" => O ^-> Projection
-//                "conicConformal.raw"       => Float2 ^-> Projection
-//                "conicEquidistant.raw"     => Float2 ^-> Projection
-//                "equirectangular.raw"      => O ^-> Projection
-//                "gnomonic.raw"             => O ^-> Projection
-//                "mercator.raw"             => O ^-> Projection
-//                "orthographic.raw"         => O ^-> Projection
-//                "stereographic.raw"        => O ^-> Projection
+            // polygon (d3-polygon)
+            "polygonArea" => !|Float2T ^-> Float
+            "polygonCentroid" => !|Float2T ^-> Float2T
+            "polygonHull" => !|Float2T ^-> !|Float2T
+            "polygonContains" => !|Float2T * Float2T ^-> Bool
+            "polygonLength" => !|Float2T ^-> Float
 
-            ]
-            Class "d3.geom"
-            |+> Static [
-                "voronoi"  => O ^-> Voronoi
-                "quadtree" => O ^-> Quadtree
-                "polygon"  => (!|Float2T)?vertices ^-> PolygonClass
-                "hull"     => O ^-> Hull
-            ]
-            Class "d3.behavior"
-            |+> Static [
-                "drag" => O ^-> Drag
-                "dragDisable" => T<JavaScript.Window> ^-> O
-                "dragEnable" => T<JavaScript.Window> ^-> O
-                "zoom" => O ^-> Zoom
-            ]
+            // hierarchy (d3-hierarchy)
+            "hierarchy" => Obj?data * !?(Obj ^-> !|Obj)?children ^-> HierarchyNode
+            "cluster" => O ^-> Cluster
+            "pack" => O ^-> Pack
+            "partition" => O ^-> Partition
+            "tree" => O ^-> Tree
+            "treemap" => O ^-> Treemap
+
+            // selection helpers (d3-selection)
+            "create" => String?name ^-> Element
+            "creator" => String?name ^-> (Obj?d * Int?i ^-> Element)
+            "matcher" => String?selector ^-> (Element ^-> Bool)
+            "namespace" => String?name ^-> QualifiedNs
+            "pointer" => (Obj + Element)?ev * !?Obj?target ^-> Float2T
+            "pointers" => (Obj + Element)?ev * !?Obj?target ^-> !|Float2T
+            "selector" => String ^-> (Element ^-> Element)
+            "window" => Obj?node ^-> T<JavaScript.Window>
+
+            // array / format / timer additions
+            "histogram" => O ^-> Bin
+            "now" => O ^-> Float
+            "medianIndex" => Iterable ^-> Int
+            "quantileIndex" => Iterable * Int + Float ^-> Int
         ]
         |>! addToClassList
+
 
     let D3Assembly =
         Assembly [
             Namespace "WebSharper.D3" classList
-            Namespace "WebSharper.D3.Resources" [
-                (Resource "D3" "https://cdnjs.cloudflare.com/ajax/libs/d3/7.0.1/d3.min.js").AssemblyWide()
-            ]
         ]
 
 [<Sealed>]

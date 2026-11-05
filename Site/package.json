@@ -1,0 +1,10 @@
+{
+  "name": "WebSharper.D3.Site",
+  "version": "1.0.0",
+  "dependencies": {
+    "d3": "^7.9.2"
+  },
+  "devDependencies": {
+    "esbuild": "^0.19.9"
+  }
+}

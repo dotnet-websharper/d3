@@ -10,6 +10,7 @@ tools/packages/
 
 bin/
 obj/
+node_modules/
 /.fake/
 /paket-files/
 /.vscode/
