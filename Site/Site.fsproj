@@ -16,7 +16,7 @@
     <Compile Include="CompaniesGraph.UI.fs" />
     <None Include="CompaniesGraph.fsx" />
     <None Include="CompaniesGraph.json" /> -->
-    <!-- <Compile Include="WorldTour.fs" /> -->
+    <Compile Include="WorldTour.fs" />
     <Compile Include="Client.fs" />
     <Content Include="index.html" />
     <None Include="Style.css" />
@@ -30,11 +30,11 @@
       <SiteFiles Include="*.css" />
       <SiteFiles Include="*.csv" />
       <SiteFiles Include="*.tsv" />
-      <SiteContentFiles Include="Content/*.*" />
+      <SiteContentFiles Include="Content/**/*.*" />
       <WorldTourFiles Include="WorldTour/*.*" />
     </ItemGroup>
     <Copy SourceFiles="@(SiteFiles)" DestinationFolder="..\build\html" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(SiteContentFiles)" DestinationFolder="..\build\html\Content" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(SiteContentFiles)" DestinationFolder="..\build\html\Content\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(WorldTourFiles)" DestinationFolder="..\build\html\WorldTour" SkipUnchangedFiles="true" />
   </Target>
   <ItemGroup>
