@@ -215,7 +215,7 @@ class Sample {
         copy.attributes.removeNamedItem("id");
         self_1.appendChild(copy);
       }
-    })], []), Doc.Element("a", [Attr.Create("class", "source-link"), Attr.Create("href", "https://github.com/dotnet-websharper/d3/blob/master/Site/"+this.FileName)], [Doc.TextNode("View source")])]);
+    })], []), Doc.Element("a", [Attr.Create("class", "source-link"), Attr.Create("href", "https://github.com/dotnet-websharper/d3/blob/main/Site/"+this.FileName)], [Doc.TextNode("View source")])]);
     LoadLocalTemplates("");
     Doc.RunAppendById("sample-side", _2);
   }
