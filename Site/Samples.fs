@@ -95,7 +95,7 @@ module Samples =
             Clear sMain
             Clear sSide
             s.Render(sMain)
-            let url = "http://github.com/intellifactory/websharper.d3/blob/master/Site/" + s.FileName
+            let url = "https://github.com/dotnet-websharper/d3/blob/master/Site/" + s.FileName
             let side =
                 div [] [
                     div [
@@ -133,11 +133,10 @@ module Samples =
                     samples
                     |> List.mapi (fun i s ->
                         li [
-                            attr.href "#"
                             on.afterRender (fun self -> if i = 0 then select s self)
                             on.click (fun self _ -> select s self)
                         ] [
-                            text s.Title
+                            a [attr.href "#"] [text s.Title]
                         ])
                     |> Doc.Concat
                 ]
