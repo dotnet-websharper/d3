@@ -356,7 +356,7 @@ The bindings are released under the Apache 2.0 license — see
 [dotnet]: https://dotnet.microsoft.com/download
 [node]: https://nodejs.org/
 [paket]: https://fsprojects.github.io/Paket/
-[license]: https://github.com/dotnet-websharper/d3/blob/master/LICENSE.md
+[license]: https://github.com/dotnet-websharper/d3/blob/main/LICENSE.md
 [w3cselectorsapi]: https://www.w3.org/TR/selectors-api
 [sizzle]: https://sizzlejs.com
 [jquery]: https://jquery.com

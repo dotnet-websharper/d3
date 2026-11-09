@@ -95,7 +95,7 @@ module Samples =
             Clear sMain
             Clear sSide
             s.Render(sMain)
-            let url = "https://github.com/dotnet-websharper/d3/blob/master/Site/" + s.FileName
+            let url = "https://github.com/dotnet-websharper/d3/blob/main/Site/" + s.FileName
             let side =
                 div [] [
                     div [

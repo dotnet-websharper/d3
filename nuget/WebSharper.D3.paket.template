@@ -5,7 +5,7 @@ owners IntelliFactory
 projectUrl https://websharper.com/
 repositoryType git
 repositoryUrl https://github.com/dotnet-websharper/d3
-licenseUrl http://github.com/dotnet-websharper/websharper.d3/blob/master/LICENSE.md
+licenseUrl https://github.com/dotnet-websharper/d3/blob/main/LICENSE.md
 iconUrl https://github.com/dotnet-websharper/core/raw/websharper50/tools/WebSharper.png
 description
     WebSharper Extensions for D3 7.0.1
