@@ -37,11 +37,21 @@ module D3Extras =
 
     type D3 with
 
-        static member Json(url: string) =
-            Defer(fun c -> D3.Json(url, c))
+        // D3 v7 dropped the callback-based d3.json/d3.tsv (they return Promises
+        // now), so bridge the fetch API back to Async for the sample.
+        static member JsonAsync(url: string) : Async<'T> =
+            Defer(fun c ->
+                D3.Json(url).Then(
+                    (fun (data: obj) -> c(null, As<'T> data)),
+                    (fun (err: obj) -> c(err, As<'T> null))
+                ) |> ignore)
 
-        static member Tsv(url: string) =
-            Defer(fun c -> D3.Tsv(url, c))
+        static member TsvAsync(url: string) : Async<'T> =
+            Defer(fun c ->
+                D3.Tsv(url).Then(
+                    (fun (data: obj) -> c(null, As<'T> data)),
+                    (fun (err: obj) -> c(err, As<'T> null))
+                ) |> ignore)
 
 [<JavaScript>]
 module WorldTour =
@@ -73,11 +83,12 @@ module WorldTour =
                 .Attr("width", width)
                 .Attr("height", height)
         let c = (canvas.Node() |> As<CanvasElement>).GetContext("2d")
-        let path = D3.Path().Projection(projection).Context(c)
+        let path = D3.GeoPath().Projection(projection).Context(c)
         async {
             let globe = New ["type" => "sphere"]
-            let! world = D3.Json("WorldTour/world-110m.json")
-            let! names = D3.Tsv("WorldTour/world-country-names.tsv")
+            let! world = D3.JsonAsync("WorldTour/world-110m.json")
+            let! namesObj = D3.TsvAsync("WorldTour/world-country-names.tsv")
+            let names : obj[] = As namesObj
             let landFeature = topojson.feature(world, world?objects?``land``)
             let countries : obj [] = topojson.feature(world, world?objects?countries)?features
             let borders = topojson.mesh(world, world?objects?countries, fun (a, b) -> a !==. b)
@@ -95,9 +106,9 @@ module WorldTour =
             let rec transition i : unit =
                 D3.Transition()
                     .Duration(1250)
-                    .Each("start", fun (_, _) -> title.Text(countries.[i]?name : string) |> ignore)
+                    .Each(fun (_, _) -> title.Text(countries.[i]?name : string) |> ignore)
                     .Tween("rotate", fun _ ->
-                        let (p0, p1) = D3.Geo.Centroid(countries.[i])
+                        let (p0, p1) = D3.GeoCentroid(countries.[i])
                         let r = D3.Interpolate(projection.Rotate(), (-p0, -p1, 0.))
                         Action<_>(fun t ->
                             let (x, y, z) = r.Invoke(t)
@@ -108,7 +119,7 @@ module WorldTour =
                             c.StrokeStyle <- "#fff"; c.LineWidth <- 0.5; c.BeginPath(); path.Call(borders) |> ignore; c.Stroke()
                             c.StrokeStyle <- "#000"; c.LineWidth <- 2.0; c.BeginPath(); path.Call(globe) |> ignore; c.Stroke()))
                     .Transition()
-                        .Each("end", fun _ -> transition (i + 1))
+                        .On("end", fun _ -> transition (i + 1))
                 |> ignore
             return transition 0
         }

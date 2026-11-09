@@ -29,7 +29,7 @@ module Client =
         Samples.Set.Create [
             !+ Circles.Sample
             //!+ CompaniesGraph.UI.Sample
-            //!+ WorldTour.Sample
+            !+ WorldTour.Sample
         ]
 
     [<SPAEntryPoint>]
