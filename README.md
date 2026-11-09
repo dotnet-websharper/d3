@@ -320,9 +320,10 @@ dotnet paket pack ./out
 
 ### Deployment
 
-The sample is published to the repository's GitHub Pages site
-(<https://dotnet-websharper.github.io/d3/>) from the `gh-pages` branch; the
-build output to publish is `build/html`.
+Pushes to `main` run [`.github/workflows/ghpages.yml`](.github/workflows/ghpages.yml),
+which builds the sample in Release (on .NET 11 with the WS11 compiler) and
+publishes `build/html` to the `gh-pages` branch. The site is available at
+<https://dotnet-websharper.github.io/d3/>.
 
 ## Repository layout
 
