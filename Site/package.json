@@ -5,6 +5,6 @@
     "d3": "^7.9.2"
   },
   "devDependencies": {
-    "esbuild": "^0.19.9"
+    "esbuild": "^0.28.1"
   }
 }
