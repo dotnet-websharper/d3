@@ -107,7 +107,7 @@ module Samples =
                                 copy.Attributes.RemoveNamedItem("id") |> ignore
                                 self.AppendChild(copy) |> ignore) //?
                     ] []
-                    a [attr.``class`` "btn btn-primary btn-lg"; attr.href url] [text "Source"]
+                    a [attr.``class`` "source-link"; attr.href url] [text "View source"]
                 ]
             side |> Doc.RunAppendById ("sample-side")
 
@@ -129,7 +129,7 @@ module Samples =
                 dom.ClassList.Add "active"
                 s.Show()
             let rec navs =
-                ul [Attr.Class "nav nav-pills"] [
+                ul [Attr.Class "sample-tabs"] [
                     samples
                     |> List.mapi (fun i s ->
                         li [
