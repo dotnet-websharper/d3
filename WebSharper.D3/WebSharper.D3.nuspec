@@ -6,7 +6,7 @@
     <title>WebSharper.D3 (d3v3)</title>
     <authors>IntelliFactory</authors>
     <owners>IntelliFactory</owners>
-    <licenseUrl>http://github.com/intellifactory/websharper.d3/blob/master/LICENSE.md</licenseUrl>
+    <licenseUrl>https://github.com/dotnet-websharper/d3/blob/main/LICENSE.md</licenseUrl>
     <projectUrl>http://github.com/intellifactory/websharper.d3</projectUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>WebSharper bindings to D3 (d3js.org) version d3v3.</description>
