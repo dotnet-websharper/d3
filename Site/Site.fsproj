@@ -1,50 +1,39 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <WebSharperProject>Bundle</WebSharperProject>
-    <WebSharperBundleOutputDir>Content</WebSharperBundleOutputDir>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <OutputType>Library</OutputType>
     <WebSharperSourceMap>false</WebSharperSourceMap>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="Samples.fs" />
     <Compile Include="Circles.fs" />
     <Compile Include="Graphs.fs" />
-    <!-- <Compile Include="CompaniesGraph.Data.fs" />
-    <Compile Include="CompaniesGraph.UI.fs" />
-    <None Include="CompaniesGraph.fsx" />
-    <None Include="CompaniesGraph.json" /> -->
+    <Compile Include="Shapes.fs" />
     <Compile Include="WorldTour.fs" />
     <Compile Include="Client.fs" />
     <Content Include="index.html" />
-    <None Include="Style.css" />
+    <None Include="site.css" />
     <None Include="sp500.csv" />
+    <None Include="topojson.v1.min.js" />
+    <None Include="WorldTour/*.json" />
+    <None Include="WorldTour/*.tsv" />
     <None Include="package.json" />
     <None Include="esbuild.config.mjs" />
+    <None Include="wsconfig.json" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../WebSharper.D3/WebSharper.D3.fsproj" />
+  </ItemGroup>
+
   <Target Name="ESBuildBundle" AfterTargets="WebSharperCompile">
     <Exec Command="npm install" />
     <Exec Command="node ./esbuild.config.mjs" />
   </Target>
-  <Target Name="DeploySite" AfterTargets="Build">
-    <ItemGroup>
-      <SiteFiles Include="*.html" />
-      <SiteFiles Include="*.js" />
-      <SiteFiles Include="*.json" Exclude="package.json;package-lock.json" />
-      <SiteFiles Include="*.css" />
-      <SiteFiles Include="*.csv" />
-      <SiteFiles Include="*.tsv" />
-      <SiteContentFiles Include="Content/**/*.*" />
-      <WorldTourFiles Include="WorldTour/*.*" />
-    </ItemGroup>
-    <Copy SourceFiles="@(SiteFiles)" DestinationFolder="..\build\html" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(SiteContentFiles)" DestinationFolder="..\build\html\Content\%(RecursiveDir)" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(WorldTourFiles)" DestinationFolder="..\build\html\WorldTour" SkipUnchangedFiles="true" />
-  </Target>
-  <ItemGroup>
-    <ProjectReference Include="../WebSharper.D3/WebSharper.D3.fsproj" />
-  </ItemGroup>
+
   <Import Project="..\.paket\Paket.Restore.targets" />
+
 </Project>

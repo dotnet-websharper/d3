@@ -83,33 +83,28 @@ module Samples =
             BTitle = None
         }
 
-    let private Clear (el: Dom.Element) =
-        while el.HasChildNodes() do
-            el.RemoveChild(el.FirstChild) |> ignore
-
     type Sample with
 
-        member s.Show() =
-            let sMain = JS.Document.GetElementById("sample-main")
-            let sSide = JS.Document.GetElementById("sample-side")
-            Clear sMain
-            Clear sSide
-            s.Render(sMain)
+        /// The "About" pane: the sample's description, cloned from the hidden
+        /// `.sample-data` block in index.html, plus a source link.
+        member s.SideDoc =
             let url = "https://github.com/dotnet-websharper/d3/blob/main/Site/" + s.FileName
-            let side =
-                div [] [
-                    div [
-                        on.afterRender (fun self ->
-                            match JS.Document.GetElementById(s.Id) with
-                            | null -> ()
-                            | el ->
-                                let copy = el.CloneNode(true) :?> Dom.Element
-                                copy.Attributes.RemoveNamedItem("id") |> ignore
-                                self.AppendChild(copy) |> ignore) //?
-                    ] []
-                    a [attr.``class`` "source-link"; attr.href url] [text "View source"]
-                ]
-            side |> Doc.RunAppendById ("sample-side")
+            Doc.Concat [
+                div [
+                    on.afterRender (fun self ->
+                        match JS.Document.GetElementById(s.Id) with
+                        | null -> ()
+                        | el ->
+                            let copy = el.CloneNode(true) :?> Dom.Element
+                            copy.Attributes.RemoveNamedItem("id") |> ignore
+                            self.AppendChild(copy) |> ignore)
+                ] []
+                a [attr.``class`` "source-link"; attr.href url] [text "View source"]
+            ]
+
+        /// A Doc that renders the sample into a fresh container once mounted.
+        member s.MainDoc =
+            div [ on.afterRender (fun el -> s.Render el) ] []
 
     type Set =
         private
@@ -118,26 +113,28 @@ module Samples =
         static member Create(ss) = Set [for (Set xs) in ss do yield! xs]
         static member Singleton(s) = Set [s]
 
-        member s.Show() =
+        /// Fills the template's tab bar, canvas and sidebar slots, showing the
+        /// first sample.
+        member s.Show (navs: Var<Doc>) (main: Var<Doc>) (side: Var<Doc>) =
             let (Set samples) = s
-            let select (s: Sample) (dom: Dom.Element) =
+            let show (s: Sample) (dom: Dom.Element) =
                 let j = JS.Document.QuerySelectorAll("#sample-navs ul li") //("li").RemoveClass("active")
                 j.ForEach((fun (node, _, _, _) ->
                     let elem = node :?> Dom.Element
                     elem.ClassList.Remove "active"
                 ), null)
                 dom.ClassList.Add "active"
-                s.Show()
-            let rec navs =
+                main.Value <- s.MainDoc
+                side.Value <- s.SideDoc
+            navs.Value <-
                 ul [Attr.Class "sample-tabs"] [
                     samples
                     |> List.mapi (fun i s ->
                         li [
-                            on.afterRender (fun self -> if i = 0 then select s self)
-                            on.click (fun self _ -> select s self)
+                            on.afterRender (fun self -> if i = 0 then show s self)
+                            on.click (fun self _ -> show s self)
                         ] [
                             a [attr.href "#"] [text s.Title]
                         ])
                     |> Doc.Concat
                 ]
-            navs |> Doc.RunAppendById ("sample-navs")

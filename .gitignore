@@ -5,6 +5,7 @@ Site/Content/
 */bin/
 */obj/
 build/
+dist/
 packages/
 tools/packages/
 

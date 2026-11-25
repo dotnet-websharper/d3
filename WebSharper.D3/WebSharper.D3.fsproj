@@ -2,11 +2,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <WebSharperProject>Extension</WebSharperProject>
+    <WebSharperProject>binding</WebSharperProject>
     <WebSharperSourceMap>false</WebSharperSourceMap>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NpmDependencies>
-      <NpmPackage Name="d3" Version="gt= 7.9.2 lt 8.0.0" ResolutionStrategy="Max" />
+      <NpmPackage Name="d3" Version="&gt;= 7.9.2 &lt; 8.0.0" ResolutionStrategy="Max" />
     </NpmDependencies>
   </PropertyGroup>
   <ItemGroup>
