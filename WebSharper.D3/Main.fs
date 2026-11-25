@@ -505,6 +505,92 @@ module Definition =
         gen
 
 
+    // d3-scale: band/point scales are ordinal scales with a numeric range, and
+    // their own `bandwidth()`/`step()` surface.
+    let BandScale =
+        let gen =
+            Generic - fun tData ->
+            ChainedClassInheritsG "BandScale" tData Scale <| fun chained ->
+            [
+                "apply"         => tData?x ^-> Float |> WithInline "$this($x)"
+                "domain"        => getSetVal chained !|tData
+                "range"         => getSetVal chained !|Float
+                "rangeRound"    => chained !|Float
+                "round"         => getSetVal chained Bool
+                "padding"       => getSetVal chained Float
+                "paddingInner"  => getSetVal chained Float
+                "paddingOuter"  => getSetVal chained Float
+                "align"         => getSetVal chained Float
+                "bandwidth"     => O ^-> Float
+                "step"          => O ^-> Float
+                "copy"          => chained O
+            ]
+        addToClassList gen
+        gen
+
+    let PointScale =
+        let gen =
+            Generic - fun tData ->
+            ChainedClassInheritsG "PointScale" tData Scale <| fun chained ->
+            [
+                "apply"      => tData?x ^-> Float |> WithInline "$this($x)"
+                "domain"     => getSetVal chained !|tData
+                "range"      => getSetVal chained !|Float
+                "rangeRound" => chained !|Float
+                "round"      => getSetVal chained Bool
+                "padding"    => getSetVal chained Float
+                "align"      => getSetVal chained Float
+                "bandwidth"  => O ^-> Float
+                "step"       => O ^-> Float
+                "copy"       => chained O
+            ]
+        addToClassList gen
+        gen
+
+    // d3-scale: sequential and diverging scales interpolate through a
+    // continuous range; `interpolator` is the key difference from the
+    // quantitative scales.
+    let SequentialScale =
+        let gen =
+            Generic - fun tOutput ->
+            ChainedClassInheritsG "SequentialScale" tOutput Scale <| fun chained ->
+            [
+                "apply"        => Float?x ^-> tOutput |> WithInline "$this($x)"
+                "domain"       => getSetVal chained !|Float
+                "range"        => getSetVal chained !|tOutput
+                "interpolator" => getSetVal chained (Float ^-> tOutput)
+                "clamp"        => getSetVal chained Bool
+                "unknown"      => getSetVal chained tOutput
+                "nice"         => chained !?Int?count
+                "ticks"        => !?Int?count ^-> !|Float
+                "tickFormat"   => Int?count * !?String?format ^-> Float?number ^-> String
+                "copy"         => chained O
+            ]
+        addToClassList gen
+        gen
+
+    let DivergingScale =
+        let gen =
+            Generic - fun tOutput ->
+            ChainedClassInheritsG "DivergingScale" tOutput Scale <| fun chained ->
+            [
+                "apply"        => Float?x ^-> tOutput |> WithInline "$this($x)"
+                "invert"       => Float?y ^-> Float
+                "domain"       => getSetVal chained !|Float
+                "range"        => getSetVal chained !|tOutput
+                "rangeRound"   => chained !|tOutput
+                "interpolator" => getSetVal chained (Float ^-> tOutput)
+                "clamp"        => getSetVal chained Bool
+                "unknown"      => getSetVal chained tOutput
+                "nice"         => chained !?Int?count
+                "ticks"        => !?Int?count ^-> !|Float
+                "tickFormat"   => Int?count * !?String?format ^-> Float?number ^-> String
+                "copy"         => chained O
+            ]
+        addToClassList gen
+        gen
+
+
     let TimeScale = getQuantScale "TimeScale" Date
 
     let Interpolation =
@@ -571,88 +657,21 @@ module Definition =
         addToClassList gen
         gen
 
-    let Line =
-        ChainedClassCoord "Line" <| fun chained coord tData ->
-        [
-            coord "x"
-            coord "y"
-            "interpolate" => getSetVal chained Interpolation
-            "tension" => getSetVal chained String
-            "defined" => getSetVal chained (tData ^-> Bool)
-            "x" => getSetVal chained Int
-            "y" => getSetVal chained Int
-            "curve" => getSetVal chained (!| (Int * Int) * !| (Int * Int))
-            "context" => getSetVal chained Obj
+    // d3-shape's symbol types are objects (d3.symbolCircle, ...) with a
+    // `draw(context, size)` method, not the v3 strings.
+    let SymbolType =
+        Class "SymbolType"
+        |+> Instance [
+            "draw" => Obj?context * Float?size ^-> O
         ]
+        |>! addToClassList
 
-    let RadialLine =
-        ChainedClassCoord "RadialLine" <| fun chained coord tData ->
-        [
-            coord "radius"
-            coord "angle"
-            "defined" => getSetVal chained (tData ^-> Bool)
-            "angle" => getSetVal chained Int
-            "radius" => getSetVal chained Int
-            "curve" => getSetVal chained (!| (Int * Int) * !| (Int * Int))
-            "context" => getSetVal chained Obj
-        ]
-
-    let Area =
-        ChainedClassCoord "Area" <| fun chained coord tData ->
-        [
-            coord "x"
-            coord "x0"
-            coord "x1"
-            coord "y"
-            coord "y0"
-            coord "y1"
-            "interpolate" => getSetVal chained Interpolation
-            "tension" => getSetVal chained String
-            "defined" => getSetVal chained (tData ^-> Bool)
-            "curve" => getSetVal chained (!| (Int * Int) * !| (Int * Int))
-            "context" => getSetVal chained Obj
-
-            "lineX0" => Line
-            "lineY0" => Line
-            "lineX1" => Line
-            "lineY1" => Line
-        ]
-
-    let RadialArea =
-        ChainedClassCoord "RadialArea" <| fun chained coord tData ->
-        [
-            coord "radius"
-            coord "innerRadius"
-            coord "outerRadius"
-            coord "angle"
-            coord "startAngle"
-            coord "endAngle"
-            "defined" => getSetVal chained (tData ^-> Bool)
-            "curve" => getSetVal chained (!| (Int * Int) * !| (Int * Int))
-            "context" => getSetVal chained Obj
-
-            "lineX0" => Line
-            "lineY0" => Line
-            "lineX1" => Line
-            "lineY1" => Line        ]
-
-    let Arc =
-        ChainedClassCoord "Arc" <| fun chained coord tData ->
-        [
-            coord "innerRadius"
-            coord "outerRadius"
-            coord "startAngle"
-            coord "endAngle"
-            "centroid" => Obj?datum * !?Int?index ^-> Float2T
-            "innerRadius" => getSetVal chained Int
-            "outerRadius" => getSetVal chained Int
-            "cornerRadius" => getSetVal chained Int
-            "startAngle" => getSetVal chained Int
-            "endAngle" => getSetVal chained Int
-            "padAngle" => getSetVal chained Int
-            "padRadius" => getSetVal chained Int
-            "context" => getSetVal chained Obj
-        ]
+    // d3-shape (v7): the generators are callable objects. `apply` models the
+    // generator call itself (emitted as `$this(...)`), while the accessor
+    // members take either a constant or the documented accessor function.
+    let DatumAccessor (tData: CodeModel.TypeParameter) = tData?d * !?Int?i * !|((tData?data).Type) ^-> Float
+    let DatumPredicate (tData: CodeModel.TypeParameter) = tData?d * !?Int?i * !|((tData?data).Type) ^-> Bool
+    let DatumSymbolType (tData: CodeModel.TypeParameter) = tData?d * !?Int?i ^-> SymbolType
 
     let Curve =
         ChainedClassNew "Curve" <| fun chained ->
@@ -661,26 +680,142 @@ module Definition =
                 "areaEnd" => getSetVal chained O
                 "lineStart" => getSetVal chained O
                 "lineEnd" => getSetVal chained O
-                "point" => Int * Int ^-> O
+                "point" => Float * Float ^-> O
             ]
 
-    let SymbolType =
-        EnumStrings "SymbolType" [
-            "circle"
-            "cross"
-            "diamond"
-            "square"
-            "triange-down"
-            "triange-up"
-        ]
+    // Curve factories all expose `curve`'s generator surface; the parameterized
+    // families add their own knob (d3.curveBundle.beta, d3.curveCardinal.tension,
+    // d3.curveCatmullRom.alpha).
+    let CurveFactory =
+        ChainedClassNewInherits "CurveFactory" Curve <| fun _ -> []
+
+    let CurveBundleFactory =
+        ChainedClassNewInherits "CurveBundleFactory" Curve <| fun chained ->
+            [ "beta" => getSetVal chained Float ]
+
+    let CurveCardinalFactory =
+        ChainedClassNewInherits "CurveCardinalFactory" Curve <| fun chained ->
+            [ "tension" => getSetVal chained Float ]
+
+    let CurveCatmullRomFactory =
+        ChainedClassNewInherits "CurveCatmullRomFactory" Curve <| fun chained ->
+            [ "alpha" => getSetVal chained Float ]
+
+    let Line =
+        let gen =
+            Generic - fun tData ->
+            ChainedClassG "Line" tData <| fun chained ->
+            [
+                "apply"   => (!|tData)?data ^-> String |> WithInline "$this($data)"
+                "x"       => getSetVal chained (DatumAccessor tData) + chained Float
+                "y"       => getSetVal chained (DatumAccessor tData) + chained Float
+                "defined" => getSetVal chained (DatumPredicate tData) + chained Bool
+                "curve"   => getSetVal chained Curve
+                "context" => getSetVal chained Obj
+                "digits"  => getSetVal chained Int
+            ]
+        addToClassList gen
+        gen
+
+    let RadialLine =
+        let gen =
+            Generic - fun tData ->
+            ChainedClassG "RadialLine" tData <| fun chained ->
+            [
+                "apply"   => (!|tData)?data ^-> String |> WithInline "$this($data)"
+                "radius"  => getSetVal chained (DatumAccessor tData) + chained Float
+                "angle"   => getSetVal chained (DatumAccessor tData) + chained Float
+                "defined" => getSetVal chained (DatumPredicate tData) + chained Bool
+                "curve"   => getSetVal chained Curve
+                "context" => getSetVal chained Obj
+                "digits"  => getSetVal chained Int
+            ]
+        addToClassList gen
+        gen
+
+    let Area =
+        let gen =
+            Generic - fun tData ->
+            ChainedClassG "Area" tData <| fun chained ->
+            [
+                "apply"   => (!|tData)?data ^-> String |> WithInline "$this($data)"
+                "x"       => getSetVal chained (DatumAccessor tData) + chained Float
+                "x0"      => getSetVal chained (DatumAccessor tData) + chained Float
+                "x1"      => getSetVal chained (DatumAccessor tData) + chained Float
+                "y"       => getSetVal chained (DatumAccessor tData) + chained Float
+                "y0"      => getSetVal chained (DatumAccessor tData) + chained Float
+                "y1"      => getSetVal chained (DatumAccessor tData) + chained Float
+                "defined" => getSetVal chained (DatumPredicate tData) + chained Bool
+                "curve"   => getSetVal chained Curve
+                "context" => getSetVal chained Obj
+                "digits"  => getSetVal chained Int
+
+                "lineX0" => Line.[tData]
+                "lineY0" => Line.[tData]
+                "lineX1" => Line.[tData]
+                "lineY1" => Line.[tData]
+            ]
+        addToClassList gen
+        gen
+
+    let RadialArea =
+        let gen =
+            Generic - fun tData ->
+            ChainedClassG "RadialArea" tData <| fun chained ->
+            [
+                "apply"       => (!|tData)?data ^-> String |> WithInline "$this($data)"
+                "radius"      => getSetVal chained (DatumAccessor tData) + chained Float
+                "innerRadius" => getSetVal chained (DatumAccessor tData) + chained Float
+                "outerRadius" => getSetVal chained (DatumAccessor tData) + chained Float
+                "angle"       => getSetVal chained (DatumAccessor tData) + chained Float
+                "startAngle"  => getSetVal chained (DatumAccessor tData) + chained Float
+                "endAngle"    => getSetVal chained (DatumAccessor tData) + chained Float
+                "defined"     => getSetVal chained (DatumPredicate tData) + chained Bool
+                "curve"       => getSetVal chained Curve
+                "context"     => getSetVal chained Obj
+                "digits"      => getSetVal chained Int
+
+                "lineX0" => RadialLine.[tData]
+                "lineY0" => RadialLine.[tData]
+                "lineX1" => RadialLine.[tData]
+                "lineY1" => RadialLine.[tData]
+            ]
+        addToClassList gen
+        gen
+
+    let Arc =
+        let gen =
+            Generic - fun tData ->
+            ChainedClassG "Arc" tData <| fun chained ->
+            [
+                "apply"       => tData?d ^-> String |> WithInline "$this($d)"
+                "centroid"    => tData?d * !?Int?i ^-> Float2T |> WithInline "$this.centroid($d, $i)"
+                "innerRadius" => getSetVal chained (DatumAccessor tData) + chained Float
+                "outerRadius" => getSetVal chained (DatumAccessor tData) + chained Float
+                "cornerRadius" => getSetVal chained (DatumAccessor tData) + chained Float
+                "startAngle"  => getSetVal chained (DatumAccessor tData) + chained Float
+                "endAngle"    => getSetVal chained (DatumAccessor tData) + chained Float
+                "padAngle"    => getSetVal chained (DatumAccessor tData) + chained Float
+                "padRadius"   => getSetVal chained (DatumAccessor tData) + chained Float
+                "context"     => getSetVal chained Obj
+                "digits"      => getSetVal chained Int
+            ]
+        addToClassList gen
+        gen
 
     let Symbol =
-        ChainedClassNew "Symbol" <| fun chained ->
-        [
-            "type" => getSetVal chained SymbolType.Type
-            "size" => getSetVal chained Int
-            "context" => getSetVal chained Obj
-        ]
+        let gen =
+            Generic - fun tData ->
+            ChainedClassG "Symbol" tData <| fun chained ->
+            [
+                "apply"   => tData?d * !?Int?i ^-> String |> WithInline "$this($d, $i)"
+                "type"    => getSetVal chained SymbolType + chained (DatumSymbolType tData)
+                "size"    => getSetVal chained (DatumAccessor tData) + chained Float
+                "context" => getSetVal chained Obj
+                "digits"  => getSetVal chained Int
+            ]
+        addToClassList gen
+        gen
 
     let Chord =
         ChainedClassCoord "Chord" <| fun chained coord tData ->
@@ -830,7 +965,7 @@ module Definition =
 
     let BundleNode =
         Record "BundleNode" [
-            "parent" , TSelf
+            ("parent", TSelf)
         ]
 
     let Bundle =
@@ -1037,46 +1172,63 @@ module Definition =
             ]
             @ propF2 TSelf "size"
 
+    let PieArcDatum =
+        let gen =
+            Generic - fun tData ->
+            Class "PieArcDatum"
+            |+> Instance [
+                "data"       =@ tData
+                "value"      =@ Float
+                "index"      =@ Int
+                "startAngle" =@ Float
+                "endAngle"   =@ Float
+                "padAngle"   =@ Float
+            ]
+        addToClassList gen
+        gen
+
     let Pie =
-        ChainedClassNew "Pie" <| fun chained ->
-        [
-            "apply"      => (!|Obj)?values * !?Int?index ^-> !|Obj |> WithInline "$this($values, $index)"
-            "value"    => getSetVal chained (Obj ^-> Float)
-            "sort"     => getSetVal chained Comparator
-            "sortValues" => getSetVal chained Comparator
-            "startAngle" => getVal Float + chained (Float + Obj * Int ^-> Float)
-            "endAngle" => getVal Float + chained (Float + Obj * Int ^-> Float)
-            "padAngle" => getSetVal chained (O ^-> Int)
+        let gen =
+            Generic - fun tData ->
+            ChainedClassG "Pie" tData <| fun chained ->
+            [
+                "apply"      => (!|tData)?data ^-> !|PieArcDatum.[tData] |> WithInline "$this($data)"
+                "value"      => getSetVal chained (DatumAccessor tData) + chained Float
+                "sort"       => getSetVal chained Comparator
+                "sortValues" => getSetVal chained Comparator
+                "startAngle" => getSetVal chained (DatumAccessor tData) + chained Float
+                "endAngle"   => getSetVal chained (DatumAccessor tData) + chained Float
+                "padAngle"   => getSetVal chained (DatumAccessor tData) + chained Float
+            ]
+        addToClassList gen
+        gen
 
+    // d3.stack's series points are `[y0, y1]` tuples carrying their datum.
+    let SeriesPoint =
+        Class "SeriesPoint"
+        |+> Instance [
+            "data" =? Obj
+            "Item" => Int?index ^-> Float |> WithInline "$this[$index]"
+            "y0" => O ^-> Float |> WithInline "$this[0]"
+            "y1" => O ^-> Float |> WithInline "$this[1]"
         ]
+        |>! addToClassList
 
-    let StackOffset =
-        EnumStrings "StackOffset" [
-            "silhouette"
-            "wiggle"
-            "expand"
-            "zero"
-        ]
-
-    let StackOrder =
-        EnumStrings "StackOrder" [
-            "inside-out"
-            "reverse"
-            "default"
-        ]
+    let Series = !| SeriesPoint
 
     let Stack =
-        ChainedClassNew "Stack" <| fun chained ->
-        [
-            "apply"      => (!|Obj)?layers * !?Int?index ^-> !|Obj |> WithInline "$this($layers, $index)"
-            "values" => getSetVal chained (Obj ^-> Obj)
-            "offset" => getVal (!|Float2T ^-> !|Float) + chained (StackOffset + (Float2T ^-> !|Float))
-            "order"  => getVal (!|Float2T ^-> !|Int) + chained (StackOrder + (!|Float2T ^-> !|Int))
-            "x"      => getSetVal chained (Obj ^-> Float)
-            "y"      => getSetVal chained (Obj ^-> Float)
-            "out"    => getSetVal chained (Obj?d * Float?y0 * Float?y ^-> O)
-            "keys" => getSetVal chained (!| Obj ^-> !| Obj)
-        ]
+        let gen =
+            Generic - fun tData ->
+            ChainedClassG "Stack" tData <| fun chained ->
+            [
+                "apply"  => (!|tData)?data * !?Int?index ^-> !|Series |> WithInline "$this($data, $index)"
+                "keys"   => getSetVal chained (!|String) + chained (!|((tData?data).Type) ^-> !|String)
+                "value"  => getSetVal chained (tData?d * String?key * Int?i * !|((tData?data).Type) ^-> Float)
+                "order"  => getSetVal chained (!|Series ^-> !|Int)
+                "offset" => getSetVal chained ((!|Series * !|Int) ^-> O)
+            ]
+        addToClassList gen
+        gen
 
     let TreeNode =
         Record "TreeNode" [
@@ -1207,9 +1359,9 @@ module Definition =
             "projection"  => getSetVal chained ((Float2T ^-> Float2T) + Projection)
             "context"     => getSetVal chained (PathContext.Type + Obj)
             "pointRadius" => getSetVal chained Float
-            "area"        => Feature ^-> Int
-            "centroid"    => Feature ^-> Int2T
-            "bounds"      => Feature ^-> Int2x2T
+            "area"        => Feature ^-> Float
+            "centroid"    => Feature ^-> Float2T
+            "bounds"      => Feature ^-> Float2x2T
         ]
 
 
@@ -1729,31 +1881,64 @@ module Definition =
             "timeout" => (Int ^-> O) * !? Int ^-> Timer
             "interval" => (Int ^-> O) * !? Int ^-> Timer
 
-            //curve
+            //curve (d3-shape curve factories are constants returning a CurveFactory)
+            "curveBasis" =? CurveFactory
+            "curveBasisClosed" =? CurveFactory
+            "curveBasisOpen" =? CurveFactory
+            "curveBumpX" =? CurveFactory
+            "curveBumpY" =? CurveFactory
+            "curveBundle" =? CurveBundleFactory
+            "curveCardinal" =? CurveCardinalFactory
+            "curveCardinalClosed" =? CurveCardinalFactory
+            "curveCardinalOpen" =? CurveCardinalFactory
+            "curveCatmullRom" =? CurveCatmullRomFactory
+            "curveCatmullRomClosed" =? CurveCatmullRomFactory
+            "curveCatmullRomOpen" =? CurveCatmullRomFactory
+            "curveLinear" =? CurveFactory
+            "curveLinearClosed" =? CurveFactory
+            "curveMonotoneX" =? CurveFactory
+            "curveMonotoneY" =? CurveFactory
+            "curveNatural" =? CurveFactory
+            "curveStep" =? CurveFactory
+            "curveStepAfter" =? CurveFactory
+            "curveStepBefore" =? CurveFactory
 
-            Generic - fun t -> "curveBasis" => t ^-> !| Point
-            Generic - fun t -> "curveBasisClosed" => t ^-> !| Point
-            Generic - fun t -> "curveBasisOpen" => t ^-> !| Point
-            Generic - fun t -> "curveBumpX" => t ^-> !| Point
-            Generic - fun t -> "curveBumpY" => t ^-> !| Point
-            Generic - fun t -> "curveBundle" => t ^-> !| Point
-            "curveBundle" => Int ^-> !| Point
-            Generic - fun t -> "curveCardinal" => t ^-> !| Point
-            Generic - fun t -> "curveCardinalClosed" => t ^-> !| Point
-            Generic - fun t -> "curveCardinalOpen" => t ^-> !| Point
-            Generic - fun t -> "curveCatmullRom" => t ^-> !| Point
-            Generic - fun t -> "curveCatmullRomClosed" => t ^-> !| Point
-            Generic - fun t -> "curveCatmullRomOpen" => t ^-> !| Point
-            Generic - fun t -> "curveLinear" => t ^-> !| Point
-            Generic - fun t -> "curveLinearClosed" => t ^-> !| Point
-            Generic - fun t -> "curveMonotoneX" => t ^-> !| Point
-            Generic - fun t -> "curveMonotoneY" => t ^-> !| Point
-            Generic - fun t -> "curveNatural" => t ^-> !| Point
-            Generic - fun t -> "curveStep" => t ^-> !| Point
-            Generic - fun t -> "curveStepAfter" => t ^-> !| Point
-            Generic - fun t -> "curveStepBefore" => t ^-> !| Point
+            //shape (d3-shape generators)
+            Generic - fun tData -> "arc" => O ^-> Arc.[tData]
+            Generic - fun tData -> "area" => O ^-> Area.[tData]
+            Generic - fun tData -> "areaRadial" => O ^-> RadialArea.[tData]
+            Generic - fun tData -> "radialArea" => O ^-> RadialArea.[tData]
+            Generic - fun tData -> "line" => O ^-> Line.[tData]
+            Generic - fun tData -> "lineRadial" => O ^-> RadialLine.[tData]
+            Generic - fun tData -> "radialLine" => O ^-> RadialLine.[tData]
+            Generic - fun tData -> "pie" => O ^-> Pie.[tData]
+            "pointRadial" => Float?angle * Float?radius ^-> Float2T
+            Generic - fun tData -> "symbol" => O ^-> Symbol.[tData]
+            "symbols" =? !|SymbolType
 
-            "curve" => Curve
+            "symbolAsterisk" =? SymbolType
+            "symbolCircle" =? SymbolType
+            "symbolCross" =? SymbolType
+            "symbolDiamond" =? SymbolType
+            "symbolPlus" =? SymbolType
+            "symbolSquare" =? SymbolType
+            "symbolStar" =? SymbolType
+            "symbolTriangle" =? SymbolType
+            "symbolWye" =? SymbolType
+            "symbolX" =? SymbolType
+
+            Generic - fun tData -> "stack" => O ^-> Stack.[tData]
+            "stackOffsetExpand" =? ((!|Series * !|Int) ^-> O)
+            "stackOffsetDiverging" =? ((!|Series * !|Int) ^-> O)
+            "stackOffsetNone" =? ((!|Series * !|Int) ^-> O)
+            "stackOffsetSilhouette" =? ((!|Series * !|Int) ^-> O)
+            "stackOffsetWiggle" =? ((!|Series * !|Int) ^-> O)
+            "stackOrderAppearance" =? (!|Series ^-> !|Int)
+            "stackOrderAscending" =? (!|Series ^-> !|Int)
+            "stackOrderDescending" =? (!|Series ^-> !|Int)
+            "stackOrderInsideOut" =? (!|Series ^-> !|Int)
+            "stackOrderNone" =? (!|Series ^-> !|Int)
+            "stackOrderReverse" =? (!|Series ^-> !|Int)
 
             //link
             
@@ -1791,6 +1976,13 @@ module Definition =
             "geoProjectionMutator" => (Float2T ^-> Float2T ^-> Float2T)?rawFactory ^-> Projection
             "geoStream" => Obj?``object`` * Listener?listener ^-> O
             "geoIdentity" => O ^-> Projection
+
+            //geo clip/stream helpers (d3-geo v7)
+            "geoClipAntimeridian" =? (Listener ^-> Listener)
+            "geoClipCircle" => Float?angle ^-> (Listener ^-> Listener)
+            "geoClipRectangle" => Float?x0 * Float?y0 * Float?x1 * Float?y1 ^-> (Listener ^-> Listener)
+            "geoClipExtent" => O ^-> ClipTransform
+            "geoTransform" => Obj?methods ^-> StreamTransform
 
             //projections
 
@@ -2150,8 +2342,21 @@ module Definition =
             "scaleThreshold" => O ^-> DiscreteScale
             "scaleQuantile" => O ^-> QuantileScale
             Generic - fun tData -> "scaleOrdinal" => O ^-> OrdinalScale.[tData]
-            Generic - fun tData -> "scaleBand" => O ^-> OrdinalScale.[tData]
-            Generic - fun tData -> "scalePoint" => O ^-> OrdinalScale.[tData]
+            Generic - fun tData -> "scaleBand" => O ^-> BandScale.[tData]
+            Generic - fun tData -> "scalePoint" => O ^-> PointScale.[tData]
+            Generic - fun tOutput -> "scaleSequential" => O ^-> SequentialScale.[tOutput]
+            Generic - fun tOutput -> "scaleSequentialLog" => O ^-> SequentialScale.[tOutput]
+            Generic - fun tOutput -> "scaleSequentialPow" => O ^-> SequentialScale.[tOutput]
+            Generic - fun tOutput -> "scaleSequentialSqrt" => O ^-> SequentialScale.[tOutput]
+            Generic - fun tOutput -> "scaleSequentialSymlog" => O ^-> SequentialScale.[tOutput]
+            Generic - fun tOutput -> "scaleSequentialQuantile" => O ^-> SequentialScale.[tOutput]
+            Generic - fun tOutput -> "scaleDiverging" => O ^-> DivergingScale.[tOutput]
+            Generic - fun tOutput -> "scaleDivergingLog" => O ^-> DivergingScale.[tOutput]
+            Generic - fun tOutput -> "scaleDivergingPow" => O ^-> DivergingScale.[tOutput]
+            Generic - fun tOutput -> "scaleDivergingSqrt" => O ^-> DivergingScale.[tOutput]
+            Generic - fun tOutput -> "scaleDivergingSymlog" => O ^-> DivergingScale.[tOutput]
+            "scaleImplicit" =? Obj
+            "tickFormat" => Float?start * Float?stop * Int?count * !?String?specifier ^-> (Float ^-> String)
 
             // drag / zoom / brush (d3-drag, d3-zoom, d3-brush)
             "drag" => O ^-> Drag

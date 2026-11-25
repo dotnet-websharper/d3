@@ -26,7 +26,7 @@ This repository contains:
 | Project | Purpose |
 | --- | --- |
 | `WebSharper.D3` | The binding: WIG definitions for the D3 v7 API. |
-| `Site` | The sample: a Circles demo (selections, data joins, transitions) and mbostock's World Tour (geo projections and animated transitions). |
+| `Site` | The sample: a Circles demo (selections, data joins, transitions), a Shapes demo (`arc`/`pie`, `symbol`, `stack`, `line` over the scale types) and mbostock's World Tour (geo projections and animated transitions). It is a WebSharper.UI template with a light/dark theme switcher. |
 
 ## Live demos
 
@@ -35,7 +35,9 @@ This repository contains:
 ![D3 World Tour sample](docs/sample.png)
 
 The sample doubles as the binding's test case: **Circles** joins an array of
-numbers to SVG circles, and **World Tour** renders a rotating orthographic globe
+numbers to SVG circles, **Shapes** draws a pie/arc donut, the `symbol` glyph
+set, a stacked area chart and a line generator over point, linear, sequential
+and diverging scales, and **World Tour** renders a rotating orthographic globe
 using the v7 geo path, centroid and transition APIs while loading TopoJSON and
 TSV data through the Promise-based fetch helpers.
 
@@ -275,10 +277,42 @@ that is easier to use.
   `.On("end", fun _ -> …)`.
 - **Fetch helpers.** `D3.Json`, `D3.Csv`, `D3.Tsv`, … take a URL and return a
   `Promise`; use `.Then(...)` (see `Site/WorldTour.fs` for an `Async` bridge).
+- **Shapes.** The `d3-shape` generators are typed as callable objects:
+  `D3.Arc<T>()`, `D3.Area<T>()`, `D3.Line<T>()`, `D3.Pie<T>`, `D3.Symbol<T>()`
+  and `D3.Stack<T>()` expose the v7 accessor setters (each taking either a
+  constant or the documented `(datum, index, data) -> value` accessor), and
+  calling them goes through `Apply` (`arc.Apply(datum)`, `pie.Apply(data)`,
+  `stack.Apply(rows)`). `D3.RadialArea()`/`D3.AreaRadial()` and
+  `D3.LineRadial()`/`D3.RadialLine()` are the radial variants.
+- **Symbol types.** `d3.symbolCircle` and friends are objects, not v3 strings:
+  the binding models them as `SymbolType` and exposes `D3.SymbolCircle`,
+  `D3.SymbolCross`, `D3.SymbolDiamond`, `D3.SymbolSquare`, `D3.SymbolStar`,
+  `D3.SymbolTriangle`, `D3.SymbolWye`, `D3.SymbolX`, `D3.SymbolAsterisk`,
+  `D3.SymbolPlus` and the `D3.Symbols` array.
+- **Stacking.** `D3.StackOffsetNone`/`Silhouette`/`Wiggle`/`Expand`/`Diverging`
+  and `D3.StackOrderNone`/`Appearance`/`Ascending`/`Descending`/`InsideOut`/
+  `Reverse` are the documented offset and order functions; pass them to the
+  stack's `Offset`/`Order` accessors. Series points are `SeriesPoint` values
+  (`Y0()`, `Y1()`, `Data`, indexer) and a series is a `SeriesPoint[]`.
+- **Curves.** The `D3.Curve*` constants are `CurveFactory` values, settable on
+  `Line`/`Area` via `Curve(...)`; the parameterized families carry their own
+  knob (`D3.CurveBundle.Beta(...)`, `D3.CurveCardinal.Tension(...)`,
+  `D3.CurveCatmullRom.Alpha(...)`).
+- **Scales.** `D3.ScaleBand<T>()` / `D3.ScalePoint<T>()` have their own typed
+  surface (`Bandwidth()`, `Step()`, `PaddingInner()`, `Align()`, …), and
+  `D3.ScaleSequential<T>()` / `D3.ScaleDiverging<T>()` are generic over their
+  output type, so a color range/interpolator is typed as `string` (or whatever
+  the interpolator produces).
+- **Geo helpers.** `D3.GeoPath()`, `D3.GeoArea`, `D3.GeoCentroid`,
+  `D3.GeoBounds`, `D3.GeoDistance`, `D3.GeoGraticule`, `D3.GeoContains`,
+  `D3.GeoLength`, `D3.GeoRotation` and the clip/transform helpers
+  (`D3.GeoClipCircle`, `D3.GeoClipRectangle`, `D3.GeoClipAntimeridian`,
+  `D3.GeoClipExtent`, `D3.GeoTransform`) live at the top level.
 - **Typing aids.** `AttrFn` / `AttrIx` are aliases for `Attr` with a data- or
   index-dependent value, for better completion. Use WebSharper's `As` helper
   when a function accepts several shapes; the cast is erased from the generated
-  JavaScript.
+  JavaScript. Attribute callbacks on a `Selection` handed back as
+  `Selection<obj>` take `obj` datums, so cast with `As<YourDatum> d`.
 
 ## Build from source
 
@@ -298,17 +332,19 @@ dotnet build WebSharper.D3.sln -c Release
 
 ### Run the sample
 
-Building `Site` in Release emits the self-contained static site in `build/html`
-and runs the `esbuild` bundle step automatically (it installs the npm `d3`
-dependency and produces `Content/Site.bundle.js`):
+Building `Site` in Release emits the self-contained static site in `dist/` and
+runs the `esbuild` bundle step automatically (it installs the npm `d3`
+dependency and produces `dist/Scripts/Site.min.js`):
 
 ```bash
 dotnet build Site/Site.fsproj -c Release
-cd build/html
-python3 -m http.server 8080     # or: npx serve .
+dotnet serve -d dist -p 5423
 ```
 
-Then open <http://localhost:8080/> and pick **Circles** or **World Tour**.
+`dotnet serve` comes from the
+[`dotnet-serve`](https://github.com/dotnet-serve/dotnet-serve) tool; install it
+once with `dotnet tool install -g dotnet-serve`. Then open
+<http://localhost:5423/> and pick **Circles**, **Shapes** or **WorldTour**.
 
 ### Pack the NuGet package
 
@@ -322,7 +358,7 @@ dotnet paket pack ./out
 
 Pushes to `main` run [`.github/workflows/ghpages.yml`](.github/workflows/ghpages.yml),
 which builds the sample in Release (on .NET 11 with the WS11 compiler) and
-publishes `build/html` to the `gh-pages` branch. The site is available at
+publishes `dist/` to the `gh-pages` branch. The site is available at
 <https://dotnet-websharper.github.io/d3/>.
 
 ## Repository layout
@@ -333,13 +369,17 @@ WebSharper.D3/
   WebSharper.D3.fsproj     # NpmDependencies = d3
 Site/
   Circles.fs               # selections / data join / transitions sample
+  Shapes.fs                # arc/pie, symbol, stack, line over the scales
   WorldTour.fs             # geo path + centroid + transition sample
   Samples.fs               # tiny sample navigator
-  Client.fs                # SPA entry point
-  index.html               # page shell (loads Content/Site.bundle.js)
+  Client.fs                # SPA entry point, template, theme switcher
+  index.html               # page shell and WebSharper.UI template
+  site.css                 # light/dark palette (CSS variables)
+  wsconfig.json            # `spa` project, outputDir = build
   package.json             # d3 + esbuild
-  esbuild.config.mjs       # bundles Content/Site.js -> Content/Site.bundle.js
-  Content/                 # generated WebSharper/esbuild output (not committed)
+  esbuild.config.mjs       # bundles build/Site.js -> dist/Scripts/Site.min.js
+  build/                   # generated WebSharper output (not committed)
+dist/                      # static site emitted by esbuild (not committed)
 docs/sample.png            # screenshot used in this README
 nuget/                     # Paket pack template
 LICENSE.md
@@ -349,6 +389,19 @@ LICENSE.md
 
 The bindings are released under the Apache 2.0 license — see
 [LICENSE.md][license].
+
+### Upstream library: D3 (ISC)
+
+D3 itself is **not** Apache 2.0: `d3` **7.9.x** ships under the **ISC license**
+(SPDX: `ISC`) — see the upstream
+[`LICENSE`](https://github.com/d3/d3/blob/main/LICENSE) and the
+[d3 license note](https://github.com/d3/d3/blob/main/README.md#license). ISC is
+a permissive, OSI-approved license: you may use, copy, modify and redistribute
+D3 (including commercially) as long as the copyright notice and permission
+notice are retained in copies of the source. Because the sample and any bundle
+you build include the npm `d3` package, keep that notice with the bundled
+output (`esbuild` legal comments, or your own attribution file). This binding's
+own code stays Apache 2.0; only the upstream library carries the ISC terms.
 
 [d3]: https://d3js.org
 [ws]: https://websharper.com

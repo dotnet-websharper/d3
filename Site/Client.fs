@@ -20,17 +20,70 @@
 namespace Site
 
 open WebSharper
+open WebSharper.JavaScript
+open WebSharper.UI
+open WebSharper.UI.Client
+open WebSharper.UI.Templating
 
 [<JavaScript>]
 module Client =
+
+    // The template is the whole document, loaded from the DOM, so editing
+    // index.html and refreshing the browser is enough.
+    type IndexTemplate = Template<"index.html", ClientLoad.FromDocument>
+
+    // ------------------------------------------------------------------
+    // Theme (light by default, choice persisted in localStorage)
+    // ------------------------------------------------------------------
+
+    // Keep in sync with the bootstrap script in index.html.
+    let themeStorageKey = "websharper-d3-theme"
+
+    let theme = Var.Create "light"
+    let themeLabel = Var.Create "🌙 Dark mode"
+
+    let applyTheme () =
+        JS.Document.DocumentElement.SetAttribute("data-theme", theme.Value)
+        themeLabel.Value <-
+            if theme.Value = "dark" then "☀️ Light mode" else "🌙 Dark mode"
+
+    let toggleTheme () =
+        theme.Value <- (if theme.Value = "dark" then "light" else "dark")
+        try JS.Window.LocalStorage.SetItem(themeStorageKey, theme.Value) with _ -> ()
+        applyTheme ()
+
+    // ------------------------------------------------------------------
+    // Sample slots: the catalog swaps these in place.
+    // ------------------------------------------------------------------
+
+    let navs = Var.Create Doc.Empty
+    let main = Var.Create Doc.Empty
+    let side = Var.Create Doc.Empty
 
     let All =
         let ( !+ ) x = Samples.Set.Singleton(x)
         Samples.Set.Create [
             !+ Circles.Sample
-            //!+ CompaniesGraph.UI.Sample
+            !+ Shapes.Sample
             !+ WorldTour.Sample
         ]
 
     [<SPAEntryPoint>]
-    let Main() = All.Show()
+    let Main () =
+        try
+            match JS.Window.LocalStorage.GetItem(themeStorageKey) with
+            | null -> ()
+            | stored when stored = "dark" || stored = "light" -> theme.Value <- stored
+            | _ -> ()
+        with _ -> ()
+        applyTheme ()
+
+        IndexTemplate()
+            .themeLabel(themeLabel.V)
+            .ToggleTheme(fun _ -> toggleTheme ())
+            .Navs(navs.V)
+            .Main(main.V)
+            .Side(side.V)
+            .Bind()
+
+        All.Show navs main side

@@ -5,7 +5,6 @@ VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{22726ABE-9379-46B6-8BA4-44594C8F7B13}"
 	ProjectSection(SolutionItems) = preProject
-		ivy.xml = ivy.xml
 		LICENSE.md = LICENSE.md
 		README.md = README.md
 	EndProjectSection

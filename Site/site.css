@@ -1,4 +1,6 @@
 :root {
+    color-scheme: light;
+
     --bg: #f4f6fb;
     --card: #ffffff;
     --text: #0f172a;
@@ -10,6 +12,33 @@
     --accent: #f59e0b;
     --shadow: 0 18px 40px -20px rgba(15, 23, 42, .35);
     --radius: 16px;
+    --text-soft: #334155;
+    --glow-1: #e0e7ff;
+    --glow-2: #fef3c7;
+    --chip: rgba(255, 255, 255, .75);
+    --primary-border: #c7d2fe;
+}
+
+/* Dark theme: `data-theme="dark"` on <html> (set by Client.fs, applied before
+   first paint by the inline script in index.html). */
+:root[data-theme="dark"] {
+    color-scheme: dark;
+
+    --bg: #0b1220;
+    --card: #111c30;
+    --text: #e2e8f0;
+    --muted: #93a1bd;
+    --border: #22304a;
+    --primary: #818cf8;
+    --primary-600: #6366f1;
+    --primary-soft: #1c2740;
+    --accent: #fbbf24;
+    --shadow: 0 18px 40px -22px rgba(0, 0, 0, .85);
+    --text-soft: #c7d2e5;
+    --glow-1: #1e293b;
+    --glow-2: #292524;
+    --chip: rgba(30, 41, 59, .8);
+    --primary-border: #4f46e5;
 }
 
 * {
@@ -28,8 +57,8 @@ body {
         "Helvetica Neue", Arial, sans-serif;
     color: var(--text);
     background:
-        radial-gradient(1200px 600px at 82% -10%, #e0e7ff 0%, transparent 60%),
-        radial-gradient(900px 520px at -10% 110%, #fef3c7 0%, transparent 55%),
+        radial-gradient(1200px 600px at 82% -10%, var(--glow-1) 0%, transparent 60%),
+        radial-gradient(900px 520px at -10% 110%, var(--glow-2) 0%, transparent 55%),
         var(--bg);
     -webkit-font-smoothing: antialiased;
 }
@@ -104,6 +133,25 @@ body {
     background: var(--primary-soft);
 }
 
+.theme-toggle {
+    margin-left: 6px;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--card);
+    color: var(--muted);
+    font: inherit;
+    font-size: .9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+}
+
+.theme-toggle:hover {
+    color: var(--primary);
+    border-color: var(--primary-border);
+}
+
 /* ---- Layout ----------------------------------------------------------- */
 
 .app {
@@ -134,7 +182,7 @@ body {
     padding: 9px 18px;
     border-radius: 999px;
     border: 1px solid var(--border);
-    background: rgba(255, 255, 255, .75);
+    background: var(--chip);
     color: var(--muted);
     font-size: .92rem;
     font-weight: 600;
@@ -144,7 +192,7 @@ body {
 
 .sample-tabs a:hover {
     color: var(--primary);
-    border-color: #c7d2fe;
+    border-color: var(--primary-border);
 }
 
 .sample-tabs li.active a {
@@ -213,7 +261,7 @@ body {
 
 #sample-side p {
     margin: 0 0 18px;
-    color: #334155;
+    color: var(--text-soft);
     line-height: 1.65;
     font-size: .95rem;
 }
